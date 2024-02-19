@@ -1,0 +1,12 @@
+bin
+obj
+.vs
+wiki
+Output
+Release
+**.nupkg
+**.class
+VirtualMachines
+Distr
+Java/Test/mylinkedmodapp
+var

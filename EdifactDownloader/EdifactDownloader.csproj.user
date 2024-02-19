@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup />
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="files\edifact.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Update="files\un\d\message.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Update="files\un\d\segments.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Update="files\un\d\simpletypes.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Update="files\un\d\types.xsd">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+</Project>

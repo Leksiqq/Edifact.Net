@@ -1,0 +1,248 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- UN -->
+<!-- The file was automatically generated with 'edifact_schema_gen.exe' -->
+<!-- Don't edit! -->
+<xs:schema
+  targetNamespace="EDIFACT"
+  xmlns="EDIFACT"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified" attributeFormDefault="unqualified"
+>
+  <xs:include schemaLocation="simpletypes.xsd"/>
+  <xs:complexType name="S001">
+    <xs:annotation>
+      <xs:documentation>SYNTAX IDENTIFIER</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="E0001" type="E0001">
+        <xs:annotation>
+          <xs:documentation>Syntax identifier</xs:documentation>
+          <xs:documentation>Desc: Specifies which character set is going to be used in the interchange.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0002" type="E0002">
+        <xs:annotation>
+          <xs:documentation>Syntax version number</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="S002">
+    <xs:annotation>
+      <xs:documentation>INTERCHANGE SENDER</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="E0004 " type="E0004 ">
+        <xs:annotation>
+          <xs:documentation>Sender identification</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0007" type="E0007" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Partner identification code qualifier</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0008" type="E0008" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Address for reverse routing</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="S003">
+    <xs:annotation>
+      <xs:documentation>INTERCHANGE RECIPIENT</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="E0010 " type="E0010 ">
+        <xs:annotation>
+          <xs:documentation>Recipient Identification</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0007" type="E0007" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Partner identification code qualifier</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0014" type="E0014" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Routing address</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="S004">
+    <xs:annotation>
+      <xs:documentation>DATE/TIME OF PREPARATION</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="E0017 " type="E0017">
+        <xs:annotation>
+          <xs:documentation>Date YYMMDD</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0019" type="E0019">
+        <xs:annotation>
+          <xs:documentation>Time HHMM</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="S005">
+    <xs:annotation>
+      <xs:documentation>RECIPIENTS REFERENCE, PASSWORD</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="E0022 " type="E0022">
+        <xs:annotation>
+          <xs:documentation>Recipient's reference/password</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0025" type="E0025" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Recipient's reference/password qualifier</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="S006">
+    <xs:annotation>
+      <xs:documentation>APPLICATION SENDER'S IDENTIFICATION</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="E0040 " type="E0040">
+        <xs:annotation>
+          <xs:documentation>Application sender's identification</xs:documentation>
+          <xs:documentation>Code or name identifying the division, department etc. within the originating sender's organization</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0007" type="E0007" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Partner identification code qualifier</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="S007">
+    <xs:annotation>
+      <xs:documentation>APPLICATION RECIPIENT'S IDENTIFICATION</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="E0044" type="E0044">
+        <xs:annotation>
+          <xs:documentation>Application Recipient's identification</xs:documentation>
+          <xs:documentation>
+            Code or name identifying the division, department etc. within the originating Recipient's organization
+            for which the group of
+            messages is intended
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0007" type="E0007" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Partner identification code qualifier</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="S008">
+    <xs:annotation>
+      <xs:documentation>MESSAGE VERSION</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="E0052" type="E0052">
+        <xs:annotation>
+          <xs:documentation>Message version number</xs:documentation>
+          <xs:documentation>
+            Version number of the message type the functional group
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0054" type="E0054">
+        <xs:annotation>
+          <xs:documentation>Message release number</xs:documentation>
+          <xs:documentation>
+            Release number within
+            current version number
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0057" type="E0057" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Association assigned Code</xs:documentation>
+          <xs:documentation>
+            A code assigned by the association responsible for the design and maintenance of the type of message concerned
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="S009">
+    <xs:annotation>
+      <xs:documentation>MESSAGE IDENTIFIER</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="E0065" type="E0065">
+        <xs:annotation>
+          <xs:documentation>Message type</xs:documentation>
+          <xs:documentation>
+            Type of message being transmitted
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0052" type="E0052">
+        <xs:annotation>
+          <xs:documentation>Message version number</xs:documentation>
+          <xs:documentation>
+            Version number of the message type. If UNG is used, 0052 shall be identical
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0054" type="E0054">
+        <xs:annotation>
+          <xs:documentation>Message release number</xs:documentation>
+          <xs:documentation>
+            Release number within current version number
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0051" type="E0051">
+        <xs:annotation>
+          <xs:documentation>Controlling agency</xs:documentation>
+          <xs:documentation>
+            Release number within current version number
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0057" type="E0057" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>Association assigned code</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="S010">
+    <xs:annotation>
+      <xs:documentation>STATUS OF THE TRANSFER</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="E0070" type="E0070">
+        <xs:annotation>
+          <xs:documentation>Sequence of transfers</xs:documentation>
+          <xs:documentation>
+            Starts at 1 and is incremented by 1 for each transfer
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="E0073" type="E0073" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>First and last transfer</xs:documentation>
+          <xs:documentation>
+            C = Creation, must be present for first transfer if more than one foreseen
+            F = Final, must be present for last transfer
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

@@ -1,0 +1,53 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Net.Leksi.EdifactDownloader</AssemblyName>
+    <RootNamespace>Net.Leksi.Edifact</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\fixed.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>fixed.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\fixed.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>fixed.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\fixed.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>fixed.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Properties\fixed.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>fixed.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <PropertyGroup>
+      <MakeResources>MakeResources</MakeResources>
+      <Fixed>fixed</Fixed>
+      <FixedResx>Properties\$(Fixed).resx</FixedResx>
+    </PropertyGroup>
+    <Exec Command="$(MSBuildProjectDirectory)\..\$(MakeResources)\bin\$(Configuration)\$(TargetFramework)\$(MakeResources).exe $(FixedResx) $(Fixed)" />
+  </Target>
+
+</Project>

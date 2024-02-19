@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- UN -->
+<!-- The file was automatically generated with 'edifact_schema_gen.exe' -->
+<!-- Don't edit! -->
+<xs:schema
+  targetNamespace="EDIFACT"
+  xmlns="EDIFACT"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified" attributeFormDefault="unqualified"
+>
+  <xs:include schemaLocation="segments.xsd"/>
+  <xs:complexType name="MESSAGE">
+    <xs:complexContent>
+      <xs:extension base="GENERIC-MESSAGE">
+        <xs:sequence id="structure">
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="MESSAGE" type="MESSAGE"/>
+</xs:schema>

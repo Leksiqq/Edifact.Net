@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "EdifactDownloaderCLI": {
+      "commandName": "Project",
+      "commandLineArgs": "--tmp-folder W:\\C#\\Edifact\\var\\tmp /d d94a\r\n/t W:\\C#\\Edifact\\var\\xsd"
+    }
+  }
+}

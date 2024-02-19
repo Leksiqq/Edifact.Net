@@ -1,0 +1,854 @@
+
+
+
+UN/ECE                                                TRADE/WP.4/R.741
+
+UN/EDIFACT TRIAL Directory 91.1
+Section 3, Message frameworks
+
+
+
+                           UN/EDIFACT
+
+                      DRAFT RECOMMENDATION
+
+             INTERNATIONAL FORWARDING AND TRANSPORT
+
+                        MESSAGE FRAMEWORK
+
+
+
+
+
+
+
+
+     --------------------------------------------------------------
+
+     A message framework is not a message type in itself but serves
+     as an aligning structuring master for a set of related message
+     types within an identified application area.
+
+     It is revised based on requirements in the message types to
+     which it relates and follows the procedures for their version/
+     release and status.
+
+     -------------------------------------------------------------
+
+
+
+
+                                Framework Type    : IFTMFR
+                                Version           : 1
+                                Release           : 911
+                                Contr. Agency     : UN
+
+                                Status            : 2
+                                Date              : 91-09
+
+
+         SOURCE: Western European Edifact Board - MD2
+                 on behalf of the North American Edifact Board
+
+
+
+                               CONTENTS
+
+
+        0.   Introduction
+
+        1.   Scope
+
+        2.   Message framework structure
+
+
+
+        0.  Introduction
+
+        A message framework contains a segment table which is the
+        basis for a set of related and structurally aligned message
+        types within an identified application area.
+
+        Beside the sequence of the segments and their groups, it
+        states their number of repeats. With the exception of the
+        mandatory message header and trailer segments, the segments
+        in the framework are indicated as conditional so that
+        they can be made mandatory as required in the development
+        of the respective message types based on the framework.
+
+        The Message framework is consequently not a message type by
+        itself.
+
+
+        1.  Scope
+
+        This framework is suitable for message types providing
+        information suitable for all parties involved in the
+        arrangement of a transport of goods including the consignor/
+        shipper, the consignee and forwarders, brookers and carriers.
+
+
+
+UNH	Message header
+
+BGM	Beginning of message
+
+CTA     Contact information
+
+COM     Communication contact
+
+DTM     Date/time/period
+
+TSR     Transport service requirements
+
+CUX     Currencies
+
+MOA     Monetary amount
+
+FTX     Free text
+
+CNT     Control total
+
+Segment Group  1: RFF-DTM
+
+RFF     Reference
+
+DTM     Date/time/period
+
+Segment Group  2: GOR-DTM-LOC-SEL-SG3
+
+GOR     Governmental requirements
+
+DTM     Date/time/period
+
+LOC     Place/location identification
+
+SEL     Seal number
+                         
+Segment Group  3: DOC-DTM
+
+DOC     Document/message details
+
+DTM     Date/time/period
+
+Segment Group  4: TCC-PRI-EQN-PCD-MOA-QTY-LOC
+
+TCC     Transport charge/rate calculations
+
+PRI     Price details
+
+EQN     Number of units
+
+PCD     Percentage details
+
+MOA     Monetary amount
+
+QTY     Quantity
+
+LOC     Place/location identification
+
+Segment Group  5: TDT-TSR-LOC-DTM-SEL-FTX-SG6-SG7-SG8-SG9
+
+TDT     Details of transport
+
+TSR     Transport service requirements
+
+LOC     Place/location identification
+
+DTM     Date/time/period
+
+SEL     Seal number
+
+FTX     Free text
+                 
+Segment Group  6: MEA-EQN
+
+MEA     Measurements
+
+EQN     Number of units
+                       
+Segment Group  7: DIM-EQN
+
+DIM     Dimensions
+
+EQN     Number of units
+                 
+Segment Group  8: CTA-COM
+
+CTA     Contact information
+
+COM     Communication contact
+                 
+Segment Group  9:NAD-LOC-SG10-SG11-SG12
+
+NAD     Name and address
+
+LOC     Place/location identification
+                                     
+Segment Group 10: CTA-COM
+
+CTA     Contact information
+
+COM     Communication contact
+
+Segment Group 11: DOC-DTM
+
+DOC     Document/message details
+
+DTM     Date/time/period
+                 
+Segment Group 12: TCC-PRI-EQN-PCD-MOA-QTY
+
+TCC     Transport charge/rate calculations
+
+PRI     Price details
+
+EQN     Number of units
+
+PCD     Percentage details
+
+MOA     Monetary amount 
+
+QTY     Quantity 
+
+Segment Group 13: EQD-EQN-TMD-MEA-DIM-SEL-NAD-LOC-FTX-SG14
+
+EQD     Equipment details
+
+EQN     Number of units 
+
+TMD     Transport movement details
+
+MEA     Measurements
+
+DIM     Dimensions
+
+SEL     Seal number
+
+NAD     Name and address
+
+LOC     Place/location identification
+
+FTX     Free text
+                 
+Segment Group 14: EQA-EQN
+
+EQA     Attached equipment
+
+EQN     Number of units   
+
+Segment Group 15: CNI-SGP-CTA-COM-DTM-TSR-CUX-MOA-FTX-
+	SG16-SG17-SG18-SG19-SG21-SG22-SG23-SG25-SG31-SG49
+
+CNI     Consignment information
+
+SGP     Split goods placement
+
+CTA     Contact information
+
+COM     Communication contact
+
+DTM     Date/time/period
+
+TSR     Transport service requirements
+
+CUX     Currencies
+
+MOA     Monetary amount
+
+FTX     Free text
+
+ 
+Segment Group 16: LOC-DTM
+
+LOC     Place/location identification
+
+DTM     Date/time/period
+                        
+Segment Group 17: TOD-LOC
+
+TOD     Terms of delivery
+
+LOC     Place/location identification
+                                     
+Segment Group 18: RFF-DTM
+
+RFF     Reference
+
+DTM     Date/time/period
+                        
+Segment Group 19: GOR-SG20
+
+GOR     Governmental requirements
+                                 
+Segment Group 20: DOC-DTM
+
+DOC     Document/message details
+
+DTM     Date/time/period
+                 
+Segment Group 21: CPI-CUX-LOC-MOA
+
+CPI     Charge payment instructions
+
+CUX     Currencies
+
+LOC     Place/location identification
+
+MOA     Monetary amount
+                       
+Segment Group 22: TCC-LOC-FTX-CUX-PRI-EQN-PCD-MOA-QTY
+
+TCC     Transport charge/rate calculations
+
+LOC     Place/location identification
+
+FTX     Free text
+
+CUX     Currencies
+
+PRI     Price details
+
+EQN     Number of units
+
+PCD     Percentage details
+
+MOA     Monetary amount
+
+QTY     Quantity
+                                      
+Segment Group 23: TDT-DTM-TSR-LOC-SG24
+
+TDT     Details of transport
+
+DTM     Date/time/period
+
+TSR     Transport service requirements
+
+LOC     Place/location identification 
+                         
+Segment Group 24: RFF-DTM
+
+RFF     Reference
+
+DTM     Date/time/period
+                        
+Segment Group 25: NAD-LOC-MOA-SG26-SG27-SG28-SG29-SG30
+
+NAD     Name and address
+
+LOC     Place/location identification
+
+MOA     Monetary amount
+                       
+Segment Group 26: CTA-COM
+
+CTA     Contact information
+
+COM     Communication contact
+                 
+Segment Group 27: DOC-DTM
+
+DOC     Document/message details
+
+DTM     Date/time/period
+                 
+Segment Group 28: TCC-PRI-EQN-PCD-MOA-QTY
+
+TCC     Transport charge/rate calculations
+
+PRI     Price details
+
+EQN     Number of units
+
+PCD     Percentage details
+
+MOA     Monetary amount
+
+QTY     Quantity
+                 
+Segment Group 29: RFF-DTM
+
+RFF     Reference
+
+DTM     Date/time/period
+                        
+Segment Group 30: CPI-CUX-LOC-MOA
+
+CPI     Charge payment instructions
+
+CUX     Currencies
+
+LOC     Place/location identification
+
+MOA     Monetary amount
+                       
+Segment Group 31: GID-HAN-TMP-RNG-TMD-LOC-MOA-PIA-FTX-SG32-
+	SG33-SG34-SG35-SG36-SG37-SG38-SG39-SG41-SG43-SG44
+
+GID     Goods item details
+
+HAN     Handling instructions
+
+TMP     Temperature
+
+RNG     Range details
+
+TMD     Transport movement details
+
+LOC     Place/location identification
+
+MOA     Monetary amount
+
+PIA     Additional product id
+
+FTX     Free text
+                 
+Segment Group 32: NAD-DTM
+
+NAD     Name and address
+
+DTM     Date/time/period
+
+Segment Group 33: GDS-FTX
+
+GDS     Goods description
+
+FTX     Free text
+                 
+Segment Group 34: MEA-EQN
+
+MEA     Measurements
+
+EQN     Number of units
+                       
+Segment Group 35: DIM-EQN
+
+DIM     Dimensions
+
+EQN     Number of units
+                       
+Segment Group 36: RFF-DTM
+
+RFF     Reference
+
+DTM     Date/time/period
+                        
+Segment Group 37: PCI-RFF-DTM
+
+PCI     Package identification
+
+RFF     Reference
+
+DTM     Date/time/period
+
+Segment Group 38: DOC-DTM
+
+DOC     Document/message details
+
+DTM     Date/time/period
+                        
+Segment Group 39: TPL-SG40
+
+TPL     Transport placement
+                           
+Segment Group 40: MEA-EQN
+
+MEA     Measurements
+
+EQN     Number of units
+
+Segment Group 41: SGP-SG42
+
+SGP     Split goods placement
+                             
+Segment Group 42: MEA-EQN
+
+MEA     Measurements
+
+EQN     Number of units
+                 
+Segment Group 43: TCC-PRI-EQN-PCD-MOA-QTY-LOC
+
+TCC     Transport charge/rate calculations
+
+PRI     Price details
+
+EQN     Number of units
+
+PCD     Percentage details
+
+MOA     Monetary amount
+
+QTY     Quantity
+
+LOC     Place/location identification 
+                                      
+Segment Group 44: DGS-FTX-SG45-SG46-SG47
+
+DGS     Dangerous goods
+
+FTX     Free text
+                 
+Segment Group 45: CTA-COM
+
+CTA     Contact information
+
+COM     Communication contact
+                             
+Segment Group 46: MEA-EQN
+
+MEA     Measurements
+
+EQN     Number of units
+                       
+Segment Group 47: SGP-SG48
+
+SGP     Split goods placement
+
+Segment Group 48: MEA-EQN
+
+MEA     Measurements
+
+EQN     Number of units
+                       
+Segment Group 49: EQD-EQN-TMD-MEA-DIM-SEL-TPL-FTX-SG50-SG51-SG52
+	
+EQD     Equipment details
+
+EQN     Number of units
+
+TMD     Transport movement details
+
+MEA     Measurements
+
+DIM     Dimensions
+
+SEL     Seal number
+
+TPL     Transport placement
+
+FTX     Free text 
+                  
+Segment Group 50: TCC-PRI-EQN-PCD-MOA-QTY
+
+TCC     Transport charge/rate calculations
+
+PRI     Price details
+
+EQN     Number of units
+
+PCD     Percentage details
+
+MOA     Monetary amount
+
+QTY     Quantity
+                 
+Segment Group 51: NAD-DTM
+
+NAD     Name and address
+
+DTM     Date/time/period
+
+Segment Group 52: EQA-EQN
+
+EQA     Attached equipment
+
+EQN     Number of units
+
+UNT     Message trailer
+
+
+         2.  Message framework structure
+
+
+Tag     Name                          Status  Repeats  Loops
+
+UNH     Message header                     M    1
+BGM     Beginning of message               M    1
+CTA     Contact information                C    1
+COM     Communication contact              C    9
+DTM     Date/time/period                   C    9
+TSR     Transport service requirements     C    9
+CUX     Currencies                         C    9
+MOA     Monetary amount                    C   99
+FTX     Free text                          C   99
+CNT     Control total                      C    9
+
+----- Segment Group  1 ------------------- C    9 -------+
+RFF     Reference                          C    1        |
+DTM     Date/time/period                   C    9 -------+
+
+----- Segment Group  2 ------------------- C    9 -------+
+GOR     Governmental requirements          C    1        |
+DTM     Date/time/period                   C    9        |
+LOC     Place/location identification      C    9        |
+SEL     Seal number                        C    9        |
+                                                         |
+----- Segment Group  3 ------------------- C    9 -----+ |
+DOC     Document/message details           C    1      | |
+DTM     Date/time/period                   C    1 -----+-+
+
+----- Segment Group  4 ------------------- C    9 -------+
+TCC     Transport charge/rate calculations C    1        |
+PRI     Price details                      C    1        |
+EQN     Number of units                    C    1        |
+PCD     Percentage details                 C    1        |
+MOA     Monetary amount                    C    9        |
+QTY     Quantity                           C    9        |
+LOC     Place/location identification      C    9 -------+
+
+----- Segment Group  5 ------------------- C    9 -------+
+TDT     Details of transport               C    1        |
+TSR     Transport service requirements     C    9        |
+LOC     Place/location identification      C    9        |
+DTM     Date/time/period                   C    9        |
+SEL     Seal number                        C    9        |
+FTX     Free text                          C    9        |
+                                                         |
+----- Segment Group  6 ------------------- C    9 -----+ |
+MEA     Measurements                       C    1      | |
+EQN     Number of units                    C    1 -----+ |
+                                                         |
+----- Segment Group  7 ------------------- C    9 -----+ |
+DIM     Dimensions                         C    1      | |
+EQN     Number of units                    C    1 -----+ |
+                                                         |
+----- Segment Group  8 ------------------- C    9 -----+ |
+CTA     Contact information                C    1      | |
+COM     Communication contact              C    9 -----+ |
+                                                         |
+----- Segment Group  9 ------------------- C    9 -----+ |
+NAD     Name and address                   C    1      | |
+LOC     Place/location identification      C    9      | |
+                                                       | |
+----- Segment Group 10 ------------------- C    9 ---+ | |
+CTA     Contact information                C    1    | | |
+COM     Communication contact              C    9 ---+ | |
+                                                       | |
+----- Segment Group 11 ------------------- C    9 ---+ | |
+DOC     Document/message details           C    1    | | |
+DTM     Date/time/period                   C    1 ---+ | |
+                                                       | |
+----- Segment Group 12 ------------------- C    9 ---+ | |
+TCC     Transport charge/rate calculations C    1    | | |
+PRI     Price details                      C    1    | | |
+EQN     Number of units                    C    1    | | |
+PCD     Percentage details                 C    1    | | |
+MOA     Monetary amount                    C    9    | | |
+QTY     Quantity                           C    9 ---+-+-+
+
+----- Segment Group 13 ------------------- C  999 -------+
+EQD     Equipment details                  C    1        |
+EQN     Number of units                    C    1        |
+TMD     Transport movement details         C    1        |
+MEA     Measurements                       C    9        |
+DIM     Dimensions                         C    9        |
+SEL     Seal number                        C    9        |
+NAD     Name and address                   C    9        |
+LOC     Place/location identification      C    9        |
+FTX     Free text                          C    9        |
+                                                         |
+----- Segment Group 14 ------------------- C   99 -----+ |
+EQA     Attached equipment                 C    1      | |
+EQN     Number of units                    C    1 -----+-+
+
+----- Segment Group 15 ------------------- C 9999 -------+
+CNI     Consignment information            C    1        |
+SGP     Split goods placement              C    9        |
+CTA     Contact information                C    1        |
+COM     Communication contact              C    9        |
+DTM     Date/time/period                   C    9        |
+TSR     Transport service requirements     C    9        |
+CUX     Currencies                         C    9        |
+MOA     Monetary amount                    C   99        |
+FTX     Free text                          C   99        |
+                                                         |
+----- Segment Group 16 ------------------- C   99 -----+ |
+LOC     Place/location identification      C    1      | |
+DTM     Date/time/period                   C    9 -----+ |
+                                                         |
+----- Segment Group 17 ------------------- C    1 -----+ |
+TOD     Terms of delivery                  C    1      | |
+LOC     Place/location identification      C    9 -----+ |
+                                                         |
+----- Segment Group 18 ------------------- C   99 -----+ |
+RFF     Reference                          C    1      | |
+DTM     Date/time/period                   C    9 -----+ |
+                                                         |
+----- Segment Group 19 ------------------- C    9 -----+ |
+GOR     Governmental requirements          C    1      | |
+                                                       | |
+----- Segment Group 20 ------------------- C    9 ---+ | |
+DOC     Document/message details           C    1    | | |
+DTM     Date/time/period                   C    1 ---+-+ |
+                                                         |
+----- Segment Group 21 ------------------- C    9 -----+ |
+CPI     Charge payment instructions        C    1      | |
+CUX     Currencies                         C    1      | |
+LOC     Place/location identification      C    9      | |
+MOA     Monetary amount                    C    9 -----+ |
+                                                         |
+----- Segment Group 22 ------------------- C   99 -----+ |
+TCC     Transport charge/rate calculations C    1      | |
+LOC     Place/location identification      C    1      | |
+FTX     Free text                          C    1      | |
+CUX     Currencies                         C    1      | |
+PRI     Price details                      C    1      | |
+EQN     Number of units                    C    1      | |
+PCD     Percentage details                 C    1      | |
+MOA     Monetary amount                    C    9      | |
+QTY     Quantity                           C    9 -----+ |
+                                                         |
+----- Segment Group 23 ------------------- C   99 -----+ |
+TDT     Details of transport               C    1      | |
+DTM     Date/time/period                   C    9      | |
+TSR     Transport service requirements     C    9      | |
+LOC     Place/location identification      C   99      | |
+                                                       | |
+----- Segment Group 24 ------------------- C    9 ---+ | |
+RFF     Reference                          C    1    | | |
+DTM     Date/time/period                   C    1 ---+-+ |
+                                                         |
+----- Segment Group 25 ------------------- C   99 -----+ |
+NAD     Name and address                   C    1      | |
+LOC     Place/location identification      C    9      | |
+MOA     Monetary amount                    C    9      | |
+                                                       | |
+----- Segment Group 26 ------------------- C    9 ---+ | |
+CTA     Contact information                C    1    | | |
+COM     Communication contact              C    9 ---+ | |
+                                                       | |
+----- Segment Group 27 ------------------- C    9 ---+ | |
+DOC     Document/message details           C    1    | | |
+DTM     Date/time/period                   C    1 ---+ | |
+                                                       | |
+----- Segment Group 28 ------------------- C   99 ---+ | |
+TCC     Transport charge/rate calculations C    1    | | |
+PRI     Price details                      C    1    | | |
+EQN     Number of units                    C    1    | | |
+PCD     Percentage details                 C    1    | | |
+MOA     Monetary amount                    C    9    | | |
+QTY     Quantity                           C    9 ---+ | |
+                                                       | |
+----- Segment Group 29 ------------------- C    9 ---+ | |
+RFF     Reference                          C    1    | | |
+DTM     Date/time/period                   C    9 ---+ | |
+                                                       | |
+----- Segment Group 30 ------------------- C    9 ---+ | |
+CPI     Charge payment instructions        C    1    | | |
+CUX     Currencies                         C    1    | | |
+LOC     Place/location identification      C    9    | | |
+MOA     Monetary amount                    C    9 ---+-+ |
+                                                         |
+----- Segment Group 31 ------------------- C  999 -----+ |
+GID     Goods item details                 C    1      | |
+HAN     Handling instructions              C    1      | |
+TMP     Temperature                        C    1      | |
+RNG     Range details                      C    1      | |
+TMD     Transport movement details         C    1      | |
+LOC     Place/location identification      C    9      | |
+MOA     Monetary amount                    C    9      | |
+PIA     Additional product id              C    9      | |
+FTX     Free text                          C    9      | |
+                                                       | |
+----- Segment Group 32 ------------------- C    9 ---+ | |
+NAD     Name and address                   C    1    | | |
+DTM     Date/time/period                   C    1 ---+ | |
+                                                       | |
+----- Segment Group 33 ------------------- C    9 ---+ | |
+GDS     Goods description                  C    1    | | |
+FTX     Free text                          C    1 ---+ | |
+                                                       | |
+----- Segment Group 34 ------------------- C   99 ---+ | |
+MEA     Measurements                       C    1    | | |
+EQN     Number of units                    C    1 ---+ | |
+                                                       | |
+----- Segment Group 35 ------------------- C   99 ---+ | |
+DIM     Dimensions                         C    1    | | |
+EQN     Number of units                    C    1 ---+ | |
+                                                       | |
+----- Segment Group 36 ------------------- C    9 ---+ | |
+RFF     Reference                          C    1    | | |
+DTM     Date/time/period                   C    9 ---+ | |
+                                                       | |
+----- Segment Group 37 ------------------- C    9 ---+ | |
+PCI     Package identification             C    1    | | |
+RFF     Reference                          C    1    | | |
+DTM     Date/time/period                   C    1 ---+ | |
+                                                       | |
+----- Segment Group 38 ------------------- C    9 ---+ | |
+DOC     Document/message details           C    1    | | |
+DTM     Date/time/period                   C    9 ---+ | |
+                                                       | |
+----- Segment Group 39 ------------------- C    9 ---+ | |
+TPL     Transport placement                C    1    | | |
+                                                     | | |
+----- Segment Group 40 ------------------- C    9 -+ | | |
+MEA     Measurements                       C    1  | | | |
+EQN     Number of units                    C    1 -+-+ | |
+                                                       | |
+----- Segment Group 41 ------------------- C  999 ---+ | |
+SGP     Split goods placement              C    1    | | |
+                                                     | | |
+----- Segment Group 42 ------------------- C    9 -+ | | |
+MEA     Measurements                       C    1  | | | |
+EQN     Number of units                    C    1 -+-+ | |
+                                                       | |
+----- Segment Group 43 ------------------- C   99 ---+ | |
+TCC     Transport charge/rate calculations C    1    | | |
+PRI     Price details                      C    1    | | |
+EQN     Number of units                    C    1    | | |
+PCD     Percentage details                 C    1    | | |
+MOA     Monetary amount                    C    9    | | |
+QTY     Quantity                           C    9    | | |
+LOC     Place/location identification      C    9 ---+ | |
+                                                       | |
+----- Segment Group 44 ------------------- C    9 ---+ | |
+DGS     Dangerous goods                    C    1    | | |
+FTX     Free text                          C   99    | | |
+                                                     | | |
+----- Segment Group 45 ------------------- C    9 -+ | | |
+CTA     Contact information                C    1  | | | |
+COM     Communication contact              C    9 -+ | | |
+                                                     | | |
+----- Segment Group 46 ------------------- C    9 -+ | | |
+MEA     Measurements                       C    1  | | | |
+EQN     Number of units                    C    1 -+ | | |
+                                                     | | |
+----- Segment Group 47 ------------------- C  999 -+ | | |
+SGP     Split goods placement              C    1  | | | |
+                                                   | | | |
+----- Segment Group 48 ------------------- C    9  | | | |
+MEA     Measurements                       C    1  | | | |
+EQN     Number of units                    C    1 -+-+-+ |
+                                                         |
+----- Segment Group 49 ------------------- C  999 -----+ |
+EQD     Equipment details                  C    1      | |
+EQN     Number of units                    C    1      | |
+TMD     Transport movement details         C    1      | |
+MEA     Measurements                       C    9      | |
+DIM     Dimensions                         C    9      | |
+SEL     Seal number                        C   99      | |
+TPL     Transport placement                C    9      | |
+FTX     Free text                          C    9      | |
+                                                       | |
+----- Segment Group 50 ------------------- C   99 ---+ | |
+TCC     Transport charge/rate calculations C    1    | | |
+PRI     Price details                      C    1    | | |
+EQN     Number of units                    C    1    | | |
+PCD     Percentage details                 C    1    | | |
+MOA     Monetary amount                    C    9    | | |
+QTY     Quantity                           C    9 ---+ | |
+                                                       | |
+----- Segment Group 51 ------------------- C    9 ---+ | |
+NAD     Name and address                   C    1    | | |
+DTM     Date/time/period                   C    1 ---+ | |
+                                                       | |
+----- Segment Group 52 ------------------- C   99 ---+ | |
+EQA     Attached equipment                 C    1    | | |
+EQN     Number of units                    C    1 ---+-+-+
+
+UNT     Message trailer                    C    1
+
+

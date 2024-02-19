@@ -1,0 +1,283 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- UN -->
+<!-- The file was automatically generated with 'edifact_schema_gen.exe' -->
+<!-- Don't edit! -->
+<xs:schema
+  targetNamespace="EDIFACT"
+  xmlns="EDIFACT"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified" attributeFormDefault="unqualified"
+>
+  <xs:include schemaLocation="types.xsd"/>
+  <xs:complexType name="UNB">
+    <xs:annotation>
+      <xs:documentation>Interchange Header</xs:documentation>
+      <xs:documentation>
+        Function: To start, identify and specify an interchange.  This segment is used to envelope the interchange
+        and also to identify the party for whom the interchange is intended and the party who has sent
+        the interchange.  The principle of the UNB segment is the same as a physical envelope which
+        covers one or more letters or documents and which details the address where delivery is to take
+        place and the address from where the envelope has come.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="GENERIC-SEGMENT">
+        <xs:sequence>
+          <xs:element name="S001" type="S001">
+            <xs:annotation>
+              <xs:documentation>SYNTAX IDENTIFIER</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S002" type="S002">
+            <xs:annotation>
+              <xs:documentation>INTERCHANGE SENDER</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S003" type="S003">
+            <xs:annotation>
+              <xs:documentation>INTERCHANGE RECIPIENT</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S004" type="S004">
+            <xs:annotation>
+              <xs:documentation>DATE/TIME OF PREPARATION</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="E0020" type="E0020">
+            <xs:annotation>
+              <xs:documentation>INTERCHANGE CONTROL REFERENCE</xs:documentation>
+              <xs:documentation>Unique reference assigned by sender</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S005" type="S005" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation>RECIPIENTS REFERENCE, PASSWORD</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="E0026" type="E0026" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation>APPLICATION REFERENCE</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="E0029" type="E0029" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation>PROCESSING PRIORITY CODE</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="E0031" type="E0031" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation>ACKNOWLEDGEMENT REQUEST</xs:documentation>
+              <xs:documentation>Set = 1 if sender requests acknowledgement, i.e. UNB and UNZ segments received and identified</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="E0032" type="E0032" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation>COMMUNICATIONS AGREEMENT ID</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="E0035" type="E0035" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation>TEST INDICATOR</xs:documentation>
+              <xs:documentation>Set = 1 if the interchange is a test. Otherwise not used</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UNZ">
+    <xs:annotation>
+      <xs:documentation>Interchange Trailer</xs:documentation>
+      <xs:documentation>Function: To end and check the completeness of an interchange</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="GENERIC-SEGMENT">
+        <xs:sequence>
+          <xs:element name="E0036" type="E0036">
+            <xs:annotation>
+              <xs:documentation>INTERCHANGE CONTROL COUNT</xs:documentation>
+              <xs:documentation>
+                The count of the number of messages or, if used, the number of functional groups in the interchange.
+                One of these counts shall appear.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="E0020" type="E0020">
+            <xs:annotation>
+              <xs:documentation>INTERCHANGE CONTROL REFERENCE</xs:documentation>
+              <xs:documentation>Shall be identical to 0020 in UNB</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UNG">
+    <xs:annotation>
+      <xs:documentation>Functional Group Header</xs:documentation>
+      <xs:documentation>Function: To head, identify and specify a Functional Group</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="GENERIC-SEGMENT">
+        <xs:sequence>
+          <xs:element name="E0038" type="E0038">
+            <xs:annotation>
+              <xs:documentation>FUNCTIONAL GROUP IDENTIFICATION</xs:documentation>
+              <xs:documentation>Identifies the one message type in the functional group</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S006" type="S006">
+            <xs:annotation>
+              <xs:documentation>APPLICATION SENDER'S IDENTIFICATION</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S007" type="S007">
+            <xs:annotation>
+              <xs:documentation>APPLICATION RECIPIENT'S IDENTIFICATION</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S004" type="S004">
+            <xs:annotation>
+              <xs:documentation>DATE/TIME OF PREPARATION</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="E0048" type="E0048">
+            <xs:annotation>
+              <xs:documentation>FUNCTIONAL GROUP REFERENCE NUMBER</xs:documentation>
+              <xs:documentation>Unique reference number assigned by sender's division, department etc.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="E0051" type="E0051">
+            <xs:annotation>
+              <xs:documentation>CONTROLLING AGENCY</xs:documentation>
+              <xs:documentation>Code to identify the agency controlling the specification, maintenance and publication of the message type</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S008" type="S008">
+            <xs:annotation>
+              <xs:documentation>MESSAGE VERSION</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="E0058" type="E0058" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation>APPLICATION PASSWORD</xs:documentation>
+              <xs:documentation>
+                Password to recepient's division, department or sectional system (if required)
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UNE">
+    <xs:annotation>
+      <xs:documentation>Functional Group Trailer</xs:documentation>
+      <xs:documentation>Function: To end and check the completeness of a Functional Group</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="GENERIC-SEGMENT">
+        <xs:sequence>
+          <xs:element name="E0060" type="E0060">
+            <xs:annotation>
+              <xs:documentation>NUMBER OF MESSAGES</xs:documentation>
+              <xs:documentation>The count of the number of messages in the functional group</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="E0048" type="E0048">
+            <xs:annotation>
+              <xs:documentation>FUNCTIONAL GROUP REFERENCE NUMBER</xs:documentation>
+              <xs:documentation>Shall be identical to 0048 in UNG</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UNH">
+    <xs:annotation>
+      <xs:documentation>Message Header</xs:documentation>
+      <xs:documentation>Function: To head, identify and specify a Message</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="GENERIC-SEGMENT">
+        <xs:sequence>
+          <xs:element name="E0062" type="E0062">
+            <xs:annotation>
+              <xs:documentation>MESSAGE REFERENCE NUMBER</xs:documentation>
+              <xs:documentation>A sender's unique message reference</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S009" type="S009">
+            <xs:annotation>
+              <xs:documentation>MESSAGE IDENTIFIER</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="E0068" type="E0068" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation>COMMON ACCESS REFERENCE</xs:documentation>
+              <xs:documentation>
+                Key to relate all subsequent transfers of data to the same business case of file.
+                Within the 35 characters the IA may specify component elements
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S010" type="S010" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation>STATUS OF THE TRANSFER</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UNT">
+    <xs:annotation>
+      <xs:documentation>Message Trailer</xs:documentation>
+      <xs:documentation>Function: To end and check the completeness of a Message</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="GENERIC-SEGMENT">
+        <xs:sequence>
+          <xs:element name="E0074" type="E0074" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation>NUMBER OF SEGMENTS IN THE MESSAGE</xs:documentation>
+              <xs:documentation>Control count including UNH and UNT</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="E0062" type="E0062">
+            <xs:annotation>
+              <xs:documentation>MESSAGE REFERENCE NUMBER</xs:documentation>
+              <xs:documentation>Shall be identical to 0062 in UNH</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="UNS">
+    <xs:annotation>
+      <xs:documentation>Section Control</xs:documentation>
+      <xs:documentation>
+        Function: To separate Header, Detail and Summary sections of a
+        message
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="GENERIC-SEGMENT">
+        <xs:sequence>
+          <xs:element name="E0081" type="E0081">
+            <xs:annotation>
+              <xs:documentation>SECTION IDENTIFICATION</xs:documentation>
+              <xs:documentation>
+                Separates sections in a message by one of the following codes:
+                D separates the header and detail sections
+                S separates the detail and summary sections
+              </xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+</xs:schema>

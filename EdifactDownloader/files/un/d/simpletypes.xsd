@@ -1,0 +1,257 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!-- UN -->
+<!-- The file was automatically generated with 'edifact_schema_gen.exe' -->
+<!-- Don't edit! -->
+<xs:schema
+  targetNamespace="EDIFACT"
+  xmlns="EDIFACT"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified" attributeFormDefault="unqualified"
+>
+  <xs:include schemaLocation="..\..\edifact.xsd" />
+  <xs:complexType name="E0001">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:pattern value="^\w{4}$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0002">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:pattern value="^\d$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0004">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="35"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0007">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="4"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0008">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="14"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0010">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="35"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0014">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="14"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0017">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:pattern value="^\d{6}$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0019">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:pattern value="^\d{4}$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0020">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="14"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0022">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="14"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0025">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:length value="2"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0026">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="14"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0029">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:pattern value="^\w$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0031">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:pattern value="^\d$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0032">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="35"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0035">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:pattern value="^\d$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0036">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:pattern value="^\d{1,6}$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0038">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="6"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0040">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="35"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0044">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="35"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0048">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="14"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0051">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="2"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0052">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="3"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0054">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="3"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0057">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="6"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0058">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="14"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0060">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:pattern value="^\d{1,6}$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0062">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="14"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0065">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="6"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0068">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:maxLength value="35"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0070">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:pattern value="^\d{1,2}$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0073">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:pattern value="^\w$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0074">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:pattern value="^\d{1,6}$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="E0081">
+    <xs:simpleContent>
+      <xs:restriction base="E">
+        <xs:pattern value="^\w$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+</xs:schema>
