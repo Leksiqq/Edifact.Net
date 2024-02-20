@@ -123,4 +123,22 @@
   <data name="UNEXPECTED_SEGMENT" xml:space="preserve">
     <value>Неподходящий сегмент '{0}' встретился в строке {L0}, колонке {C0}.</value>
   </data>
+  <data name="FAILED_UNZIP" xml:space="preserve">
+    <value>Ошибка распаковки {0}. Попробуйте использовать внешний архиватор.</value>
+  </data>
+  <data name="USING_EXTERNAL_UNZIP" xml:space="preserve">
+    <value>Используется внешний архиватор: {0}</value>
+  </data>
+  <data name="FILE_FOR_DIRECTORY_NOT_FOUND" xml:space="preserve">
+    <value>Файл '{0}' для директории '{1}' не обнаружен.</value>
+  </data>
+  <data name="UNSL_MESSAGE" xml:space="preserve">
+    <value>{0}: используется 'unsl' файл для директории '{1}'.</value>
+  </data>
+  <data name="RECEIVING_DIRECTORY" xml:space="preserve">
+    <value>Получаем директорию {0}.</value>
+  </data>
+  <data name="DIRECTORY_NOT_FOUND" xml:space="preserve">
+    <value>Директория '{0}' не обнаружена.</value>
+  </data>
 </root>

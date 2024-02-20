@@ -168,4 +168,22 @@
   <data name="INVALID_SUB_ELEMENT_VALUE" xml:space="preserve">
     <value>The sub-element '{1}/{2}/{3}' has invalid value '{0}' according to its datatype at line {L0}, col {C0}.</value>
   </data>
+  <data name="FAILED_UNZIP" xml:space="preserve">
+    <value>Failed unzip {0}, try use external unzip program.</value>
+  </data>
+  <data name="USING_EXTERNAL_UNZIP" xml:space="preserve">
+    <value>Using external unzip: {0}</value>
+  </data>
+  <data name="FILE_FOR_DIRECTORY_NOT_FOUND" xml:space="preserve">
+    <value>'{0}' File for directory '{1}' not found.</value>
+  </data>
+  <data name="UNSL_MESSAGE" xml:space="preserve">
+    <value>{0}: using 'unsl' File for directory '{1}'.</value>
+  </data>
+  <data name="RECEIVING_DIRECTORY" xml:space="preserve">
+    <value>Receiving directory: {0}</value>
+  </data>
+  <data name="DIRECTORY_NOT_FOUND" xml:space="preserve">
+    <value>Directory '{0}' not found.</value>
+  </data>
 </root>

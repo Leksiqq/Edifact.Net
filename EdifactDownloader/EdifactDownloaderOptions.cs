@@ -10,4 +10,5 @@ public class EdifactDownloaderOptions
     public WebProxy? Proxy { get; set; }
     public string? TargetFolder { get; set; }
     public string? TmpFolder { get; set; }
+    public string? ExternalUnzipCommandLineFormat {  get; set; }
 }

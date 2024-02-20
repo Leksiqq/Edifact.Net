@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 namespace Net.Leksi.Edifact;
 
-public class CLParser : PartsParser
+internal class CLParser : PartsParser
 {
     string name;
     string value = null;
@@ -36,7 +36,7 @@ public class CLParser : PartsParser
         OnItem += new Item(delegate(string value, string change_indicator, string info, string description) { });
     }
 
-    public override void Run(string[] data)
+    protected internal override void Run(string[] data)
     {
         base.Run(data);
         if (value != null)

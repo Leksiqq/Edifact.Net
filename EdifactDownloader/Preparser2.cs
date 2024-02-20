@@ -16,9 +16,9 @@ public class Preparser2
     Regex reSeg = new Regex("^\\s*([A-Z]{3})[^\\w].*$");
     Regex reSG = new Regex("^\\s*(?:Segment\\s+)?[gG]roup\\s+\\d+\\s*[:.,]?.*$");
     Regex reHeaders = new Regex("^\\s*(TAG)\\s+(NAME)\\s+(S|status)(?:\\s+|/)(REPT|repeats).*$", RegexOptions.IgnoreCase);
-    Regex reUNH = new Regex("^\\s*UNH\\s*,?\\s*Message header.*$");
+    Regex reUNH = new Regex("^\\s*UNH\\s*,?\\s*s_logMessage header.*$");
     Regex reBGM = new Regex("^\\s*BGM\\s*,?\\s*Beginning of message.*$");
-    Regex reUNT = new Regex("^\\s*UNT\\s+Message trailer.*$");
+    Regex reUNT = new Regex("^\\s*UNT\\s+s_logMessage trailer.*$");
     Regex reOccSeg = new Regex("^[-\\s\\*+#|X]*([A-Z]{3})\\s+(.*?)\\s*([CM])\\s+(\\d+).*$");
     Regex reOccSG = new Regex("^.*?Segment\\s+[gG]roup\\s+(\\d+).*?([CM])\\s+(\\d+).*$");
     int TAGpos = 0;

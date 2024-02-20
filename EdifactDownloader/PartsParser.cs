@@ -2,23 +2,23 @@
 
 namespace Net.Leksi.Edifact;
 
-public class PartsParser
+internal class PartsParser
 {
-    Regex reLine = new Regex("^(.*?)[-─]{5,}\\s*$");
+    private static readonly Regex reLine = new Regex("^(.*?)[-─]{5,}\\s*$");
 
-    public delegate void Part();
-    public delegate void Line(string line);
+    internal delegate void Part();
+    internal delegate void Line(string line);
 
-    public event Part OnPart;
-    public event Line OnLine;
+    internal event Part OnPart;
+    internal event Line OnLine;
 
-    public PartsParser()
+    internal PartsParser()
     {
         OnPart += new Part(delegate() { });
         OnLine += new Line(delegate(string line) { });
     }
 
-    public virtual void Run(string[] data)
+    protected internal virtual void Run(string[] data)
     {
         foreach (string line in data)
         {

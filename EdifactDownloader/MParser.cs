@@ -25,7 +25,7 @@ public class MParser
     Regex reOccSG = null;
     Regex reS = null;
     Regex reR = null;
-    Regex reHeaders = new Regex("^\\s*(\\d{4})\\s+(UNH)\\s+(Message header)\\s+(M)\\s+(1)\\s*$", RegexOptions.IgnoreCase);
+    Regex reHeaders = new Regex("^\\s*(\\d{4})\\s+(UNH)\\s+(s_logMessage header)\\s+(M)\\s+(1)\\s*$", RegexOptions.IgnoreCase);
     string segment = null;
     string info = null;
     string desc = null;

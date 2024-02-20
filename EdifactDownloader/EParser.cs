@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 namespace Net.Leksi.Edifact;
 
-public class EParser : PartsParser
+internal class EParser : PartsParser
 {
     string name = null;
     string info;
@@ -27,7 +27,7 @@ public class EParser : PartsParser
         OnSimpleType += new SimpleType(delegate(string name, string change_indicator, string info, string description, string repr, string note) { });
     }
 
-    public override void Run(string[] data)
+    protected internal override void Run(string[] data)
     {
         base.Run(data);
         if (name != null)

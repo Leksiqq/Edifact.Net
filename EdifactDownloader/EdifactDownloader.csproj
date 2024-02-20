@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Properties\fixed.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -23,6 +28,11 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\unsl.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>unsl.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 
@@ -39,15 +49,22 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Properties\unsl.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>unsl.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <PropertyGroup>
-      <MakeResources>MakeResources</MakeResources>
+      <MakeResources>Files2Resources</MakeResources>
       <Fixed>fixed</Fixed>
       <FixedResx>Properties\$(Fixed).resx</FixedResx>
+      <Unsl>unsl</Unsl>
+      <UnslResx>Properties\$(Unsl).resx</UnslResx>
     </PropertyGroup>
     <Exec Command="$(MSBuildProjectDirectory)\..\$(MakeResources)\bin\$(Configuration)\$(TargetFramework)\$(MakeResources).exe $(FixedResx) $(Fixed)" />
+    <Exec Command="$(MSBuildProjectDirectory)\..\$(MakeResources)\bin\$(Configuration)\$(TargetFramework)\$(MakeResources).exe $(UnslResx) $(Unsl)" />
   </Target>
 
 </Project>

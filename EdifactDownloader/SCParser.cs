@@ -2,7 +2,7 @@
 
 namespace Net.Leksi.Edifact;
 
-public class SCParser : PartsParser
+internal class SCParser : PartsParser
 {
     string name;
     string info;

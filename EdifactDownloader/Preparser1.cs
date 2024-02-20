@@ -1,24 +1,24 @@
-﻿using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace Net.Leksi.Edifact;
 
-public class Preparser1 : PartsParser
+internal class Preparser1 : PartsParser
 {
-    TextWriter tw;
-    bool started = false;
-    Regex reDesc = new Regex("^\\s*Desc:.*$");
-    Regex reCont = new Regex("^(\\s*)(Cont|Repr):(.*)$");
-    enum Stages { NONE, DESC, CONT };
-    Stages stage = Stages.NONE;
-    Regex reHeaders = new Regex("^\\s*(POS)\\s+(TAG)\\s+(NAME)\\s+(S)\\s+(R)\\s*$", RegexOptions.IgnoreCase);
-    string savefile;
+    private enum Stages { NONE, DESC, CONT };
 
-    public Preparser1(string filename)
+    private const string s_manyDashes = "----------------------------------------------------------------------";
+    private static readonly Regex reDesc = new("^\\s*Desc:.*$");
+    private static readonly Regex reCont = new("^(\\s*)(Cont|Repr):(.*)$");
+    private readonly TextWriter tw;
+    private readonly string savefile;
+    private Stages stage = Stages.NONE;
+    private bool started = false;
+
+    internal Preparser1(string filename)
     {
-        OnPart += new Part(on_part);
-        OnLine += new Line(on_line);
-        tw = new StreamWriter(filename, false, Encoding.GetEncoding(866));
+        OnPart += OnPartHandler;
+        OnLine += OnLineHandler;
+        tw = new StreamWriter(filename, false);
         savefile = Path.GetDirectoryName(filename) + "\\" + Path.GetFileName(filename) + ".1";
         if (File.Exists(savefile))
         {
@@ -26,9 +26,9 @@ public class Preparser1 : PartsParser
         }
     }
 
-    public override void Run(string[] data)
+    protected internal override void Run(string[] data)
     {
-        File.AppendAllLines(savefile, data, Encoding.GetEncoding(866));
+        File.AppendAllLines(savefile, data);
         try
         {
             base.Run(data);
@@ -39,7 +39,7 @@ public class Preparser1 : PartsParser
         }
     }
 
-    void on_line(string line)
+    private void OnLineHandler(string line)
     {
         if (started)
         {
@@ -71,11 +71,11 @@ public class Preparser1 : PartsParser
         tw.WriteLine(line);
     }
 
-    void on_part()
+    private void OnPartHandler()
     {
         started = true;
-        tw.WriteLine("");
-        tw.WriteLine("----------------------------------------------------------------------");
+        tw.WriteLine();
+        tw.WriteLine(s_manyDashes);
         stage = Stages.DESC;
     }
 }
