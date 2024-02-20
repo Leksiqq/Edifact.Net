@@ -60,5 +60,584 @@ namespace Net.Leksi.Edifact.Properties {
             }
         }
         
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1911_CREADV_911 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1911\\CREADV.911", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1911_CUSDEC_911 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1911\\CUSDEC.911", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1911_DELFOR_911 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1911\\DELFOR.911", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1911_DELJIT_911 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1911\\DELJIT.911", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1911_DESADV_911 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1911\\DESADV.911", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1911_IFCSUM_911 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1911\\IFCSUM.911", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1911_IFTMFR_911 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1911\\IFTMFR.911", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1911_INVOIC_911 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1911\\INVOIC.911", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1911_ORDERS_911 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1911\\ORDERS.911", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1911_PRICAT_911 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1911\\PRICAT.911", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1911_QALITY_911 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1911\\QALITY.911", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1911_QUOTES_911 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1911\\QUOTES.911", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1911_REQOTE_911 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1911\\REQOTE.911", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1921_INVOIC_921 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1921\\INVOIC.921", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1921_ORDCHG_921 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1921\\ORDCHG.921", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1921_ORDERS_921 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1921\\ORDERS.921", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1921_QALITY_921 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1921\\QALITY.921", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1921_trcd_921 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1921\\trcd.921", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_1921_tred_921 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\1921\\tred.921", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2912_IFTMFR_912 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2912\\IFTMFR.912", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2932_CREADV_932 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2932\\CREADV.932", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2932_CUSDEC_932 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2932\\CUSDEC.932", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2932_DELJIT_932 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2932\\DELJIT.932", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2932_edcd_932 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2932\\edcd.932", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2932_eded_932 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2932\\eded.932", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2932_IFCSUM_932 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2932\\IFCSUM.932", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2932_INVOIC_932 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2932\\INVOIC.932", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2932_ORDERS_932 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2932\\ORDERS.932", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2932_QALITY_932 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2932\\QALITY.932", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2932_QUOTES_932 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2932\\QUOTES.932", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2932_REQOTE_932 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2932\\REQOTE.932", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D09A_GOVCBR_D_09a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D09A\\GOVCBR_D.09a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_CONITT_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\CONITT_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_CUSDEC_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\CUSDEC_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_DELJIT_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\DELJIT_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_DESADV_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\DESADV_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_DOCAPP_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\DOCAPP_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_IFCSUM_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\IFCSUM_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_INVRPT_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\INVRPT_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_ORDCHG_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\ORDCHG_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_PAYDUC_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\PAYDUC_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_QALITY_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\QALITY_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_QUOTES_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\QUOTES_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_REMADV_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\REMADV_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_SANCRT_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\SANCRT_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_SLSRPT_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\SLSRPT_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_SUPCOT_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\SUPCOT_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D93A_SUPMAN_D_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D93A\\SUPMAN_D.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D94A_HANMOV_D_94a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D94A\\HANMOV_D.94a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D94A_PRICAT_D_94a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D94A\\PRICAT_D.94a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D94A_SLSRPT_D_94a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D94A\\SLSRPT_D.94a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D94B_CUSEXP_D_94b {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D94B\\CUSEXP_D.94b", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D94B_DOCINF_D_94b {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D94B\\DOCINF_D.94b", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D94B_IFTSTA_D_94b {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D94B\\IFTSTA_D.94b", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D99B_BOPBNK_D_99b {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D99B\\BOPBNK_D.99b", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_S93A_ORDCHG_S_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\S93A\\ORDCHG_S.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_S93A_ORDERS_S_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\S93A\\ORDERS_S.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_S93A_QALITY_S_93a {
+            get {
+                object obj = ResourceManager.GetObject("UN\\S93A\\QALITY_S.93a", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

@@ -59,5 +59,75 @@ namespace Net.Leksi.Edifact.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2912_EDCL_1_912 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2912\\EDCL-1.912", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2912_EDCL_2_912 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2912\\EDCL-2.912", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2912_EDCL_3_912 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2912\\EDCL-3.912", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2912_EDCL_4_912 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2912\\EDCL-4.912", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_2912_EDCL_5_912 {
+            get {
+                object obj = ResourceManager.GetObject("UN\\2912\\EDCL-5.912", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D94B_UNSL_94B {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D94B\\UNSL.94B", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        internal static byte[] UN_D99A_UNSL_99A {
+            get {
+                object obj = ResourceManager.GetObject("UN\\D99A\\UNSL.99A", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
