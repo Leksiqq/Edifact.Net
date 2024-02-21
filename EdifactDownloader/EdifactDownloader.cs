@@ -236,21 +236,6 @@ public class EdifactDownloader
         {
             _tmpDir += s_slash;
         }
-        if (!Directory.Exists(_tmpDir))
-        {
-            Directory.CreateDirectory(_tmpDir);
-        }
-        else
-        {
-            foreach (string f in Directory.GetFiles(_tmpDir))
-            {
-                File.Delete(f);
-            }
-            foreach (string d in Directory.GetDirectories(_tmpDir))
-            {
-                Directory.Delete(d, true);
-            }
-        }
         if (!Directory.Exists(_targetDirectory))
         {
             Directory.CreateDirectory(_targetDirectory);
@@ -1329,12 +1314,27 @@ public class EdifactDownloader
 
     private void InitContext()
     {
+        if (!Directory.Exists(_tmpDir))
+        {
+            Directory.CreateDirectory(_tmpDir);
+        }
+        else
+        {
+            foreach (string f in Directory.GetFiles(_tmpDir))
+            {
+                File.Delete(f);
+            }
+            foreach (string d in Directory.GetDirectories(_tmpDir))
+            {
+                Directory.Delete(d, true);
+            }
+        }
+
         _dir = _directory!.ToLower();
         _fname = _dir;
         _ext = _directory[1..];
         _uncl = s_uncl;
         _unsl = s_unsl;
-
 
         if (s_1911.Equals(_directory))
         {
