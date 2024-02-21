@@ -1,6 +1,6 @@
 ﻿namespace Net.Leksi.Edifact;
 
-public enum ErrorKinds
+internal enum ErrorKinds
 {
     UNEXPECTED_SEGMENT,
     EXPECTED_ELEMENT_NOT_FOUND,

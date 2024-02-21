@@ -7,59 +7,59 @@ internal class Preparser1 : PartsParser
     private enum Stages { NONE, DESC, CONT };
 
     private const string s_manyDashes = "----------------------------------------------------------------------";
-    private static readonly Regex reDesc = new("^\\s*Desc:.*$");
-    private static readonly Regex reCont = new("^(\\s*)(Cont|Repr):(.*)$");
-    private readonly TextWriter tw;
-    private readonly string savefile;
-    private Stages stage = Stages.NONE;
-    private bool started = false;
+    private static readonly Regex s_reDesc = new("^\\s*Desc:.*$");
+    private static readonly Regex s_reCont = new("^(\\s*)(Cont|Repr):(.*)$");
+    private readonly TextWriter _tw;
+    private readonly string _savefile;
+    private Stages _stage = Stages.NONE;
+    private bool _started = false;
 
     internal Preparser1(string filename)
     {
-        OnPart += OnPartHandler;
-        OnLine += OnLineHandler;
-        tw = new StreamWriter(filename, false);
-        savefile = Path.GetDirectoryName(filename) + "\\" + Path.GetFileName(filename) + ".1";
-        if (File.Exists(savefile))
+        OnPart += Preparser1_OnPart;
+        OnLine += Preparser1_OnLine;
+        _tw = new StreamWriter(filename, false);
+        _savefile = Path.GetDirectoryName(filename) + "\\" + Path.GetFileName(filename) + ".1";
+        if (File.Exists(_savefile))
         {
-            File.Delete(savefile);
+            File.Delete(_savefile);
         }
     }
 
     protected internal override void Run(string[] data)
     {
-        File.AppendAllLines(savefile, data);
+        File.AppendAllLines(_savefile, data);
         try
         {
             base.Run(data);
         }
         finally
         {
-            tw.Close();
+            _tw.Close();
         }
     }
 
-    private void OnLineHandler(string line)
+    private void Preparser1_OnLine(string line)
     {
-        if (started)
+        if (_started)
         {
             Match m;
-            switch (stage)
+            switch (_stage)
             {
                 case Stages.DESC:
-                    m = reDesc.Match(line);
+                    m = s_reDesc.Match(line);
                     if (m.Success)
                     {
-                        tw.WriteLine("");
-                        stage = Stages.CONT;
+                        _tw.WriteLine("");
+                        _stage = Stages.CONT;
                     }
                     break;
                 case Stages.CONT:
-                    m = reCont.Match(line);
+                    m = s_reCont.Match(line);
                     if (m.Success)
                     {
-                        tw.WriteLine("");
-                        stage = Stages.NONE;
+                        _tw.WriteLine("");
+                        _stage = Stages.NONE;
                         if ("Cont".Equals(m.Groups[2].Captures[0].Value))
                         {
                             line = m.Groups[1].Captures[0].Value + m.Groups[3].Captures[0].Value;
@@ -68,14 +68,14 @@ internal class Preparser1 : PartsParser
                     break;
             }
         }
-        tw.WriteLine(line);
+        _tw.WriteLine(line);
     }
 
-    private void OnPartHandler()
+    private void Preparser1_OnPart()
     {
-        started = true;
-        tw.WriteLine();
-        tw.WriteLine(s_manyDashes);
-        stage = Stages.DESC;
+        _started = true;
+        _tw.WriteLine();
+        _tw.WriteLine(s_manyDashes);
+        _stage = Stages.DESC;
     }
 }

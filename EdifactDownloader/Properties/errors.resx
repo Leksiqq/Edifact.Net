@@ -186,4 +186,31 @@
   <data name="DIRECTORY_NOT_FOUND" xml:space="preserve">
     <value>Directory '{0}' not found.</value>
   </data>
+  <data name="NO_ENUM_SIMPLE_TYPES" xml:space="preserve">
+    <value>{0}: no simple types with enumeration found.</value>
+  </data>
+  <data name="MESSAGE_NOT_FOUND" xml:space="preserve">
+    <value>File '{0}' for directory '{1}' not found.</value>
+  </data>
+  <data name="LOAD_FIXED_FILE" xml:space="preserve">
+    <value>Loading fixed file: {0}.</value>
+  </data>
+  <data name="INVALID_STRUCTURE" xml:space="preserve">
+    <value>Invalid structure.</value>
+  </data>
+  <data name="EXCEPTION_PARSING_MESSAGE" xml:space="preserve">
+    <value>Error while building message '{0}' for directory '{1}' at {2}:{3}</value>
+  </data>
+  <data name="NO_ITEMS_FOR_ELEMENT" xml:space="preserve">
+    <value>'{0}': no items for element '{1}' found.</value>
+  </data>
+  <data name="NO_ITEMS_FOR_COMPLEX_TYPE" xml:space="preserve">
+    <value>'{0}': no items for complex type '{1}' found.</value>
+  </data>
+  <data name="NO_SIMPLE_TYPES" xml:space="preserve">
+    <value>'{0}': no simple types found. </value>
+  </data>
+  <data name="DESC_NOT_FOUND" xml:space="preserve">
+    <value>{0}: 'Desc:' not found.</value>
+  </data>
 </root>

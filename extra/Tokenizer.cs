@@ -1,12 +1,12 @@
 ﻿using System.Text;
 namespace Net.Leksi.Edifact;
 
-public class Tokenizer
+internal class Tokenizer
 {
     const int BUF_LEN = 1024;
 
-    public delegate void Segment(object sender, SegmentEventArgs e);
-    public event Segment OnSegment;
+    internal delegate void Segment(object sender, SegmentEventArgs e);
+    internal event Segment? OnSegment;
 
     byte component_data_element_separator;
     byte segment_tag_and_data_element_separator;
@@ -24,7 +24,7 @@ public class Tokenizer
     List<LocatedString> element = new List<LocatedString>();
     protected List<ParseError> errors = new List<ParseError>();
 
-    public bool HasErrors
+    internal bool HasErrors
     {
         get
         {
@@ -32,7 +32,7 @@ public class Tokenizer
         }
     }
 
-    public ParseError[] Errors
+    internal ParseError[] Errors
     {
         get
         {
@@ -48,7 +48,7 @@ public class Tokenizer
         return errors[errors.Count - 1];
     }
 
-    public int FormatWidth
+    internal int FormatWidth
     {
         get
         {
@@ -65,7 +65,7 @@ public class Tokenizer
         OnSegment += new Segment(delegate(object sender, SegmentEventArgs e) { });
     }
 
-    void init()
+    private void init()
     {
         component_data_element_separator = (byte)':';
         segment_tag_and_data_element_separator = (byte)'+';
@@ -107,9 +107,9 @@ public class Tokenizer
             decimal_mark = buf[5];
             release_character = buf[6];
             segment_terminator = buf[8];
-            location.offset = 0;
-            location.line = 1;
-            location.col = 0;
+            location.Offset = 0;
+            location.Line = 1;
+            location.Col = 0;
             for (int pos = 0; pos < 9; pos++)
             {
                 ch[0] = (char)buf[pos];
@@ -121,12 +121,12 @@ public class Tokenizer
                     }
                     if (new_line == ch[0])
                     {
-                        location.col = 0;
-                        location.line++;
+                        location.Col = 0;
+                        location.Line++;
                     }
                 }
-                location.col++;
-                location.offset++;
+                location.Col++;
+                location.Offset++;
             }
         }
         n = reader.Read(buf, 0, BUF_LEN);
@@ -144,19 +144,19 @@ public class Tokenizer
                     }
                     if (new_line == ch[0])
                     {
-                        if (format_width > 0 && location.col < format_width)
+                        if (format_width > 0 && location.Col < format_width)
                         {
                             ch[0] = ' ';
                         }
-                        location.col = 0;
-                        location.line++;
+                        location.Col = 0;
+                        location.Line++;
                     }
                     if (ch[0] != ' ')
                     {
                         continue;
                     }
                 }
-                location.col++;
+                location.Col++;
                 if (release)
                 {
                     sb.Append(ch);
@@ -170,9 +170,9 @@ public class Tokenizer
                     }
                     else if (buf[pos] == segment_tag_and_data_element_separator)
                     {
-                        if (tag.data == null)
+                        if (tag.Data == null)
                         {
-                            tag.data = sb.ToString();
+                            tag.Data = sb.ToString();
                             sb.Clear();
                             do_begin_tag();
                             element_position = 0;
@@ -183,8 +183,8 @@ public class Tokenizer
                             {
                                 sub_elem = new LocatedString(location, null);
                             }
-                            sub_elem.end.Set(location);
-                            sub_elem.data = sb.ToString();
+                            sub_elem.End.Set(location);
+                            sub_elem.Data = sb.ToString();
                             element.Add(sub_elem);
                             sub_elem = null;
                             sb.Clear();
@@ -198,18 +198,18 @@ public class Tokenizer
                         {
                             sub_elem = new LocatedString(location, null);
                         }
-                        sub_elem.end.Set(location);
-                        sub_elem.data = sb.ToString();
+                        sub_elem.End.Set(location);
+                        sub_elem.Data = sb.ToString();
                         element.Add(sub_elem);
                         sub_elem = null;
                         sb.Clear();
                     }
                     else if (buf[pos] == segment_terminator)
                     {
-                        tag.end.Set(location);
-                        if (tag.data == null)
+                        tag.End.Set(location);
+                        if (tag.Data == null)
                         {
-                            tag.data = sb.ToString();
+                            tag.Data = sb.ToString();
                             sb.Clear();
                             do_begin_tag();
                             do_end_tag();
@@ -221,8 +221,8 @@ public class Tokenizer
                             {
                                 sub_elem = new LocatedString(location, null);
                             }
-                            sub_elem.end.Set(location);
-                            sub_elem.data = sb.ToString();
+                            sub_elem.End.Set(location);
+                            sub_elem.Data = sb.ToString();
                             element.Add(sub_elem);
                             sub_elem = null;
                             sb.Clear();
@@ -252,14 +252,14 @@ public class Tokenizer
                         }
                         else
                         {
-                            if (tag.data != null || !char.IsWhiteSpace(ch[0]))
+                            if (tag.Data != null || !char.IsWhiteSpace(ch[0]))
                             {
                                 sb.Append(ch[0]);
                             }
                         }
                     }
                 }
-                location.offset++;
+                location.Offset++;
             }
         }
         while ((n = reader.Read(buf, 0, BUF_LEN)) > 0);

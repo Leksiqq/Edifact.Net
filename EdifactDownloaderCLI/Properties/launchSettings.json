@@ -2,7 +2,7 @@
   "profiles": {
     "EdifactDownloaderCLI": {
       "commandName": "Project",
-      "commandLineArgs": "--tmp-folder W:\\C#\\Edifact\\var\\tmp /-d d16a\r\n/t W:\\C#\\Edifact\\var\\xsd\r\n--external-unzip \"\\\"C:\\Program Files\\7-Zip\\7z.exe\\\" e -y -o\\\"{0}\\\" \\\"{1}\\\"\""
+      "commandLineArgs": "--tmp-folder W:\\C#\\Edifact\\var\\tmp /-d d16b\r\n/t W:\\C#\\Edifact\\var\\xsd\r\n--external-unzip \"\\\"C:\\Program Files\\7-Zip\\7z.exe\\\" e -y -o\\\"{0}\\\" \\\"{1}\\\"\""
     }
   }
 }

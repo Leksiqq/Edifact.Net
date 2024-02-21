@@ -1,234 +1,217 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Net.Leksi.Edifact;
 
-public class MParser
+internal class MParser
 {
-    public delegate void EndMessage();
-    public delegate void BeginSG(int num, string desc);
-    public delegate void EndSG(int num);
-    public delegate void Segment(string name, string info, string desc, int sg);
-    public delegate void Occurs(int sgnum, string segment, int min_occurs, int max_occurs);
-
-    public event EndMessage OnEndMessage;
-    public event BeginSG OnBeginSG;
-    public event EndSG OnEndSG;
-    public event Segment OnSegment;
-    public event Occurs OnOccurs;
-
-    enum Stage { NONE, SEGORSG, SG_REST, DESC, OCCURS, DONE };
-    Stage stage = Stage.NONE;
-    Regex reSegment = new Regex("^\\d{4}\\s+([-\\*+#|X]*)\\s*(\\w[\\w\\d]*)\\s*,?\\s*(.*)$");
-    Regex reSG = new Regex("^\\d{4}\\s+([-\\*+#|X]*)\\s*Segment\\s+group\\s+(\\d+)\\s*:\\s*(?:(\\w[\\w\\d]*)\\s*-\\s*)*(\\w[\\w\\d]*)?[\\s.]*$");
-    Regex reSGRest = new Regex("^\\s+(?:(\\w[\\w\\d]*)\\s*-\\s*)*(\\w[\\w\\d]*)?[\\s.]*$");
-    Regex reOccSegment = null;
-    Regex reOccSG = null;
-    Regex reS = null;
-    Regex reR = null;
-    Regex reHeaders = new Regex("^\\s*(\\d{4})\\s+(UNH)\\s+(s_logMessage header)\\s+(M)\\s+(1)\\s*$", RegexOptions.IgnoreCase);
-    string segment = null;
-    string info = null;
-    string desc = null;
-    int sgnum = -1;
-    int node_pos = -1;
-    int node_off = 0;
-    bool deleted = false;
-    List<int> sg_stack = new List<int>();
-    int line_number = 0;
-
-    class Node
+    internal delegate void EndMessage();
+    internal delegate void BeginSG(int num, string desc);
+    internal delegate void EndSG(int num);
+    internal delegate void Segment(string name, string info, string desc, int sg);
+    internal delegate void Occurs(int sgnum, string segment, int min_occurs, int max_occurs);
+    private enum Stage { NONE, SEGORSG, SG_REST, DESC, OCCURS, DONE };
+    private class Node
     {
-        internal string name;
-        internal int sgnum;
-        internal List<int> sg_end = new List<int>();
-        internal Node(string name, int sgnum)
+        internal string Name { get; set; }
+        internal int SgNum { get; set; }
+        internal readonly List<int> SgEnd = [];
+        internal Node(string name, int sgNum)
         {
-            this.name = name;
-            this.sgnum = sgnum;
+            Name = name;
+            SgNum = sgNum;
         }
     }
 
-    List<Node> nodes = new List<Node>();
+    internal event EndMessage? OnEndMessage;
+    internal event BeginSG? OnBeginSG;
+    internal event EndSG? OnEndSG;
+    internal event Segment? OnSegment;
+    internal event Occurs? OnOccurs;
 
-    public int LineNumber
-    {
-        get
-        {
-            return line_number;
-        }
-    }
+    private const string s_sgNameFormat = "SG{0}";
+    private const string s_unt = "UNT";
+    private const string s_unh = "UNH";
+    private const string s_reOccSegmentFormat = "^.{{{0}}}\\d{{4}}([-\\s\\*+#|X]{{{1}}})(\\w[\\w\\d]*)\\s.*$";
+    private const string s_reOccSGFormat = "^.{{{0}}}\\d{{4}}([-\\s\\*+#|X]{{{1}}}).*?Segment\\s+group\\s+(\\d+).*$";
+    private const string s_reSFormat = "^.{{{0}}}([CM]).*$";
+    private const string s_reRFormat = "^.{{{0}}}(\\d+).*$";
+    private const string s_notEqual = "{0} <> {1}";
+    private static readonly Regex s_reSegment = new("^\\d{4,}\\s+([-\\*+#|X]*)\\s*(\\w[\\w\\d]*)\\s*,?\\s*(.*)$");
+    private static readonly Regex s_reSG = new("^\\d{4,}\\s+([-\\*+#|X]*)\\s*Segment\\s+group\\s+(\\d+)\\s*:\\s*(?:(\\w[\\w\\d]*)\\s*-\\s*)*(\\w[\\w\\d]*)?[\\s.]*$");
+    private static readonly Regex s_reSGRest = new("^\\s+(?:(\\w[\\w\\d]*)\\s*-\\s*)*(\\w[\\w\\d]*)?[\\s.]*$");
+    private static readonly Regex s_reHeaders = new("^\\s*(\\d{4,})\\s+(UNH)\\s+(Message\\s+header)\\s+(M)\\s+(1)\\s*$", RegexOptions.IgnoreCase);
 
-    public MParser()
-    {
-        OnEndMessage += delegate() { };
-        OnBeginSG += delegate(int num, string desc) { };
-        OnEndSG += delegate(int num) { };
-        OnSegment += delegate(string name, string info, string desc, int sg) { };
-        OnOccurs += delegate(int sgnum, string segment, int min_occurs, int max_occurs) { };
-    }
+    private Stage _stage = Stage.NONE;
+    private readonly List<int> _sgStack = [];
+    private readonly StringBuilder _desc = new();
 
+    private Regex _reOccSegment = null!;
+    private Regex _reOccSG = null!;
+    private Regex _reS = null!;
+    private Regex _reR = null!;
+    private string? _segment;
+    private string _info = null!;
+    private int _sgNum = -1;
+    private int _nodePos = -1;
+    private int _nodeOff = 0;
+    private bool _deleted = false;
+
+    private readonly List<Node> _nodes = [];
+    internal int LineNumber { get; private set; } = 0;
     public void Run(string[] data)
     {
-        stage = Stage.SEGORSG;
+        _stage = Stage.SEGORSG;
         foreach (string line in data)
         {
-            line_number++;
-            on_line(line);
+            ++LineNumber;
+            OnLine(line);
         }
     }
-
-    private void on_line(string line)
+    
+    private void OnLine(string line)
     {
         Match m;
         while (true)
         {
-            switch (stage)
+            switch (_stage)
             {
                 case Stage.SEGORSG:
-                    if (!"".Equals(line.Trim()))
+                    if (!string.IsNullOrEmpty(line.Trim()))
                     {
-                        m = reSG.Match(line);
+                        m = s_reSG.Match(line);
                         if (m.Success)
                         {
-                            //Console.WriteLine(line);
-                            seg_or_sg_event();
-                            sgnum = int.Parse(m.Groups[2].Captures[0].Value.Trim());
-                            if (m.Groups[1].Captures[0].Value.Contains("-"))
+                            SegOrSgEvent();
+                            _sgNum = int.Parse(m.Groups[2].Captures[0].Value.Trim());
+                            if (m.Groups[1].Captures[0].Value.Contains('-'))
                             {
-                                deleted = true;
+                                _deleted = true;
                             }
-                            if (!deleted)
+                            if (!_deleted)
                             {
-                                node_pos++;
-                                //Console.WriteLine(node_pos + "/" + nodes.Count);
-                                if (node_pos >= nodes.Count)
+                                ++_nodePos;
+                                if (_nodePos >= _nodes.Count)
                                 {
-                                    nodes.Add(new Node("SG" + sgnum, 0));
+                                    _nodes.Add(new Node(string.Format(s_sgNameFormat, _sgNum), 0));
                                 }
                                 else
                                 {
-                                    check_nodes_order();
+                                    CheckNodesOrder();
                                 }
-                                node_off = node_pos;
-                                foreach (Capture c in m.Groups[3].Captures)
+                                _nodeOff = _nodePos;
+                                foreach (Capture c in m.Groups[3].Captures.Cast<Capture>())
                                 {
-                                    nodes.Insert(++node_off, new Node(c.Value.Trim(), sgnum));
+                                    _nodes.Insert(++_nodeOff, new Node(c.Value.Trim(), _sgNum));
                                 }
                             }
                             if (m.Groups[4].Captures.Count > 0)
                             {
-                                if (!deleted)
+                                if (!_deleted)
                                 {
-                                    nodes.Insert(++node_off, new Node(m.Groups[4].Captures[0].Value.Trim(), sgnum));
-                                    if (nodes[node_pos].sg_end.Count > 0)
+                                    _nodes.Insert(++_nodeOff, new Node(m.Groups[4].Captures[0].Value.Trim(), _sgNum));
+                                    if (_nodes[_nodePos].SgEnd.Count > 0)
                                     {
-                                        nodes[node_off].sg_end.AddRange(nodes[node_pos].sg_end);
+                                        _nodes[_nodeOff].SgEnd.AddRange(_nodes[_nodePos].SgEnd);
                                     }
-                                    nodes[node_off].sg_end.Add(sgnum);
+                                    _nodes[_nodeOff].SgEnd.Add(_sgNum);
                                 }
-                                stage = Stage.DESC;
-                                desc = "";
+                                _stage = Stage.DESC;
+                                _desc.Clear();
                             }
                             else
                             {
-                                stage = Stage.SG_REST;
+                                _stage = Stage.SG_REST;
                             }
                         }
                         else
                         {
-                            m = reSegment.Match(line);
+                            m = s_reSegment.Match(line);
                             if (m.Success)
                             {
-                                //Console.WriteLine(line);
-                                seg_or_sg_event();
-                                segment = m.Groups[2].Captures[0].Value.Trim();
-                                info = m.Groups[3].Captures[0].Value.Trim();
-                                if ("UNT".Equals(segment))
+                                SegOrSgEvent();
+                                _segment = m.Groups[2].Captures[0].Value.Trim();
+                                _info = m.Groups[3].Captures[0].Value.Trim();
+                                if (s_unt.Equals(_segment))
                                 {
-                                    //foreach (Node n in nodes)
-                                    //{
-                                    //    Console.WriteLine(n.name);
-                                    //}
-                                    stage = Stage.OCCURS;
-                                    node_pos = 0;
-                                    sgnum = 0;
-                                    OnEndMessage();
+                                    _stage = Stage.OCCURS;
+                                    _nodePos = 0;
+                                    _sgNum = 0;
+                                    OnEndMessage?.Invoke();
                                 }
                                 else
                                 {
-                                    if (m.Groups[1].Captures[0].Value.Contains("-"))
+                                    if (m.Groups[1].Captures[0].Value.Contains('-'))
                                     {
-                                        deleted = true;
+                                        _deleted = true;
                                     }
-                                    if (!deleted && !"UNH".Equals(segment))
+                                    if (!_deleted && !s_unh.Equals(_segment))
                                     {
-                                        node_pos++;
-                                        //Console.WriteLine(node_pos + "/" + nodes.Count);
-                                        if (node_pos >= nodes.Count)
+                                        _nodePos++;
+                                        if (_nodePos >= _nodes.Count)
                                         {
-                                            nodes.Add(new Node(segment, 0));
+                                            _nodes.Add(new Node(_segment, 0));
                                         }
                                         else
                                         {
-                                            check_nodes_order();
+                                            CheckNodesOrder();
                                         }
                                     }
-                                    stage = Stage.DESC;
-                                    desc = "";
+                                    _stage = Stage.DESC;
+                                    _desc.Clear();
                                 }
                             }
                             else
                             {
-                                stage = Stage.DESC;
+                                _stage = Stage.DESC;
                                 continue;
                             }
                         }
                     }
                     break;
                 case Stage.DESC:
-                    if ("".Equals(line.Trim()))
+                    if (string.IsNullOrEmpty(line.Trim()))
                     {
-                        stage = Stage.SEGORSG;
+                        _stage = Stage.SEGORSG;
                     }
                     else
                     {
-                        desc += " " + line.Trim();
+                        _desc.Append(' ').Append(line.Trim());
                     }
                     break;
                 case Stage.SG_REST:
-                    m = reSGRest.Match(line);
+                    m = s_reSGRest.Match(line);
                     if (m.Success)
                     {
-                        //Console.WriteLine(line);
-                        if (!deleted)
+                        if (!_deleted)
                         {
-                            foreach (Capture c in m.Groups[1].Captures)
+                            foreach (Capture c in m.Groups[1].Captures.Cast<Capture>())
                             {
-                                nodes.Insert(++node_off, new Node(c.Value.Trim(), sgnum));
+                                _nodes.Insert(++_nodeOff, new Node(c.Value.Trim(), _sgNum));
                             }
                         }
                         if (m.Groups[2].Captures.Count > 0)
                         {
-                            if (!deleted)
+                            if (!_deleted)
                             {
-                                nodes.Insert(++node_off, new Node(m.Groups[2].Captures[0].Value.Trim(), sgnum));
-                                if (nodes[node_pos].sg_end.Count > 0)
+                                _nodes.Insert(++_nodeOff, new Node(m.Groups[2].Captures[0].Value.Trim(), _sgNum));
+                                if (_nodes[_nodePos].SgEnd.Count > 0)
                                 {
-                                    nodes[node_off].sg_end.AddRange(nodes[node_pos].sg_end);
+                                    _nodes[_nodeOff].SgEnd.AddRange(_nodes[_nodePos].SgEnd);
                                 }
-                                nodes[node_off].sg_end.Add(sgnum);
+                                _nodes[_nodeOff].SgEnd.Add(_sgNum);
                             }
-                            stage = Stage.DESC;
-                            desc = "";
+                            _stage = Stage.DESC;
+                            _desc.Clear();
                         }
                     }
                     break;
                 case Stage.OCCURS:
-                    if (!"".Equals(line.Trim()))
+                    if (!string.IsNullOrEmpty(line.Trim()))
                     {
-                        if (reOccSegment == null)
+                        if (_reOccSegment == null)
                         {
-                            m = reHeaders.Match(line);
+                            m = s_reHeaders.Match(line);
                             if (m.Success)
                             {
                                 int pos = m.Groups[1].Captures[0].Index;
@@ -236,54 +219,50 @@ public class MParser
                                 int name = m.Groups[3].Captures[0].Index;
                                 int s = m.Groups[4].Captures[0].Index;
                                 int r = m.Groups[5].Captures[0].Index;
-                                reOccSegment = new Regex("^.{" + pos.ToString() + "}\\d{4}([-\\s\\*+#|X]{" + (tag - pos - 4).ToString() + "})(\\w[\\w\\d]*)\\s.*$");
-                                reOccSG = new Regex("^.{" + pos.ToString() + "}\\d{4}([-\\s\\*+#|X]{" + (name - pos - 4).ToString() + "}).*?Segment group (\\d+).*$");
-                                reS = new Regex("^.{" + s.ToString() + "}([CM]).*$");
-                                reR = new Regex("^.{" + r.ToString() + "}(\\d+).*$");
+                                _reOccSegment = new Regex(string.Format(s_reOccSegmentFormat, pos, tag - pos - 4));
+                                _reOccSG = new Regex(string.Format(s_reOccSGFormat, pos, name - pos - 4));
+                                _reS = new Regex(string.Format(s_reSFormat, s));
+                                _reR = new Regex(string.Format(s_reRFormat, r));
                             }
                         }
                         else
                         {
                             bool found = false;
-                            segment = null;
-                            sgnum = 0;
-                            m = reOccSegment.Match(line);
+                            _segment = null!;
+                            _sgNum = 0;
+                            m = _reOccSegment.Match(line);
                             if (m.Success)
                             {
-                                //Console.WriteLine(line);
-                                if (!m.Groups[1].Captures[0].Value.Trim().Contains("-"))
+                                if (!m.Groups[1].Captures[0].Value.Trim().Contains('-'))
                                 {
-                                    segment = m.Groups[2].Captures[0].Value.Trim();
-                                    if (!"UNH".Equals(segment) && !"UNT".Equals(segment))
+                                    _segment = m.Groups[2].Captures[0].Value.Trim();
+                                    if (!s_unh.Equals(_segment) && !s_unt.Equals(_segment))
                                     {
-                                        //Console.WriteLine("segment: " + name);
-                                        if (!nodes[node_pos].name.Equals(segment))
+                                        if (!_nodes[_nodePos].Name.Equals(_segment))
                                         {
-                                            throw new Exception(nodes[node_pos].name + " <> " + segment);
+                                            throw new Exception(string.Format(s_notEqual, _nodes[_nodePos].Name, _segment));
                                         }
                                         found = true;
-                                        sgnum = nodes[node_pos].sgnum;
+                                        _sgNum = _nodes[_nodePos].SgNum;
                                     }
                                 }
-                                if ("UNT".Equals(segment))
+                                if (s_unt.Equals(_segment))
                                 {
-                                    stage = Stage.DONE;
+                                    _stage = Stage.DONE;
                                 }
                             }
                             else
                             {
-                                m = reOccSG.Match(line);
+                                m = _reOccSG.Match(line);
                                 if (m.Success)
                                 {
-                                    //Console.WriteLine(line);
-                                    if (!m.Groups[1].Captures[0].Value.Trim().Contains("-"))
+                                    if (!m.Groups[1].Captures[0].Value.Trim().Contains('-'))
                                     {
-                                        sgnum = int.Parse(m.Groups[2].Captures[0].Value.Trim());
-                                        string name = "SG" + sgnum.ToString();
-                                        //Console.WriteLine("sg: " + name);
-                                        if (!nodes[node_pos].name.Equals(name))
+                                        _sgNum = int.Parse(m.Groups[2].Captures[0].Value.Trim());
+                                        string name = string.Format(s_sgNameFormat, _sgNum);
+                                        if (!_nodes[_nodePos].Name.Equals(name))
                                         {
-                                            throw new Exception(nodes[node_pos].name + " <> " + name);
+                                            throw new Exception(string.Format(s_notEqual, _nodes[_nodePos].Name, name));
                                         }
                                         found = true;
                                     }
@@ -293,7 +272,7 @@ public class MParser
                             {
                                 int min_occurs = 1;
                                 int max_occurs = 1;
-                                m = reS.Match(line);
+                                m = _reS.Match(line);
                                 if (m.Success)
                                 {
                                     if ("C".Equals(m.Groups[1].Captures[0].Value.Trim()))
@@ -301,14 +280,13 @@ public class MParser
                                         min_occurs = 0;
                                     }
                                 }
-                                m = reR.Match(line);
+                                m = _reR.Match(line);
                                 if (m.Success)
                                 {
                                     max_occurs = int.Parse(m.Groups[1].Captures[0].Value.Trim());
                                 }
-                                OnOccurs(sgnum, segment, min_occurs, max_occurs);
-                                node_pos++;
-                                //Console.WriteLine(node_pos + "/" + nodes.Count);
+                                OnOccurs?.Invoke(_sgNum, _segment!, min_occurs, max_occurs);
+                                _nodePos++;
                             }
                         }
                     }
@@ -318,43 +296,43 @@ public class MParser
         }
     }
 
-    private void check_nodes_order()
+    private void CheckNodesOrder()
     {
-        if (!nodes[node_pos].name.Equals(sgnum == -1 ? segment : "SG" + sgnum))
+        if (!_nodes[_nodePos].Name.Equals(_sgNum == -1 ? _segment : string.Format(s_sgNameFormat, _sgNum)))
         {
-            throw new Exception((sgnum == -1 ? segment : "SG" + sgnum) + " <> " + nodes[node_pos].name);
+            throw new Exception(string.Format(s_notEqual, (_sgNum == -1 ? _segment : string.Format(s_sgNameFormat, _sgNum)), _nodes[_nodePos].Name));
         }
     }
 
-    private void check_end_sg()
+    private void CheckEndSg()
     {
-        for (int i = nodes[node_pos].sg_end.Count - 1; i >= 0; i--)
+        for (int i = _nodes[_nodePos].SgEnd.Count - 1; i >= 0; i--)
         {
-            OnEndSG(nodes[node_pos].sg_end[i]);
-            sg_stack.RemoveAt(sg_stack.Count - 1);
+            OnEndSG?.Invoke(_nodes[_nodePos].SgEnd[i]);
+            _sgStack.RemoveAt(_sgStack.Count - 1);
         }
     }
 
-    private void seg_or_sg_event()
+    private void SegOrSgEvent()
     {
-        if (sgnum != -1 || (segment != null && !"UNH".Equals(segment)))
+        if (_sgNum != -1 || (_segment != null && !s_unh.Equals(_segment)))
         {
-            if (!deleted)
+            if (!_deleted)
             {
-                if (sgnum != -1)
+                if (_sgNum != -1)
                 {
-                    sg_stack.Add(sgnum);
-                    OnBeginSG(sgnum, desc);
+                    _sgStack.Add(_sgNum);
+                    OnBeginSG?.Invoke(_sgNum, _desc.ToString());
                 }
-                else if (segment != null && !"UNH".Equals(segment))
+                else if (_segment != null && !s_unh.Equals(_segment))
                 {
-                    OnSegment(segment, info, desc, sg_stack.Count > 0 ? sg_stack[sg_stack.Count - 1] : 0);
-                    check_end_sg();
+                    OnSegment?.Invoke(_segment, _info, _desc.ToString(), _sgStack.Count > 0 ? _sgStack[^1] : 0);
+                    CheckEndSg();
                 }
             }
-            sgnum = -1;
-            segment = null;
-            deleted = false;
+            _sgNum = -1;
+            _segment = null!;
+            _deleted = false;
         }
     }
 }

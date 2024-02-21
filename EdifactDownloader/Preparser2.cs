@@ -3,92 +3,94 @@ using System.Text.RegularExpressions;
 
 namespace Net.Leksi.Edifact;
 
-public class Preparser2
+internal class Preparser2
 {
-    TextWriter tw;
-    enum Stages { NONE, SEGORSG, SG_REST, OCCURS, DONE };
-    Stages stage = Stages.NONE;
-    bool unh_passed = false;
-    bool bgm_passed = false;
-    bool unt_passed = false;
-    bool headers_passed = false;
-    int cnt = 0;
-    Regex reSeg = new Regex("^\\s*([A-Z]{3})[^\\w].*$");
-    Regex reSG = new Regex("^\\s*(?:Segment\\s+)?[gG]roup\\s+\\d+\\s*[:.,]?.*$");
-    Regex reHeaders = new Regex("^\\s*(TAG)\\s+(NAME)\\s+(S|status)(?:\\s+|/)(REPT|repeats).*$", RegexOptions.IgnoreCase);
-    Regex reUNH = new Regex("^\\s*UNH\\s*,?\\s*s_logMessage header.*$");
-    Regex reBGM = new Regex("^\\s*BGM\\s*,?\\s*Beginning of message.*$");
-    Regex reUNT = new Regex("^\\s*UNT\\s+s_logMessage trailer.*$");
-    Regex reOccSeg = new Regex("^[-\\s\\*+#|X]*([A-Z]{3})\\s+(.*?)\\s*([CM])\\s+(\\d+).*$");
-    Regex reOccSG = new Regex("^.*?Segment\\s+[gG]roup\\s+(\\d+).*?([CM])\\s+(\\d+).*$");
-    int TAGpos = 0;
-    int NAMEpos = 0;
-    int Spos = 0;
-    int Rpos = 0;
-    string savefile;
-    int line_num = 0;
+    private enum Stages { NONE, SEGORSG, SG_REST, OCCURS, DONE };
+
+    private const string s_fileNameFormat = "{0}.1";
+    private static readonly Regex s_reSeg = new("^\\s*([A-Z]{3})[^\\w].*$");
+    private static readonly Regex s_reSG = new("^\\s*(?:Segment\\s+)?[gG]roup\\s+\\d+\\s*[:.,]?.*$");
+    private static readonly Regex s_reHeaders = new("^\\s*(TAG)\\s+(NAME)\\s+(S|status)(?:\\s+|/)(REPT|repeats).*$", RegexOptions.IgnoreCase);
+    private static readonly Regex s_reUNH = new("^\\s*UNH\\s*,?\\s*s_logMessage header.*$");
+    private static readonly Regex s_reBGM = new("^\\s*BGM\\s*,?\\s*Beginning of message.*$");
+    private static readonly Regex s_reUNT = new("^\\s*UNT\\s+s_logMessage trailer.*$");
+    private static readonly Regex s_reOccSeg = new("^[-\\s\\*+#|X]*([A-Z]{3})\\s+(.*?)\\s*([CM])\\s+(\\d+).*$");
+    private static readonly Regex s_reOccSG = new("^.*?Segment\\s+[gG]roup\\s+(\\d+).*?([CM])\\s+(\\d+).*$");
+
+    private TextWriter _tw;
+    private Stages _stage = Stages.NONE;
+    private bool _unhPassed = false;
+    private bool _bgmPassed = false;
+    private bool _untPassed = false;
+    private bool _headersPassed = false;
+    private int _cnt = 0;
+    private int _tagPos = 0;
+    private int _namePos = 0;
+    private int _sPos = 0;
+    private int _rPos = 0;
+    private string _savefile;
+    private int _lineNum = 0;
 
     public Preparser2(string filename)
     {
-        tw = new StreamWriter(filename, false, Encoding.GetEncoding(866));
-        savefile = Path.GetDirectoryName(filename) + "\\" + Path.GetFileName(filename) + ".1";
-        if (File.Exists(savefile))
+        _tw = new StreamWriter(filename, false);
+        _savefile = Path.Combine(Path.GetDirectoryName(filename)!, string.Format(s_fileNameFormat, Path.GetFileName(filename)));
+        if (File.Exists(_savefile))
         {
-            File.Delete(savefile);
+            File.Delete(_savefile);
         }
     }
 
     public void Run(string[] data)
     {
-        File.AppendAllLines(savefile, data, Encoding.GetEncoding(866));
-        stage = Stages.NONE;
-        unh_passed = false;
-        bgm_passed = false;
-        unt_passed = false;
-        headers_passed = false;
-        cnt = 0;
-        TAGpos = 0;
-        NAMEpos = 0;
-        Spos = 0;
-        Rpos = 0;
-        line_num = 0;
+        File.AppendAllLines(_savefile, data);
+        _stage = Stages.NONE;
+        _unhPassed = false;
+        _bgmPassed = false;
+        _untPassed = false;
+        _headersPassed = false;
+        _cnt = 0;
+        _tagPos = 0;
+        _namePos = 0;
+        _sPos = 0;
+        _rPos = 0;
+        _lineNum = 0;
         try
         {
             foreach (string line in data)
             {
-                on_line(line);
+                OnLine(line);
             }
         }
         finally
         {
-            tw.Close();
-            //Console.WriteLine(line_num);
+            _tw.Close();
         }
     }
 
-    private void on_line(string line)
+    private void OnLine(string line)
     {
-        line_num++;
-        bool can_write = true;
+        ++_lineNum;
+        bool canWrite = true;
         while (true)
         {
             Match m;
-            switch (stage)
+            switch (_stage)
             {
                 case Stages.NONE:
-                    if (reUNH.IsMatch(line))
+                    if (s_reUNH.IsMatch(line))
                     {
-                        stage = Stages.SEGORSG;
+                        _stage = Stages.SEGORSG;
                         continue;
                     }
                     break;
                 case Stages.SEGORSG:
-                    m = reSG.Match(line);
+                    m = s_reSG.Match(line);
                     if (m.Success)
                     {
                         //Console.WriteLine(line);
-                        cnt++;
-                        line = string.Format("{0:0000}   ", cnt * 10) + line.Replace("Group", "group");
+                        _cnt++;
+                        line = string.Format("{0:0000}   ", _cnt * 10) + line.Replace("Group", "group");
                         if (!line.Contains("egment"))
                         {
                             line = line.Replace("group", "Segment group");
@@ -109,28 +111,28 @@ public class Preparser2
                                 return m1.Groups[0].Value.Substring(0, m1.Groups[1].Captures[0].Index - m1.Groups[0].Index) + ":" + m1.Groups[1].Captures[0].Value;
                             });
                         }
-                        stage = Stages.SG_REST;
+                        _stage = Stages.SG_REST;
                     }
                     else
                     {
-                        m = reSeg.Match(line);
+                        m = s_reSeg.Match(line);
                         if (m.Success)
                         {
                             //Console.WriteLine(line);
-                            cnt++;
-                            line = string.Format("{0:0000}   ", cnt * 10) + line;
-                            stage = Stages.SG_REST;
+                            _cnt++;
+                            line = string.Format("{0:0000}   ", _cnt * 10) + line;
+                            _stage = Stages.SG_REST;
                             if ("UNH".Equals(m.Groups[1].Captures[0].Value))
                             {
-                                unh_passed = true;
+                                _unhPassed = true;
                             }
                             else if ("BGM".Equals(m.Groups[1].Captures[0].Value))
                             {
-                                bgm_passed = true;
+                                _bgmPassed = true;
                             }
                             else if ("UNT".Equals(m.Groups[1].Captures[0].Value))
                             {
-                                unt_passed = true;
+                                _untPassed = true;
                             }
                         }
                         else
@@ -141,40 +143,40 @@ public class Preparser2
                     break;
                 case Stages.SG_REST:
                     //if (bgm_passed && "".Equals(line.Trim()))
-                    if (unh_passed && "".Equals(line.Trim()))
+                    if (_unhPassed && "".Equals(line.Trim()))
                     {
-                        if (unt_passed)
+                        if (_untPassed)
                         {
-                            stage = Stages.OCCURS;
-                            cnt = 0;
+                            _stage = Stages.OCCURS;
+                            _cnt = 0;
                         }
                         else
                         {
-                            stage = Stages.SEGORSG;
+                            _stage = Stages.SEGORSG;
                         }
                     }
                     else
                     {
-                        if (reBGM.IsMatch(line))
+                        if (s_reBGM.IsMatch(line))
                         {
-                            stage = Stages.SEGORSG;
+                            _stage = Stages.SEGORSG;
                             continue;
                         }
                         line = "       " + line;
                     }
                     break;
                 case Stages.OCCURS:
-                    m = reHeaders.Match(line);
+                    m = s_reHeaders.Match(line);
                     if (m.Success)
                     {
                         line = "";
-                        if (!headers_passed)
+                        if (!_headersPassed)
                         {
-                            TAGpos = m.Groups[1].Captures[0].Index + 7;
-                            NAMEpos = m.Groups[2].Captures[0].Index + 7;
-                            Spos = m.Groups[3].Captures[0].Index + 7;
-                            Rpos = m.Groups[4].Captures[0].Index + 7;
-                            headers_passed = true;
+                            _tagPos = m.Groups[1].Captures[0].Index + 7;
+                            _namePos = m.Groups[2].Captures[0].Index + 7;
+                            _sPos = m.Groups[3].Captures[0].Index + 7;
+                            _rPos = m.Groups[4].Captures[0].Index + 7;
+                            _headersPassed = true;
                             int pos = 0;
                             for (int i = 1; i <= 4; i++)
                             {
@@ -205,27 +207,27 @@ public class Preparser2
                     }
                     else
                     {
-                        if (headers_passed && !"".Equals(line.Trim()))
+                        if (_headersPassed && !"".Equals(line.Trim()))
                         {
-                            if (line.Length > TAGpos - 5 && line[TAGpos - 7] != ' ' && line[TAGpos - 6] != ' ' && line[TAGpos - 5] != ' ')
+                            if (line.Length > _tagPos - 5 && line[_tagPos - 7] != ' ' && line[_tagPos - 6] != ' ' && line[_tagPos - 5] != ' ')
                             {
-                                if (reUNT.IsMatch(line))
+                                if (s_reUNT.IsMatch(line))
                                 {
-                                    stage = Stages.DONE;
+                                    _stage = Stages.DONE;
                                 }
-                                m = reOccSeg.Match(line);
+                                m = s_reOccSeg.Match(line);
                                 if (m.Success)
                                 {
-                                    cnt++;
+                                    _cnt++;
                                     line = string.Format(
                                         "{0:0000}   {1}{2," +
-                                        (NAMEpos - TAGpos - m.Groups[1].Captures[0].Length + m.Groups[2].Captures[0].Length) +
+                                        (_namePos - _tagPos - m.Groups[1].Captures[0].Length + m.Groups[2].Captures[0].Length) +
                                         "}{3," +
-                                        (Spos - NAMEpos - m.Groups[2].Captures[0].Length + m.Groups[3].Captures[0].Length) +
+                                        (_sPos - _namePos - m.Groups[2].Captures[0].Length + m.Groups[3].Captures[0].Length) +
                                         "}{4," +
-                                        (Rpos - Spos - m.Groups[3].Captures[0].Length + m.Groups[4].Captures[0].Length) +
+                                        (_rPos - _sPos - m.Groups[3].Captures[0].Length + m.Groups[4].Captures[0].Length) +
                                         "}",
-                                        cnt * 10,
+                                        _cnt * 10,
                                         m.Groups[1].Captures[0].Value,
                                         m.Groups[2].Captures[0].Value,
                                         m.Groups[3].Captures[0].Value,
@@ -234,20 +236,20 @@ public class Preparser2
                                 }
                                 else
                                 {
-                                    m = reOccSG.Match(line);
+                                    m = s_reOccSG.Match(line);
                                     if (m.Success)
                                     {
-                                        cnt++;
+                                        _cnt++;
                                         string sg = "--- Segment group " + m.Groups[1].Captures[0].Value + " ---";
                                         line = string.Format(
                                             "{0:0000}   {1," +
-                                            (NAMEpos - TAGpos + sg.Length) +
+                                            (_namePos - _tagPos + sg.Length) +
                                             "}{2," +
-                                            (Spos - NAMEpos - sg.Length + m.Groups[2].Captures[0].Length) +
+                                            (_sPos - _namePos - sg.Length + m.Groups[2].Captures[0].Length) +
                                             "}{3," +
-                                            (Rpos - Spos - m.Groups[2].Captures[0].Length + m.Groups[3].Captures[0].Length) +
+                                            (_rPos - _sPos - m.Groups[2].Captures[0].Length + m.Groups[3].Captures[0].Length) +
                                             "}",
-                                            cnt * 10,
+                                            _cnt * 10,
                                             sg,
                                             m.Groups[2].Captures[0].Value,
                                             m.Groups[3].Captures[0].Value
@@ -257,21 +259,21 @@ public class Preparser2
                             }
                             else
                             {
-                                can_write = false;
+                                canWrite = false;
                             }
                         }
                     }
-                    if (headers_passed && "".Equals(line.Trim()))
+                    if (_headersPassed && "".Equals(line.Trim()))
                     {
-                        can_write = false;
+                        canWrite = false;
                     }
                     break;
             }
             break;
         }
-        if (can_write)
+        if (canWrite)
         {
-            tw.WriteLine(line);
+            _tw.WriteLine(line);
         }
     }
 

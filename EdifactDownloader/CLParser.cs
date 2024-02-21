@@ -1,198 +1,201 @@
-﻿
+﻿using System.Reflection;
+using System.Resources;
+using System.Text;
 using System.Text.RegularExpressions;
 namespace Net.Leksi.Edifact;
 
 internal class CLParser : PartsParser
 {
-    string name;
-    string value = null;
-    string info;
-    string desc;
-    string value_note;
-    string change_indicator;
+    internal delegate void SimpleType(string name);
+    internal delegate void Item(string value, string change_indicator, string info, string description);
+    internal event SimpleType? OnSimpleType;
+    internal event Item? OnItem;
+    private enum Stages { NONE, NAME, DESC, REPR, NOTE, VALUE };
 
-    Regex reName = new Regex("^[-\\*+#|X]*\\s*(\\d{4})(.*)$");
-    Regex reDesc = new Regex("^[-\\*+#|X]*\\s*(Desc:.*)$");
-    Regex reRepr = new Regex("^\\s+Repr:.*$");
-    Regex reNote = new Regex("^[-\\*+#|X]*\\s*(Note:.*)$");
-    Regex reValue = null;
-    Regex reValueDesc = null;
+    private const string s_reValueFormat = "^([\\*+#|X]|\\s)\\s{{1,{0}}}([^\\s]+)\\s+(.*)$";
+    private const string s_reValueDescFormat = "^\\s{{{0},}}.*$";
+    private const string s_space = " ";
+    private const string s_descNotFound = "DESC_NOT_FOUND";
+    private const string s_rmErrorsName = "Net.Leksi.Edifact.Properties.errors";
+    private static readonly Regex s_reName = new("^[-\\*+#|X]*\\s*(\\d{4})(.*)$");
+    private static readonly Regex s_reDesc = new("^[-\\*+#|X]*\\s*(Desc:.*)$");
+    private static readonly Regex s_reRepr = new("^\\s+Repr:.*$");
+    private static readonly Regex s_reNote = new("^[-\\*+#|X]*\\s*(Note:.*)$");
+    private static readonly Regex s_reValue = new("^[\\*+#|X]?\\s+([^\\s]+)\\s+.*$");
+    private static readonly ResourceManager s_rmErrors;
 
-    Stages stage = Stages.NONE;
+    private readonly StringBuilder _desc = new();
+    private readonly StringBuilder _valueNote = new();
 
-    enum Stages { NONE, NAME, DESC, REPR, NOTE, VALUE };
+    private Regex _reValue = null!;
+    private Regex _reValueDesc = null!;
+    private Stages _stage = Stages.NONE;
+    private string? _name;
+    private string? _value;
+    private string _info = null!;
+    private string _changeIndicator = null!;
 
-    public delegate void SimpleType(string name);
-    public delegate void Item(string value, string change_indicator, string info, string description);
-
-    public event SimpleType OnSimpleType;
-    public event Item OnItem;
-
-    public CLParser()
+    static CLParser()
     {
-        OnPart += new Part(on_part);
-        OnLine += new Line(on_line);
-        OnSimpleType += new SimpleType(delegate(string name) { });
-        OnItem += new Item(delegate(string value, string change_indicator, string info, string description) { });
+        s_rmErrors = new ResourceManager(s_rmErrorsName, Assembly.GetExecutingAssembly());
     }
-
+    internal CLParser()
+    {
+        OnPart += CLParser_OnPart;
+        OnLine += CLParser_OnLine;
+    }
     protected internal override void Run(string[] data)
     {
         base.Run(data);
-        if (value != null)
+        if (_value != null)
         {
-            OnItem(value, change_indicator, info, desc);
+            OnItem?.Invoke(_value, _changeIndicator, _info, _desc.ToString());
         }
     }
 
-    void on_part()
+    private void CLParser_OnPart()
     {
-        if (value != null)
+        if (_value != null)
         {
-            OnItem(value, change_indicator, info, desc);
+            OnItem?.Invoke(_value, _changeIndicator, _info, _desc.ToString());
         }
-        value = null;
-        stage = Stages.NAME;
-        name = null;
+        _value = null;
+        _stage = Stages.NAME;
+        _name = null;
     }
 
-    void on_line(string line)
+    private void CLParser_OnLine(string line)
     {
         Match m;
         while (true)
         {
-            switch (stage)
+            switch (_stage)
             {
                 case Stages.NAME:
-                    if ("".Equals(line))
+                    if (string.IsNullOrEmpty(line))
                     {
-                        if (name != null)
+                        if (_name is { })
                         {
-                            stage = Stages.DESC;
-                            OnSimpleType(name);
+                            _stage = Stages.DESC;
+                            OnSimpleType?.Invoke(_name);
                         }
                     }
                     else
                     {
-                        m = reName.Match(line);
+                        m = s_reName.Match(line);
                         if (m.Success)
                         {
-                            name = m.Groups[1].Captures[0].Value.Trim();
-                            info = m.Groups[2].Captures[0].Value.Trim();
+                            _name = m.Groups[1].Captures[0].Value.Trim();
+                            _info = m.Groups[2].Captures[0].Value.Trim();
                         }
                         else
                         {
-                            info += " " + line.Trim();
+                            _info += s_space + line.Trim();
                         }
                     }
                     break;
                 case Stages.DESC:
-                    if ("".Equals(line))
+                    if (string.IsNullOrEmpty(line))
                     {
-                        stage = Stages.REPR;
+                        _stage = Stages.REPR;
                     }
                     else
                     {
-                        m = reDesc.Match(line);
+                        m = s_reDesc.Match(line);
                         if (m.Success)
                         {
-                            desc = m.Groups[1].Captures[0].Value.Trim();
+                            _desc.Clear();
+                            _desc.Append(m.Groups[1].Captures[0].Value.Trim());
                         }
                         else
                         {
-                            if ("".Equals(desc))
+                            if (_desc.Length == 0)
                             {
-                                throw new Exception(name + ": 'Desc:' not found.");
+                                throw new Exception(string.Format(s_rmErrors.GetString(s_descNotFound)!, _name));
                             }
                             else
                             {
-                                m = reRepr.Match(line);
+                                m = s_reRepr.Match(line);
                                 if (m.Success)
                                 {
-                                    stage = Stages.REPR;
+                                    _stage = Stages.REPR;
                                     continue;
                                 }
                                 else
                                 {
-                                    desc += " " + line.Trim();
+                                    _desc.Append(' ').Append(line.Trim());
                                 }
                             }
                         }
                     }
                     break;
                 case Stages.REPR:
-                    if ("".Equals(line))
+                    if (string.IsNullOrEmpty(line))
                     {
-                        stage = Stages.NOTE;
-                        value_note = "";
-                    }
-                    else
-                    {
-                        m = reRepr.Match(line);
-                        if (m.Success)
-                        {
-                        }
+                        _stage = Stages.NOTE;
+                        _valueNote.Clear();
                     }
                     break;
                 case Stages.NOTE:
-                    if ("".Equals(line))
+                    if (string.IsNullOrEmpty(line))
                     {
-                        stage = Stages.VALUE;
+                        _stage = Stages.VALUE;
                     }
                     else
                     {
-                        m = reNote.Match(line);
+                        m = s_reNote.Match(line);
                         if (m.Success)
                         {
-                            value_note = m.Groups[1].Captures[0].Value.Trim();
+                            _valueNote.Clear();
+                            _valueNote.Append(m.Groups[1].Captures[0].Value.Trim());
                         }
                         else
                         {
-                            if ("".Equals(value_note))
+                            if (_valueNote.Length == 0)
                             {
-                                stage = Stages.VALUE;
+                                _stage = Stages.VALUE;
                                 continue;
                             }
                             else
                             {
-                                value_note += "\t" + line.Trim();
+                                _valueNote.Append('\t').Append(line.Trim());
                             }
                         }
                     }
                     break;
                 case Stages.VALUE:
-                    if (reValue == null)
+                    if (_reValue == null)
                     {
-                        m = Regex.Match(line, "^[\\*+#|X]?\\s+([^\\s]+)\\s+.*$");
+                        m = s_reValue.Match(line);
                         if (m.Success)
                         {
-                            int max_value_pos = m.Groups[1].Captures[0].Index + m.Groups[1].Captures[0].Length;
-                            reValue = new Regex("^([\\*+#|X]|\\s)\\s{1," + (max_value_pos - 1) + "}([^\\s]+)\\s+(.*)$");
-                            reValueDesc = new Regex("^\\s{" + (max_value_pos + 1) + ",}.*$");
+                            int maxValuePos = m.Groups[1].Captures[0].Index + m.Groups[1].Captures[0].Length;
+                            _reValue = new Regex(string.Format(s_reValueFormat, maxValuePos - 1));
+                            _reValueDesc = new Regex(string.Format(s_reValueDescFormat, maxValuePos + 1));
                         }
                     }
-                    m = reValue.Match(line);
+                    m = _reValue!.Match(line);
                     if (m.Success)
                     {
-                        if (value != null)
+                        if (_value != null)
                         {
-                            OnItem(value, change_indicator, info, desc);
+                            OnItem?.Invoke(_value, _changeIndicator, _info, _desc.ToString());
                         }
-                        change_indicator = m.Groups[1].Captures[0].Value.Trim();
-                        value = m.Groups[2].Captures[0].Value.Trim();
-                        info = m.Groups[3].Captures[0].Value.Trim();
-                        desc = "";
+                        _changeIndicator = m.Groups[1].Captures[0].Value.Trim();
+                        _value = m.Groups[2].Captures[0].Value.Trim();
+                        _info = m.Groups[3].Captures[0].Value.Trim();
+                        _desc.Clear();
                     }
                     else
                     {
-                        m = reValueDesc.Match(line);
+                        m = _reValueDesc.Match(line);
                         if (m.Success)
                         {
-                            if (!"".Equals(desc))
+                            if (_desc.Length > 0)
                             {
-                                desc += " ";
+                                _desc.Append(' ');
                             }
-                            desc += line.Trim();
+                            _desc.Append(line.Trim());
                         }
                     }
                     break;

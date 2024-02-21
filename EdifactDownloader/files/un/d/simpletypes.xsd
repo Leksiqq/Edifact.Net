@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <!-- UN -->
-<!-- The file was automatically generated with 'edifact_schema_gen.exe' -->
+<!-- The file was automatically generated -->
 <!-- Don't edit! -->
 <xs:schema
   targetNamespace="EDIFACT"

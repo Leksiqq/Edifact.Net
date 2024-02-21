@@ -14,6 +14,8 @@ public class EdfifactDownloaderCLI : BackgroundService
     private const string s_rmResource1 = "Net.Leksi.Edifact.Properties.errors";
     private const string s_directoryNotFound = "DIRECTORY_NOT_FOUND";
 
+    private static readonly Regex s_reProxy = new("^(https?\\://)(?:([^\\s:]+)(?::(.+))?@)?(.*)$");
+
     private readonly IServiceProvider _services;
     private readonly string _directoryNotFoundFormat;
     private readonly EdifactDownloader _downloader;
@@ -35,7 +37,7 @@ public class EdfifactDownloaderCLI : BackgroundService
         _downloader.DirectoryNotFound += Downloader_DirectoryNotFound;
     }
 
-    public static void Run(string[] args)
+    public static async Task RunAsync(string[] args)
     {
         EdifactDownloaderOptions? options = Create(args);
 
@@ -50,7 +52,7 @@ public class EdfifactDownloaderCLI : BackgroundService
         builder.Services.AddHostedService<EdfifactDownloaderCLI>();
 
         IHost host = builder.Build();
-        host.Run();
+        await host.RunAsync();
 
     }
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -58,7 +60,7 @@ public class EdfifactDownloaderCLI : BackgroundService
 
         try
         {
-            await _downloader.Download(stoppingToken);
+            await _downloader.DownloadAsync(stoppingToken);
         }
         catch (Exception)
         {
@@ -99,7 +101,7 @@ public class EdfifactDownloaderCLI : BackgroundService
             }
             else if (waiting is Waiting.Proxy)
             {
-                Match m = Regex.Match(arg, "^(https?\\://)(?:([^\\s:]+)(?::(.+))?@)?(.*)$");
+                Match m = s_reProxy.Match(arg);
                 if (m.Success)
                 {
                     options.Proxy = new WebProxy($"{m.Groups[1].Captures[0].Value}{m.Groups[4].Captures[0].Value.Trim()}");
@@ -117,7 +119,7 @@ public class EdfifactDownloaderCLI : BackgroundService
                 }
                 else
                 {
-                    usage();
+                    Usage();
                     return null;
                 }
                 waiting = Waiting.None;
@@ -142,7 +144,7 @@ public class EdfifactDownloaderCLI : BackgroundService
                 if (options.Message is { })
                 {
                     AlreadyUsed(arg);
-                    usage();
+                    Usage();
                     return null;
                 }
                 waiting = Waiting.Message;
@@ -152,7 +154,7 @@ public class EdfifactDownloaderCLI : BackgroundService
                 if (options.Directory is { })
                 {
                     AlreadyUsed(arg);
-                    usage();
+                    Usage();
                     return null;
                 }
                 waiting = Waiting.Directory;
@@ -162,7 +164,7 @@ public class EdfifactDownloaderCLI : BackgroundService
                 if (options.Namespace is { })
                 {
                     AlreadyUsed(arg);
-                    usage();
+                    Usage();
                     return null;
                 }
                 waiting = Waiting.Namespace;
@@ -172,7 +174,7 @@ public class EdfifactDownloaderCLI : BackgroundService
                 if (options.Namespace is { })
                 {
                     AlreadyUsed(arg);
-                    usage();
+                    Usage();
                     return null;
                 }
                 waiting = Waiting.TargetFolder;
@@ -182,7 +184,7 @@ public class EdfifactDownloaderCLI : BackgroundService
                 if (options.Namespace is { })
                 {
                     AlreadyUsed(arg);
-                    usage();
+                    Usage();
                     return null;
                 }
                 waiting = Waiting.TmpFolder;
@@ -192,7 +194,7 @@ public class EdfifactDownloaderCLI : BackgroundService
                 if (options.ExternalUnzipCommandLineFormat is { })
                 {
                     AlreadyUsed(arg);
-                    usage();
+                    Usage();
                     return null;
                 }
                 waiting = Waiting.ExternalUnzipCommandLineFormat;
@@ -202,7 +204,7 @@ public class EdfifactDownloaderCLI : BackgroundService
                 if (options.Proxy is { })
                 {
                     AlreadyUsed(arg);
-                    usage();
+                    Usage();
                     return null;
                 }
                 waiting = Waiting.Proxy;
@@ -216,7 +218,7 @@ public class EdfifactDownloaderCLI : BackgroundService
         Console.WriteLine($"The key {arg} is already used!");
     }
 
-    private static void usage()
+    private static void Usage()
     {
         Console.WriteLine(string.Format(@"usage: {0} ARGS ...
 ARGS:

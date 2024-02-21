@@ -1,3 +1,3 @@
 ﻿using Net.Leksi.Edifact;
 
-EdfifactDownloaderCLI.Run(args);
+await EdfifactDownloaderCLI.RunAsync(args);

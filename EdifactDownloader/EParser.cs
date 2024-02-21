@@ -1,54 +1,66 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Reflection;
+using System.Resources;
+using System.Text;
+using System.Text.RegularExpressions;
 namespace Net.Leksi.Edifact;
 
 internal class EParser : PartsParser
 {
-    string name = null;
-    string info;
-    string desc;
-    string repr;
-    string note;
-    string change_indicator;
+    private const string s_rmErrorsName = "Net.Leksi.Edifact.Properties.errors";
+    private const string s_descNotFound = "DESC_NOT_FOUND";
+    private enum Stages { NONE, NAME, DESC, REPR, NOTE };
+    internal delegate void SimpleType(string name, string change_indicator, string info, string description, string repr, string note);
+    internal event SimpleType? OnSimpleType;
 
-    Regex reName = new Regex("^([-\\*+#|X]*)\\s*(\\d{4})\\s+(.*?)(?:\\s+\\[.\\])?\\s*$");
-    Regex reDesr = new Regex("^[-\\*+#|X]*\\s*(Desc:.*)$");
-    Regex reRepr = new Regex("^\\s+Repr:(.*)$");
+    private static readonly Regex reName = new("^([-\\*+#|X]*)\\s*(\\d{4})\\s+(.*?)(?:\\s+\\[.\\])?\\s*$");
+    private static readonly Regex reDesr = new("^[-\\*+#|X]*\\s*(Desc:.*)$");
+    private static readonly Regex reRepr = new("^\\s+Repr:(.*)$");
+    private static readonly ResourceManager s_rmErrors;
 
-    enum Stages { NONE, NAME, DESC, REPR, NOTE };
+    private readonly StringBuilder _info = new();
+    private readonly StringBuilder _desc = new();
+    private readonly StringBuilder _note = new();
+
+    private string? _name;
+    private string _repr = null!;
+    private string _changeIndicator = null!;
+
     Stages stage = Stages.NONE;
-    public delegate void SimpleType(string name, string change_indicator, string info, string description, string repr, string note);
 
-    public event SimpleType OnSimpleType;
 
-    public EParser()
+    static EParser()
     {
-        OnPart += new Part(on_part);
-        OnLine += new Line(on_line);
+        s_rmErrors = new ResourceManager(s_rmErrorsName, Assembly.GetExecutingAssembly());
+    }
+    internal EParser()
+    {
+        OnPart += EParser_OnPart;
+        OnLine += EParser_OnLine;
         OnSimpleType += new SimpleType(delegate(string name, string change_indicator, string info, string description, string repr, string note) { });
     }
 
     protected internal override void Run(string[] data)
     {
         base.Run(data);
-        if (name != null)
+        if (_name != null)
         {
-            OnSimpleType(name, change_indicator, info.Trim(), desc.Trim(), repr.Trim(), note.Trim());
+            OnSimpleType?.Invoke(_name, _changeIndicator, _info.ToString().Trim(), _desc.ToString().Trim(), _repr.Trim(), _note.ToString().Trim());
         }
     }
 
-    void on_part()
+    private void EParser_OnPart()
     {
-        if (name != null)
+        if (_name != null)
         {
-            OnSimpleType(name, change_indicator, info.Trim(), desc.Trim(), repr.Trim(), note.Trim());
+            OnSimpleType?.Invoke(_name, _changeIndicator, _info.ToString().Trim(), _desc.ToString().Trim(), _repr.Trim(), _note.ToString().Trim());
         }
-        name = null;
+        _name = null;
         stage = Stages.NAME;
-        change_indicator = "";
-        note = "";
+        _changeIndicator = string.Empty;
+        _note.Clear();
     }
 
-    void on_line(string line)
+    private void EParser_OnLine(string line)
     {
         Match m;
         while (true)
@@ -56,9 +68,9 @@ internal class EParser : PartsParser
             switch (stage)
             {
                 case Stages.NAME:
-                    if ("".Equals(line))
+                    if (string.IsNullOrEmpty(line))
                     {
-                        if (name != null)
+                        if (_name != null)
                         {
                             stage = Stages.DESC;
                         }
@@ -68,18 +80,19 @@ internal class EParser : PartsParser
                         m = reName.Match(line);
                         if (m.Success)
                         {
-                            change_indicator = m.Groups[1].Captures[0].Value.Trim();
-                            name = m.Groups[2].Captures[0].Value.Trim();
-                            info = m.Groups[3].Captures[0].Value.Trim();
+                            _changeIndicator = m.Groups[1].Captures[0].Value.Trim();
+                            _name = m.Groups[2].Captures[0].Value.Trim();
+                            _info.Clear();
+                            _info.Append(m.Groups[3].Captures[0].Value.Trim());
                         }
                         else
                         {
-                            info += " " + line.Trim();
+                            _info.Append(' ').Append(line.Trim());
                         }
                     }
                     break;
                 case Stages.DESC:
-                    if ("".Equals(line))
+                    if (string.IsNullOrEmpty(line))
                     {
                         stage = Stages.REPR;
                     }
@@ -88,23 +101,24 @@ internal class EParser : PartsParser
                         m = reDesr.Match(line);
                         if (m.Success)
                         {
-                            desc = m.Groups[1].Captures[0].Value.Trim();
+                            _desc.Clear();
+                            _desc.Append(m.Groups[1].Captures[0].Value.Trim());
                         }
                         else
                         {
-                            if ("".Equals(desc))
+                            if (_desc.Length == 0)
                             {
-                                throw new Exception(name + ": 'Desc:' not found.");
+                                throw new Exception(string.Format(s_rmErrors.GetString(s_descNotFound)!, _name));
                             }
                             else
                             {
-                                desc += " " + line.Trim();
+                                _desc.Append(' ').Append(line.Trim());
                             }
                         }
                     }
                     break;
                 case Stages.REPR:
-                    if ("".Equals(line))
+                    if (string.IsNullOrEmpty(line))
                     {
                         stage = Stages.NOTE;
                     }
@@ -113,16 +127,16 @@ internal class EParser : PartsParser
                         m = reRepr.Match(line);
                         if (m.Success)
                         {
-                            repr = m.Groups[1].Captures[0].Value.Trim();
+                            _repr = m.Groups[1].Captures[0].Value.Trim();
                         }
                     }
                     break;
                 case Stages.NOTE:
-                    if (!note.Equals(""))
+                    if (_note.Length > 0)
                     {
-                        note += "\t";
+                        _note.Append('\t');
                     }
-                    note += line.Trim() + "\r\n";
+                    _note.AppendLine(line.Trim());
                     break;
             }
             break;

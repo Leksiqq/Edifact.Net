@@ -10,34 +10,39 @@ using System.Xml.XPath;
 
 namespace Net.Leksi.Edifact;
 
-public class Parser : Tokenizer
+internal class Parser : Tokenizer
 {
-    public delegate void EndInterchange(InterchangeEventArgs args);
-    public delegate void EndFunctionalGroup(FunctionalGroupEventArgs args);
+    internal delegate void EndInterchange(InterchangeEventArgs args);
+    internal delegate void EndFunctionalGroup(FunctionalGroupEventArgs args);
 
-    public EndInterchange OnEndInterchange;
-    public EndFunctionalGroup OnEndFunctionalGroup;
+    internal event EndInterchange? OnEndInterchange;
+    internal event EndFunctionalGroup? OnEndFunctionalGroup;
 
-    XmlDocument doc = new XmlDocument();
-    XmlSchemaSet schemas = null;
-    string schemas_dir = ".";
-    XmlElement unb = null;
-    XmlElement ung = null;
-    XmlElement unh = null;
-    XmlDocument slipDoc = new XmlDocument();
-    XmlElement slip = null;
-    string system_segments_check = "UNB|UNG|UNH|UNT|UNE|UNZ|";
-    int has_functional_groups = -1;
-    int interchanges_processed = 0;
-    int fg_processed = 0;
-    int messages_processed = 0;
-    int segments_processed = 0;
-    bool running = true;
-    XmlNamespaceManager man = new XmlNamespaceManager(new NameTable());
-    ResourceManager rm_regex_tuning = null;
-    Regex reDataTypeError = null;
+    private const string s_currentDir = ".";
+    private const string s_systemSegmentsCheck = "UNB|UNG|UNH|UNT|UNE|UNZ|";
 
-    string syntax_id = null;
+    private static readonly ResourceManager s_rmRegexTuning;
+
+    private readonly XmlNamespaceManager _man = new(new NameTable());
+    private readonly XmlDocument doc = new();
+
+
+    private XmlSchemaSet _schemas = null!;
+    private string _schemasDir = s_currentDir;
+    private XmlElement unb = null!;
+    private XmlElement ung = null!;
+    private XmlElement unh = null!;
+    private XmlDocument slipDoc = new();
+    private XmlElement slip = null!;
+    private int _hasFunctionalGroups = -1;
+    private int _interchangesProcessed = 0;
+    private int _fgProcessed = 0;
+    private int _messagesProcessed = 0;
+    private int _segmentsProcessed = 0;
+    private bool _running = true;
+    private Regex _reDataTypeError = null!;
+
+    private string _syntaxId = null;
     string syntax_version = null;
     Encoding interchange_encoding = Encoding.ASCII;
     string message_type = null;
@@ -49,23 +54,37 @@ public class Parser : Tokenizer
     FunctionalGroupEventArgs fg_ea = null;
     BaseEventArgs ea = null;
 
-    public string SchemasDir
+    static Parser()
+    {
+        s_rmRegexTuning = new ResourceManager("Net.Leksi.EDIFACT.Properties.regex_tuning", Assembly.GetExecutingAssembly());
+    }
+
+
+    internal string SchemasDir
     {
         get
         {
-            return schemas_dir;
+            return _schemasDir;
         }
         set
         {
-            schemas_dir = value;
-            if (schemas_dir != null && schemas_dir.EndsWith("\\"))
+            _schemasDir = value;
+            if (_schemasDir is { } && _schemasDir.EndsWith('\\'))
             {
-                schemas_dir = schemas_dir.Substring(0, schemas_dir.Length - 1);
+                _schemasDir = _schemasDir[..^1];
             }
         }
     }
+    internal Parser()
+    {
+        OnSegment += new Segment(on_segment);
+        _man.AddNamespace("e", Properties.Resources.edifact_ns);
+        _reDataTypeError = new Regex(s_rmRegexTuning.GetString("DATA_TYPE_ERROR"));
+        OnEndInterchange += delegate (InterchangeEventArgs args) { };
+        OnEndFunctionalGroup += delegate (FunctionalGroupEventArgs args) { };
+    }
 
-    public string CalculateMD5Hash(string input)
+    internal string CalculateMD5Hash(string input)
     {
         MD5 md5 = MD5.Create();
         byte[] inputBytes = Encoding.ASCII.GetBytes(input);
@@ -79,29 +98,19 @@ public class Parser : Tokenizer
         return sb.ToString();
     }
 
-    public Parser()
-    {
-        OnSegment += new Segment(on_segment);
-        man.AddNamespace("e", Properties.Resources.edifact_ns);
-        rm_regex_tuning = new ResourceManager("Net.Leksi.EDIFACT.Properties.regex_tuning", Assembly.GetExecutingAssembly());
-        reDataTypeError = new Regex(rm_regex_tuning.GetString("DATA_TYPE_ERROR"));
-        OnEndInterchange += delegate(InterchangeEventArgs args) { };
-        OnEndFunctionalGroup += delegate(FunctionalGroupEventArgs args) { };
-    }
-
-    public void Parse(string path)
+    internal void Parse(string path)
     {
         FileStream fs = new FileStream(path, FileMode.Open);
         Parse(fs);
     }
 
-    public void Parse(Stream stream)
+    internal void Parse(Stream stream)
     {
         init();
         Tokenize(stream);
-        interchange_ea.errors = errors;
+        interchange_ea.Errors = errors;
         OnEndInterchange(interchange_ea);
-        delete_tmp_files(interchange_ea.tmp_message_files);
+        delete_tmp_files(interchange_ea.TmpMessageFiles);
     }
 
     void delete_tmp_files(List<string> tmp_files)
@@ -120,30 +129,30 @@ public class Parser : Tokenizer
 
     void init()
     {
-        if (!Directory.Exists(schemas_dir + "\\UN"))
+        if (!Directory.Exists(_schemasDir + "\\UN"))
         {
-            Directory.CreateDirectory(schemas_dir + "\\UN");
+            Directory.CreateDirectory(_schemasDir + "\\UN");
         }
         if (
-            !File.Exists(schemas_dir + "\\edifact._xsd")
-            || !CalculateMD5Hash(Properties.Resources.edifact).Equals(CalculateMD5Hash(File.ReadAllText(schemas_dir + "\\edifact._xsd")))
+            !File.Exists(_schemasDir + "\\edifact._xsd")
+            || !CalculateMD5Hash(Properties.Resources.edifact).Equals(CalculateMD5Hash(File.ReadAllText(_schemasDir + "\\edifact._xsd")))
         )
         {
-            File.WriteAllText(schemas_dir + "\\edifact._xsd", Properties.Resources.edifact);
+            File.WriteAllText(_schemasDir + "\\edifact._xsd", Properties.Resources.edifact);
         }
         errors.Clear();
-        schemas = new XmlSchemaSet();
-        schemas.Add(Properties.Resources.edifact_ns, schemas_dir + "\\edifact._xsd");
-        schemas.Compile();
-        slipDoc.Schemas = schemas;
-        interchanges_processed = 0;
-        fg_processed = 0;
-        messages_processed = 0;
-        segments_processed = 0;
+        _schemas = new XmlSchemaSet();
+        _schemas.Add(Properties.Resources.edifact_ns, _schemasDir + "\\edifact._xsd");
+        _schemas.Compile();
+        slipDoc.Schemas = _schemas;
+        _interchangesProcessed = 0;
+        _fgProcessed = 0;
+        _messagesProcessed = 0;
+        _segmentsProcessed = 0;
         unb = null;
         ung = null;
         unh = null;
-        running = true;
+        _running = true;
     }
 
     protected new ParseError add_error(ErrorTypes type, ErrorKinds kind)
@@ -153,7 +162,7 @@ public class Parser : Tokenizer
         {
             if (ung != null)
             {
-                XPathNavigator nav = ung.CreateNavigator().SelectSingleNode("e:E0038", man);
+                XPathNavigator nav = ung.CreateNavigator().SelectSingleNode("e:E0038", _man);
                 if (nav != null)
                 {
                     res.AddExteraMessage("FG", new object[] { nav.Value });
@@ -161,7 +170,7 @@ public class Parser : Tokenizer
             }
             if (unh != null)
             {
-                XPathNavigator nav = unh.CreateNavigator().SelectSingleNode("e:E0062", man);
+                XPathNavigator nav = unh.CreateNavigator().SelectSingleNode("e:E0062", _man);
                 if (nav != null)
                 {
                     res.AddExteraMessage("MESS", new object[] { nav.Value });
@@ -170,11 +179,11 @@ public class Parser : Tokenizer
         }
         if (fg_ea != null)
         {
-            if (fg_ea.errors == null)
+            if (fg_ea.Errors == null)
             {
-                fg_ea.errors = new List<ParseError>();
+                fg_ea.Errors = new List<ParseError>();
             }
-            fg_ea.errors.Add(res);
+            fg_ea.Errors.Add(res);
         }
         return res;
     }
@@ -194,24 +203,24 @@ public class Parser : Tokenizer
 
     void on_segment(object sender, SegmentEventArgs e)
     {
-        if (!running)
+        if (!_running)
         {
             return;
         }
         if (unh != null)
         {
-            segments_processed++;
+            _segmentsProcessed++;
         }
         XmlSchemaComplexType segment =
-            schemas.GlobalTypes[new XmlQualifiedName(e.tag.data, Properties.Resources.edifact_ns)] as XmlSchemaComplexType;
+            _schemas.GlobalTypes[new XmlQualifiedName(e.tag.Data, Properties.Resources.edifact_ns)] as XmlSchemaComplexType;
         if (segment == null)
         {
-            add_error(ErrorTypes.ERROR, ErrorKinds.UNKNOWN_SEGMENT).AddLocation(e.tag.begin).AddData(e.tag.data);
+            add_error(ErrorTypes.ERROR, ErrorKinds.UNKNOWN_SEGMENT).AddLocation(e.tag.Begin).AddData(e.tag.Data);
         }
         else
         {
             bool terminal_ok = true;
-            bool system_segment = system_segments_check.Contains(e.tag.data + "|");
+            bool system_segment = s_systemSegmentsCheck.Contains(e.tag.Data + "|");
             if (!system_segment)
             {
                 terminal_ok = false;
@@ -221,19 +230,19 @@ public class Parser : Tokenizer
                 if (system_segment)
                 {
                     StringBuilder sb = new StringBuilder();
-                    sb.Append("<").Append(e.tag.data).Append(" xmlns=\"").Append(Properties.Resources.edifact_ns).Append("\"/>");
+                    sb.Append("<").Append(e.tag.Data).Append(" xmlns=\"").Append(Properties.Resources.edifact_ns).Append("\"/>");
                     slipDoc.LoadXml(sb.ToString());
                     slip = slipDoc.DocumentElement;
                 }
                 parse_segment(e, segment);
                 slipDoc.DocumentElement.SetAttribute("xmlns:xsi", Properties.Resources.schema_instance_ns);
                 slipDoc.DocumentElement.SetAttribute("xmlns:e", Properties.Resources.edifact_ns);
-                slipDoc.DocumentElement.SetAttribute("type", Properties.Resources.schema_instance_ns, "e:" + e.tag.data);
+                slipDoc.DocumentElement.SetAttribute("type", Properties.Resources.schema_instance_ns, "e:" + e.tag.Data);
                 CultureInfo ci = Thread.CurrentThread.CurrentUICulture;
                 Thread.CurrentThread.CurrentUICulture = CultureInfo.CreateSpecificCulture("en-US");
                 slipDoc.Validate(delegate(object obj, ValidationEventArgs args)
                 {
-                    Match m = reDataTypeError.Match(args.Message);
+                    Match m = _reDataTypeError.Match(args.Message);
                     if (m.Success)
                     {
                         //{
@@ -249,7 +258,7 @@ public class Parser : Tokenizer
                         string xpath = "//e:" + m.Groups[1].Captures[0].Value + "";
                         //Console.WriteLine(xpath1);
                         List<string> uniq = new List<string>();
-                        XPathNodeIterator ni = slipDoc.CreateNavigator().Select(xpath, man);
+                        XPathNodeIterator ni = slipDoc.CreateNavigator().Select(xpath, _man);
                         while (ni.MoveNext())
                         {
                             if (m.Groups[2].Captures[0].Value.Equals(ni.Current.Value))
@@ -258,7 +267,7 @@ public class Parser : Tokenizer
                                 {
                                     uniq.Add(ni.Current.GetAttribute("loc", ""));
                                     xpath = "ancestor-or-self::*";
-                                    XPathNodeIterator ni1 = ni.Current.Select(xpath, man);
+                                    XPathNodeIterator ni1 = ni.Current.Select(xpath, _man);
                                     List<XPathNavigator> nodes = new List<XPathNavigator>();
                                     while (ni1.MoveNext())
                                     {
@@ -286,16 +295,16 @@ public class Parser : Tokenizer
                 Thread.CurrentThread.CurrentUICulture = ci;
                 if (system_segment)
                 {
-                    if ("UNB".Equals(e.tag.data))
+                    if ("UNB".Equals(e.tag.Data))
                     {
-                        if (interchanges_processed > 0)
+                        if (_interchangesProcessed > 0)
                         {
-                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.begin).AddData(e.tag.data);
-                            running = false;
+                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.Begin).AddData(e.tag.Data);
+                            _running = false;
                         }
                         else if (unb != null)
                         {
-                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.begin).AddData(e.tag.data);
+                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.Begin).AddData(e.tag.Data);
                         }
                         else
                         {
@@ -304,294 +313,294 @@ public class Parser : Tokenizer
 
                             LocatedString ls;
                             ls = get_located_string(unb, "e:S001/e:E0001");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                syntax_id = ls.data;
+                                _syntaxId = ls.Data;
                             }
                             ls = get_located_string(unb, "e:S001/e:E0002");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                syntax_version = ls.data;
+                                syntax_version = ls.Data;
                             }
                             ls = get_located_string(unb, "e:S002/e:E0004");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                interchange_ea.sender_identification = ls.data;
+                                interchange_ea.SenderIdentification = ls.Data;
                             }
                             ls = get_located_string(unb, "e:S002/e:E0007");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                interchange_ea.sender_identification_code_qualifier = ls.data;
+                                interchange_ea.SenderIdentificationCodeQualifier = ls.Data;
                             }
                             ls = get_located_string(unb, "e:S003/e:E0010");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                interchange_ea.recipient_identification = ls.data;
+                                interchange_ea.RecipientIdentification = ls.Data;
                             }
                             ls = get_located_string(unb, "e:S003/e:E0007");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                interchange_ea.recipient_identification_code_qualifier = ls.data;
+                                interchange_ea.RecipientIdentificationCodeQualifier = ls.Data;
                             }
                             ls = get_located_string(unb, "e:E0031");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                interchange_ea.acknowledgement_request = "1".Equals(ls.data);
+                                interchange_ea.AcknowledgementRequest = "1".Equals(ls.Data);
                             }
                             ls = get_located_string(unb, "e:E0032");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                interchange_ea.communication_agreement_id = ls.data;
+                                interchange_ea.CommunicationAgreementId = ls.Data;
                             }
                             ls = get_located_string(unb, "e:E0035");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                interchange_ea.test_indicator = "1".Equals(ls.data);
+                                interchange_ea.TestIndicator = "1".Equals(ls.Data);
                             }
-                            if ("UNOA".Equals(syntax_id) || "UNOB".Equals(syntax_id))
+                            if ("UNOA".Equals(_syntaxId) || "UNOB".Equals(_syntaxId))
                             {
                                 interchange_encoding = Encoding.ASCII;
                             }
-                            else if ("UNOC".Equals(syntax_id))
+                            else if ("UNOC".Equals(_syntaxId))
                             {
                                 interchange_encoding = Encoding.GetEncoding("iso-8859-1");
                             }
-                            else if ("UNOD".Equals(syntax_id))
+                            else if ("UNOD".Equals(_syntaxId))
                             {
                                 interchange_encoding = Encoding.GetEncoding("iso-8859-2");
                             }
-                            else if ("UNOE".Equals(syntax_id))
+                            else if ("UNOE".Equals(_syntaxId))
                             {
                                 interchange_encoding = Encoding.GetEncoding("iso-8859-5");
                             }
-                            else if ("UNOF".Equals(syntax_id))
+                            else if ("UNOF".Equals(_syntaxId))
                             {
                                 interchange_encoding = Encoding.GetEncoding("iso-8859-7");
                             }
                             ls = get_located_string(unb, "e:S004/e:E0017");
                             LocatedString ls1 = get_located_string(unb, "e:S004/e:E0019");
-                            if (ls != null && ls1 != null && find_error_by_location(ls.begin).Count == 0 && find_error_by_location(ls1.begin).Count == 0)
+                            if (ls != null && ls1 != null && find_error_by_location(ls.Begin).Count == 0 && find_error_by_location(ls1.Begin).Count == 0)
                             {
-                                interchange_ea.preparation_datetime = Formats.ParseDateTime(ls.data + ls1.data, "201");
+                                interchange_ea.PreparationDateTime = Formats.ParseDateTime(ls.Data + ls1.Data, "201");
                             }
                         }
                     }
-                    else if ("UNG".Equals(e.tag.data))
+                    else if ("UNG".Equals(e.tag.Data))
                     {
-                        if (has_functional_groups == -1)
+                        if (_hasFunctionalGroups == -1)
                         {
-                            has_functional_groups = 1;
+                            _hasFunctionalGroups = 1;
                         }
-                        else if (has_functional_groups == 0)
+                        else if (_hasFunctionalGroups == 0)
                         {
-                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.begin).AddData(e.tag.data);
+                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.Begin).AddData(e.tag.Data);
                         }
                         if (ung != null)
                         {
-                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.begin).AddData(e.tag.data);
+                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.Begin).AddData(e.tag.Data);
                         }
                         else
                         {
                             ung = slip;
                             fg_ea = new FunctionalGroupEventArgs();
-                            fg_ea.interchange = interchange_ea;
+                            fg_ea.Interchange = interchange_ea;
                             ea = fg_ea;
                             LocatedString ls;
                             ls = get_located_string(ung, "e:E0038");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                fg_ea.identification = ls.data;
+                                fg_ea.Identification = ls.Data;
                             }
                             ls = get_located_string(ung, "e:S006/e:E0040");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                fg_ea.sender_identification = ls.data;
+                                fg_ea.SenderIdentification = ls.Data;
                             }
                             ls = get_located_string(ung, "e:S006/e:E0007");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                fg_ea.sender_identification_code_qualifier = ls.data;
+                                fg_ea.SenderIdentificationCodeQualifier = ls.Data;
                             }
                             ls = get_located_string(ung, "e:S007/e:E0044");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                fg_ea.recipient_identification = ls.data;
+                                fg_ea.RecipientIdentification = ls.Data;
                             }
                             ls = get_located_string(ung, "e:S007/e:E0007");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                fg_ea.recipient_identification_code_qualifier = ls.data;
+                                fg_ea.RecipientIdentificationCodeQualifier = ls.Data;
                             }
                             ls = get_located_string(ung, "e:E0048");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                fg_ea.control_reference = ls.data;
+                                fg_ea.ControlReference = ls.Data;
                             }
                             ls = get_located_string(ung, "e:E0051");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                fg_ea.controlling_agency = ls.data;
+                                fg_ea.ControllingAgency = ls.Data;
                             }
                             ls = get_located_string(ung, "e:S008/e:E0052");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                fg_ea.message_version = ls.data;
+                                fg_ea.MessageVersion = ls.Data;
                             }
                             ls = get_located_string(ung, "e:S008/e:E0054");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                fg_ea.message_release = ls.data;
+                                fg_ea.MessageRelease = ls.Data;
                             }
                             ls = get_located_string(ung, "e:S008/e:E0057");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                fg_ea.association_assigned_code = ls.data;
+                                fg_ea.AssociationAssignedCode = ls.Data;
                             }
                             ls = get_located_string(ung, "e:E0058");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                fg_ea.application_password = ls.data;
+                                fg_ea.ApplicationPassword = ls.Data;
                             }
                             ls = get_located_string(ung, "e:S004/e:E0017");
                             LocatedString ls1 = get_located_string(unb, "e:S004/e:E0019");
-                            if (ls != null && ls1 != null && find_error_by_location(ls.begin).Count == 0 && find_error_by_location(ls1.begin).Count == 0)
+                            if (ls != null && ls1 != null && find_error_by_location(ls.Begin).Count == 0 && find_error_by_location(ls1.Begin).Count == 0)
                             {
-                                fg_ea.preparation_datetime = Formats.ParseDateTime(ls.data + ls1.data, "201");
+                                fg_ea.PreparationDateTime = Formats.ParseDateTime(ls.Data + ls1.Data, "201");
                             }
                         }
                     }
-                    else if ("UNH".Equals(e.tag.data))
+                    else if ("UNH".Equals(e.tag.Data))
                     {
-                        if (has_functional_groups == -1)
+                        if (_hasFunctionalGroups == -1)
                         {
-                            has_functional_groups = 0;
+                            _hasFunctionalGroups = 0;
                         }
-                        else if (has_functional_groups == 1 && ung == null)
+                        else if (_hasFunctionalGroups == 1 && ung == null)
                         {
-                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.begin).AddData(e.tag.data);
+                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.Begin).AddData(e.tag.Data);
                         }
                         if (unh != null)
                         {
-                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.begin).AddData(e.tag.data);
+                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.Begin).AddData(e.tag.Data);
                         }
                         else
                         {
                             unh = slip;
-                            segments_processed = 1;
+                            _segmentsProcessed = 1;
                             LocatedString ls, ls1;
                             ls = get_located_string(unb, "e:S009/e:E0065");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                message_type = ls.data;
+                                message_type = ls.Data;
                             }
-                            if (has_functional_groups == 1)
+                            if (_hasFunctionalGroups == 1)
                             {
 
                             }
                             ls = get_located_string(unb, "e:S009/e:E0052");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                message_version = ls.data;
+                                message_version = ls.Data;
                             }
                             ls = get_located_string(unb, "e:S009/e:E0054");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                message_release = ls.data;
+                                message_release = ls.Data;
                             }
                             ls = get_located_string(unb, "e:S009/e:E0051");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                controlling_agency = ls.data;
+                                controlling_agency = ls.Data;
                             }
                             ls = get_located_string(unb, "e:S009/e:E0057");
-                            if (ls != null && find_error_by_location(ls.begin).Count == 0)
+                            if (ls != null && find_error_by_location(ls.Begin).Count == 0)
                             {
-                                association_assigned_code = ls.data;
+                                association_assigned_code = ls.Data;
                             }
                             doc.LoadXml("<MESSAGE xmlns=\"" + Properties.Resources.edifact_ns + "\">");
                         }
                     }
-                    else if ("UNT".Equals(e.tag.data))
+                    else if ("UNT".Equals(e.tag.Data))
                     {
                         if (unh == null)
                         {
-                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.begin)
-                                .AddData(e.tag.data);
+                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.Begin)
+                                .AddData(e.tag.Data);
                         }
                         else
                         {
                             LocatedString h_ls = get_located_string(unh, "e:E0062");
                             LocatedString t_ls = get_located_string(slip, "e:E0062");
                             if (
-                                h_ls != null && h_ls.data != null && !h_ls.data.Equals(t_ls.data)
-                                || t_ls != null && t_ls.data != null && !t_ls.data.Equals(h_ls.data)
+                                h_ls != null && h_ls.Data != null && !h_ls.Data.Equals(t_ls.Data)
+                                || t_ls != null && t_ls.Data != null && !t_ls.Data.Equals(h_ls.Data)
                             )
                             {
                                 add_error(ErrorTypes.ERROR, ErrorKinds.MESSAGE_ID_MISMATCH)
-                                    .AddLocation(t_ls.begin).AddLocation(h_ls.begin).AddData(t_ls.data).AddData(h_ls.data);
+                                    .AddLocation(t_ls.Begin).AddLocation(h_ls.Begin).AddData(t_ls.Data).AddData(h_ls.Data);
                             }
                             t_ls = get_located_string(slip, "e:E0074");
-                            if (t_ls != null && t_ls.data != null && !t_ls.data.Equals(segments_processed.ToString()))
+                            if (t_ls != null && t_ls.Data != null && !t_ls.Data.Equals(_segmentsProcessed.ToString()))
                             {
-                                add_error(ErrorTypes.ERROR, ErrorKinds.NUMBER_OF_SEGMENTS_MISMATCH).AddLocation(t_ls.begin).AddData(t_ls.data).AddData(segments_processed.ToString());
+                                add_error(ErrorTypes.ERROR, ErrorKinds.NUMBER_OF_SEGMENTS_MISMATCH).AddLocation(t_ls.Begin).AddData(t_ls.Data).AddData(_segmentsProcessed.ToString());
                             }
                             unh = null;
-                            ea.control_count++;
+                            ea.ControlCount++;
                         }
                     }
-                    else if ("UNE".Equals(e.tag.data))
+                    else if ("UNE".Equals(e.tag.Data))
                     {
                         if (ung == null)
                         {
-                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.begin)
-                                .AddData(e.tag.data);
+                            add_error(ErrorTypes.ERROR, ErrorKinds.UNEXPECTED_SEGMENT).AddLocation(e.tag.Begin)
+                                .AddData(e.tag.Data);
                         }
                         else
                         {
-                            if (has_functional_groups == 1)
+                            if (_hasFunctionalGroups == 1)
                             {
                                 LocatedString g_ls = get_located_string(unh, "e:E0048");
                                 LocatedString e_ls = get_located_string(slip, "e:E0048");
                                 if (
-                                    g_ls != null && g_ls.data != null && !g_ls.data.Equals(e_ls.data)
-                                    || e_ls != null && e_ls.data != null && !e_ls.data.Equals(g_ls.data)
+                                    g_ls != null && g_ls.Data != null && !g_ls.Data.Equals(e_ls.Data)
+                                    || e_ls != null && e_ls.Data != null && !e_ls.Data.Equals(g_ls.Data)
                                 )
                                 {
-                                    add_error(ErrorTypes.ERROR, ErrorKinds.FG_ID_MISMATCH).AddLocation(e_ls.begin)
-                                        .AddLocation(g_ls.begin).AddData(e_ls.data).AddData(g_ls.data);
+                                    add_error(ErrorTypes.ERROR, ErrorKinds.FG_ID_MISMATCH).AddLocation(e_ls.Begin)
+                                        .AddLocation(g_ls.Begin).AddData(e_ls.Data).AddData(g_ls.Data);
                                 }
                                 e_ls = get_located_string(slip, "e:E0060");
-                                if (e_ls != null && e_ls.data != null && !e_ls.data.Equals(segments_processed.ToString()))
+                                if (e_ls != null && e_ls.Data != null && !e_ls.Data.Equals(_segmentsProcessed.ToString()))
                                 {
                                     add_error(ErrorTypes.ERROR, ErrorKinds.NUMBER_OF_MESSAGES_MISMATCH)
-                                        .AddLocation(e_ls.begin).AddData(e_ls.data).AddData(messages_processed.ToString());
+                                        .AddLocation(e_ls.Begin).AddData(e_ls.Data).AddData(_messagesProcessed.ToString());
                                 }
-                                messages_processed = 0;
+                                _messagesProcessed = 0;
                             }
-                            interchange_ea.control_count++;
+                            interchange_ea.ControlCount++;
                             ung = null;
                         }
                     }
-                    else if ("UNZ".Equals(e.tag.data))
+                    else if ("UNZ".Equals(e.tag.Data))
                     {
                         LocatedString b_ls = get_located_string(unb, "e:E0020");
                         LocatedString z_ls = get_located_string(slip, "e:E0020");
                         if (
-                            b_ls != null && b_ls.data != null && !b_ls.data.Equals(z_ls.data)
-                            || z_ls != null && z_ls.data != null && !z_ls.data.Equals(b_ls.data)
+                            b_ls != null && b_ls.Data != null && !b_ls.Data.Equals(z_ls.Data)
+                            || z_ls != null && z_ls.Data != null && !z_ls.Data.Equals(b_ls.Data)
                         )
                         {
-                            add_error(ErrorTypes.ERROR, ErrorKinds.INTERCHANGE_ID_MISMATCH).AddLocation(z_ls.begin)
-                                .AddLocation(b_ls.begin).AddData(z_ls.data).AddData(b_ls.data);
+                            add_error(ErrorTypes.ERROR, ErrorKinds.INTERCHANGE_ID_MISMATCH).AddLocation(z_ls.Begin)
+                                .AddLocation(b_ls.Begin).AddData(z_ls.Data).AddData(b_ls.Data);
                         }
                         z_ls = get_located_string(slip, "e:E0036");
-                        int control_count = (has_functional_groups == 0 ? messages_processed : fg_processed);
-                        if (z_ls != null && z_ls.data != null && !z_ls.data.Equals(control_count.ToString()))
+                        int control_count = (_hasFunctionalGroups == 0 ? _messagesProcessed : _fgProcessed);
+                        if (z_ls != null && z_ls.Data != null && !z_ls.Data.Equals(control_count.ToString()))
                         {
-                            add_error(ErrorTypes.ERROR, ErrorKinds.NUMBER_OF_SEGMENTS_MISMATCH).AddLocation(z_ls.begin).AddData(z_ls.data).AddData(control_count.ToString());
+                            add_error(ErrorTypes.ERROR, ErrorKinds.NUMBER_OF_SEGMENTS_MISMATCH).AddLocation(z_ls.Begin).AddData(z_ls.Data).AddData(control_count.ToString());
                         }
                         unb = null;
-                        interchanges_processed++;
+                        _interchangesProcessed++;
                     }
                 }
                 //if (system_segment && "UNT".Equals(e.tag.data))
@@ -614,7 +623,7 @@ public class Parser : Tokenizer
     LocatedString get_located_string(XmlElement seg, string xpath)
     {
         LocatedString res = null;
-        XPathNavigator nav = seg.CreateNavigator().SelectSingleNode(xpath, man);
+        XPathNavigator nav = seg.CreateNavigator().SelectSingleNode(xpath, _man);
         if (nav != null)
         {
             string[] parts = nav.GetAttribute("loc", "").Split(new char[] { ':' });
@@ -622,7 +631,7 @@ public class Parser : Tokenizer
             {
                 Location l = new Location(parts, 0);
                 res = new LocatedString(l, Encoding.UTF8.GetString(interchange_encoding.GetBytes(nav.Value)));
-                res.end.Set(new Location(parts, 3));
+                res.End.Set(new Location(parts, 3));
             }
         }
         return res;
@@ -631,7 +640,7 @@ public class Parser : Tokenizer
     string get_value(XmlElement seg, string xpath)
     {
         string res = null;
-        XPathNavigator nav = seg.CreateNavigator().SelectSingleNode(xpath, man);
+        XPathNavigator nav = seg.CreateNavigator().SelectSingleNode(xpath, _man);
         if (nav != null)
         {
             res = Encoding.UTF8.GetString(interchange_encoding.GetBytes(nav.Value));
@@ -652,7 +661,7 @@ public class Parser : Tokenizer
     void on_element(string name, LocatedString ls)
     {
         XmlElement el = (XmlElement)slip.AppendChild(slipDoc.CreateElement("", name, Properties.Resources.edifact_ns));
-        ((XmlElement)el.AppendChild(slipDoc.CreateTextNode(Encoding.UTF8.GetString(interchange_encoding.GetBytes(ls.data)))).ParentNode).SetAttribute("loc", ls.begin.offset + ":" + ls.begin.line + ":" + ls.begin.col + ":" + ls.end.offset + ":" + ls.end.line + ":" + ls.end.col);
+        ((XmlElement)el.AppendChild(slipDoc.CreateTextNode(Encoding.UTF8.GetString(interchange_encoding.GetBytes(ls.Data)))).ParentNode).SetAttribute("loc", ls.Begin.Offset + ":" + ls.Begin.Line + ":" + ls.Begin.Col + ":" + ls.End.Offset + ":" + ls.End.Line + ":" + ls.End.Col);
         //XmlDocument d = new XmlDocument();
         //XmlElement el0 = d.CreateElement("", name, Properties.Resources.edifact_ns);
         //el0.SetAttribute("xmlns:xsi", Properties.Resources.schema_instance_ns);
@@ -685,7 +694,7 @@ public class Parser : Tokenizer
                 {
                     if (i < e.elements.Count)
                     {
-                        if (e.elements[i].Count == 1 && "".Equals(e.elements[i][0].data))
+                        if (e.elements[i].Count == 1 && "".Equals(e.elements[i][0].Data))
                         {
                             if (element.MinOccurs == 0)
                             {
@@ -708,12 +717,12 @@ public class Parser : Tokenizer
                                     {
                                         if (k < e.elements[i].Count)
                                         {
-                                            if ("".Equals(e.elements[i][k].data))
+                                            if ("".Equals(e.elements[i][k].Data))
                                             {
                                                 if (sub_element.MinOccurs > l)
                                                 {
                                                     add_error(ErrorTypes.ERROR, ErrorKinds.EXPECTED_SUB_ELEMENT_NOT_FOUND)
-                                                        .AddLocation(e.elements[i][k].begin).AddData(e.tag.data)
+                                                        .AddLocation(e.elements[i][k].Begin).AddData(e.tag.Data)
                                                         .AddData(element.Name).AddData((sub_element.Name.StartsWith("E") ? sub_element.Name.Substring(1) : sub_element.Name));
                                                 }
                                                 k++;
@@ -724,7 +733,7 @@ public class Parser : Tokenizer
                                         else if (sub_element.MinOccurs > l)
                                         {
                                             add_error(ErrorTypes.ERROR, ErrorKinds.EXPECTED_SUB_ELEMENT_NOT_FOUND)
-                                                .AddLocation(e.elements[i][e.elements[i].Count - 1].end).AddData(e.tag.data)
+                                                .AddLocation(e.elements[i][e.elements[i].Count - 1].End).AddData(e.tag.Data)
                                                 .AddData(element.Name).AddData((sub_element.Name.StartsWith("E") ? sub_element.Name.Substring(1) : sub_element.Name));
                                         }
                                         else
@@ -754,13 +763,13 @@ public class Parser : Tokenizer
                                 }
                                 Console.WriteLine(ss);
                                 add_error(ErrorTypes.ERROR, ErrorKinds.INCOMPLETE_ELEMENT)
-                                    .AddLocation(e.tag.end)
-                                    .AddData(e.tag.data).AddData(element.Name).AddData(ss.Trim().Trim(new char[] { ',' }));
+                                    .AddLocation(e.tag.End)
+                                    .AddData(e.tag.Data).AddData(element.Name).AddData(ss.Trim().Trim(new char[] { ',' }));
                             }
                             if (k < e.elements[i].Count)
                             {
                                 add_error(ErrorTypes.ERROR, ErrorKinds.EXTRA_SUB_ELEMENT_FOUND)
-                                    .AddLocation(e.elements[i][k - 1].end).AddData(e.tag.data).AddData(element.Name);
+                                    .AddLocation(e.elements[i][k - 1].End).AddData(e.tag.Data).AddData(element.Name);
                             }
                             on_end_composite_element();
                         }
@@ -769,7 +778,7 @@ public class Parser : Tokenizer
                             if (e.elements[i].Count > 1)
                             {
                                 add_error(ErrorTypes.ERROR, ErrorKinds.EXTRA_SUB_ELEMENT_FOUND)
-                                    .AddLocation(e.elements[i][0].end).AddData(e.tag.data).AddData(element.Name);
+                                    .AddLocation(e.elements[i][0].End).AddData(e.tag.Data).AddData(element.Name);
                             }
                             on_element(element.Name, e.elements[i][0]);
                         }
@@ -779,14 +788,14 @@ public class Parser : Tokenizer
                         Location loc = new Location();
                         if (i > 0)
                         {
-                            loc.Set(e.elements[i - 1][e.elements[i - 1].Count - 1].end);
+                            loc.Set(e.elements[i - 1][e.elements[i - 1].Count - 1].End);
                         }
                         else
                         {
-                            loc.Set(e.tag.end);
+                            loc.Set(e.tag.End);
                         }
                         add_error(ErrorTypes.ERROR, ErrorKinds.EXPECTED_ELEMENT_NOT_FOUND).AddLocation(loc)
-                            .AddData(e.tag.data)
+                            .AddData(e.tag.Data)
                             .AddData((element.Name.StartsWith("E") ? element.Name.Substring(1) : element.Name));
                     }
                     else
@@ -819,27 +828,27 @@ public class Parser : Tokenizer
                 ss += s + ", ";
             }
             Console.WriteLine(ss);
-            add_error(ErrorTypes.ERROR, ErrorKinds.INCOMPLETE_SEGMENT).AddLocation(e.tag.end).AddData(e.tag.data).AddData(ss.Trim().Trim(new char[] { ',' }));
+            add_error(ErrorTypes.ERROR, ErrorKinds.INCOMPLETE_SEGMENT).AddLocation(e.tag.End).AddData(e.tag.Data).AddData(ss.Trim().Trim(new char[] { ',' }));
         }
         if (i < e.elements.Count)
         {
             Location loc = new Location();
             if (i > 0)
             {
-                loc.Set(e.elements[i - 1][e.elements[i - 1].Count - 1].end);
+                loc.Set(e.elements[i - 1][e.elements[i - 1].Count - 1].End);
             }
             else
             {
-                loc.Set(e.tag.end);
+                loc.Set(e.tag.End);
             }
-            add_error(ErrorTypes.ERROR, ErrorKinds.EXTRA_ELEMENT_FOUND).AddLocation(loc).AddData(e.tag.data);
+            add_error(ErrorTypes.ERROR, ErrorKinds.EXTRA_ELEMENT_FOUND).AddLocation(loc).AddData(e.tag.Data);
         }
         return true;
     }
 
     void write_out(SegmentEventArgs e)
     {
-        Console.Write(e.tag.data + "{" + e.tag.begin.line + "," + e.tag.begin.col + "-" + e.tag.end.line + "," + e.tag.end.col + "}");
+        Console.Write(e.tag.Data + "{" + e.tag.Begin.Line + "," + e.tag.Begin.Col + "-" + e.tag.End.Line + "," + e.tag.End.Col + "}");
         foreach (List<LocatedString> el in e.elements)
         {
             Console.Write("+");
@@ -850,7 +859,7 @@ public class Parser : Tokenizer
                 {
                     Console.Write(":");
                 }
-                Console.Write(sub.data + "{" + sub.begin.line + "," + sub.begin.col + "-" + sub.end.line + "," + sub.end.col + "}");
+                Console.Write(sub.Data + "{" + sub.Begin.Line + "," + sub.Begin.Col + "-" + sub.End.Line + "," + sub.End.Col + "}");
                 i++;
             }
         }
