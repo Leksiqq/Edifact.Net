@@ -98,21 +98,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="UN\2912\EDCL-1.912" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\unsl\UN\2912\EDCL-1.912;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="UN\2912\EDCL-2.912" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\unsl\UN\2912\EDCL-2.912;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="UN\2912\EDCL-3.912" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\unsl\UN\2912\EDCL-3.912;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="UN\2912\EDCL-4.912" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\unsl\UN\2912\EDCL-4.912;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="UN\2912\EDCL-5.912" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\unsl\UN\2912\EDCL-5.912;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="UN\D94B\UNSL.94B" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\unsl\UN\D94B\UNSL.94B;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
