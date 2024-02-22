@@ -9,6 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Edifact", "Edifact\Edifact.
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EdifactDownloaderCLI", "EdifactDownloaderCLI\EdifactDownloaderCLI.csproj", "{153F7630-456D-4012-BFA9-3AA9E4B0774B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B5BA2538-F0DE-4222-986A-A5336B8FE135} = {B5BA2538-F0DE-4222-986A-A5336B8FE135}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Files2Resources", "Files2Resources\Files2Resources.csproj", "{A0DCDCA6-26E8-4498-9171-0E74FE9348BB}"
 EndProject

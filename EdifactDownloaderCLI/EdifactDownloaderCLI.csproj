@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EdifactDownloader\Edifact.csproj" />
+    <ProjectReference Include="..\Edifact\Edifact.csproj" />
   </ItemGroup>
 
 </Project>
