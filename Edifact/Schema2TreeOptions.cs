@@ -4,7 +4,7 @@ namespace Net.Leksi.Edifact;
 
 public class Schema2TreeOptions
 {
-    public XmlReader? SchemaDocument { get; set; }
+    public Uri? SchemaDocument { get; set; }
     public TextWriter? Output { get; set; }
     public int? PaddingLength { get; set; }
 

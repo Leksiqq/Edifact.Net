@@ -1,15 +1,14 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using System.Xml;
 
 namespace Net.Leksi.Edifact;
 
-public class Schema2TreeCLI(IServiceProvider services): BackgroundService
+public class Schema2TreeCLI(IServiceProvider services) : BackgroundService
 {
     private readonly Schema2Tree _schema2Tree = new();
     private readonly Schema2TreeOptions _optoins = services.GetRequiredService<Schema2TreeOptions>();
-    public static async Task RunAsync(string[] args)
+    public static async Task RunAsync(string[] args, Action<IHostApplicationBuilder> configure)
     {
         Schema2TreeOptions? options = Create(args);
 
@@ -18,6 +17,8 @@ public class Schema2TreeCLI(IServiceProvider services): BackgroundService
             return;
         }
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+
+        configure?.Invoke(builder);
 
         builder.Services.AddSingleton(options);
         builder.Services.AddHostedService<Schema2TreeCLI>();
@@ -29,9 +30,10 @@ public class Schema2TreeCLI(IServiceProvider services): BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await _schema2Tree.TranslateAsync(
-            _optoins.SchemaDocument!, 
-            _optoins.Output!, 
-            _optoins.PaddingLength is int p ? p : Schema2Tree.s_deafultPadLen
+            _optoins.SchemaDocument!,
+            _optoins.Output!,
+            xmlResolver: services.GetService<XmlResolver>(),
+            padLen: _optoins.PaddingLength is int p ? p : Schema2Tree.s_deafultPadLen
         );
         await services.GetRequiredService<IHost>().StopAsync(stoppingToken);
     }
@@ -46,12 +48,12 @@ public class Schema2TreeCLI(IServiceProvider services): BackgroundService
             {
                 try
                 {
-                    result.SchemaDocument = XmlReader.Create(arg);
+                    result.SchemaDocument = new Uri(arg);
                     prevArg = null;
                 }
                 catch (Exception)
                 {
-                    OpenSchemaFileError(arg);
+                    SchemaDocumentError(arg);
                     return null;
                 }
             }
@@ -128,7 +130,7 @@ public class Schema2TreeCLI(IServiceProvider services): BackgroundService
                 }
             }
         }
-        if(GetWaiting(prevArg) is not Waiting.None)
+        if (GetWaiting(prevArg) is not Waiting.None)
         {
             CommonCLI.MissedArgumentError(prevArg!);
             Usage();
@@ -147,6 +149,11 @@ public class Schema2TreeCLI(IServiceProvider services): BackgroundService
             return null;
         }
         return result;
+    }
+
+    private static void SchemaDocumentError(string arg)
+    {
+        throw new NotImplementedException();
     }
 
     private static void OutputMissedError()
@@ -169,10 +176,6 @@ public class Schema2TreeCLI(IServiceProvider services): BackgroundService
         );
     }
     private static void OpenOutputFileError(string arg)
-    {
-        throw new NotImplementedException();
-    }
-    private static void OpenSchemaFileError(string arg)
     {
         throw new NotImplementedException();
     }

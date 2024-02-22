@@ -1,5 +1,4 @@
-﻿using System.Resources;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Schema;
@@ -47,19 +46,26 @@ public class Schema2Tree
     private int _padLen;
     private TextWriter? _output;
 
-    public async Task TranslateAsync(XmlReader schemaDocument, TextWriter output, int padLen = s_deafultPadLen)
+    public async Task TranslateAsync(Uri schemaDocument, TextWriter output, XmlResolver? xmlResolver = null, int padLen = s_deafultPadLen)
     {
         _padLen = padLen;
         _output = output;
         XmlNameTable xmlNameTable = new NameTable();
         XmlDocument xml = new(xmlNameTable);
-        xml.Load(schemaDocument);
+        Console.WriteLine(schemaDocument);
+        if (xmlResolver is { } && xmlResolver.GetEntity(schemaDocument, null, typeof(Stream)) is Stream stream)
+        {
+            xml.Load(XmlReader.Create(stream));
+        }
+        else
+        {
+            xml.Load(XmlReader.Create(schemaDocument.ToString()));
+        }
 
-        if(xml.DocumentElement!.NamespaceURI != Properties.Resources.schema_ns)
+        if (xml.DocumentElement!.NamespaceURI != Properties.Resources.schema_ns)
         {
             throw new Exception(s_notSchema);
         }
-        Console.WriteLine(schemaDocument.BaseURI);
         XmlNamespaceManager man = new(xmlNameTable);
         man.AddNamespace(xml.DocumentElement.Prefix, xml.DocumentElement!.NamespaceURI);
         XPathNavigator nav = xml.CreateNavigator()!;
@@ -72,11 +78,12 @@ public class Schema2Tree
 
         XmlQualifiedName root_qname = new(s_message, ns);
         XmlSchemaSet xmlSchemaSet = new(xmlNameTable);
+        if(xmlResolver is { })
+        {
+            xmlSchemaSet.XmlResolver = xmlResolver;
+        }
 
-        StringReader sr = new(xml.OuterXml);
-        XmlSchema xmlSchema = new();
-        xmlSchema.SourceUri = schemaDocument.BaseURI;
-        xmlSchemaSet.Add(xmlSchema);
+        xmlSchemaSet.Add(ns, schemaDocument.ToString());
         xmlSchemaSet.Compile();
         if (xmlSchemaSet.GlobalElements[root_qname] is not XmlSchemaElement root)
         {
