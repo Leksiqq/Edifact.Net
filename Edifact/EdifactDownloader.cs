@@ -28,12 +28,6 @@ public class EdifactDownloader
     private const string s_typeAlreadyDeclared = "TYPE_ALREADY_DECLARED";
     private const string s_directoryFormat = "D{0:00}{1}";
     private const string s_defaultTargetDirectory = "xsd";
-    private const string s_path911 = "/DAM/trade/untdid/d91/91-1.zip";
-    private const string s_path912 = "/DAM/trade/untdid/d91/91-2.zip";
-    private const string s_path921 = "/DAM/trade/untdid/d92/92-1.zip";
-    private const string s_path932 = "/DAM/trade/untdid/d93/93-2.zip";
-    private const string s_path93a = "/DAM/trade/untdid/d93/d93a.zip";
-    private const string s_pathS93a = "/DAM/trade/untdid/d93/s93a.zip";
     private const string s_pathDam = "/DAM/trade/untdid/{0}/{1}.zip";
     private const string s_pathNoDam = "/fileadmin/DAM/trade/untdid/{0}/{1}.zip";
     private const string s_uriFormat = "{0}{1}";
@@ -41,12 +35,6 @@ public class EdifactDownloader
     private const string s_messagePattern = "^([A-Z]{{6}}){0}\\.{1}$";
     private const string s_fileNotFoundFormat = "FILE_FOR_DIRECTORY_NOT_FOUND";
     private const string s_slash = "\\";
-    private const string s_1911 = "1911";
-    private const string s_2912 = "2912";
-    private const string s_1921 = "1921";
-    private const string s_2932 = "2932";
-    private const string s_d93a = "D93A";
-    private const string s_s93a = "S93A";
     private const string s_d20b = "D20B";
     private const string s_d9 = "D9";
     private const string s_un = "UN";
@@ -151,7 +139,7 @@ public class EdifactDownloader
     private static readonly ResourceManager s_rmErrors;
     private static readonly Regex _reExternalUnzip = new("^\\s*(?<cmd>(?:\\\"[^\"]+\\\")|(?:[^\\s]+))(?<args>.+)$");
     private static readonly Regex _reRepr = new("(a?n?)((?:\\.\\.)?)(\\d+)");
-    private static readonly List<string> _directories = [s_1911, s_2912, s_1921, s_2932, s_d93a, s_s93a];
+    private static readonly List<string> _directories = [];
 
     private readonly EdifactDownloaderOptions _options;
     private readonly Regex _reTypeAlreadyDeclared;
@@ -446,20 +434,8 @@ public class EdifactDownloader
             {
                 File.Delete(dst);
             }
-            if (
-                s_2912.Equals(_directory) || s_1911.Equals(_directory) || s_1921.Equals(_directory) || s_2932.Equals(_directory)
-                 || s_d93a.Equals(_directory) || s_s93a.Equals(_directory)
-            )
-            {
-                Preparser2 pp = new(dst);
-                pp.Run(
-                    File.ReadAllLines(src)
-                );
-            }
-            else
-            {
-                CopyFile(src, dst);
-            }
+            CopyFile(src, dst);
+
             MakeMessage(message, dst);
 
             if (
@@ -1146,30 +1122,14 @@ public class EdifactDownloader
         {
             File.Delete(targetFile);
         }
-        if (s_2912.Equals(_dir))
-        {
-            Preparser1 pp = new(targetFile);
-            pp.Run(File.ReadAllLines(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _edcd, _ext))));
-        }
-        else
-        {
-            CopyFile(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _edcd, _ext)), targetFile);
-        }
+        CopyFile(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _edcd, _ext)), targetFile);
 
         targetFile = Path.Combine(_preparedDir, string.Format(s_fileNameFormat, _eded, _ext));
         if (File.Exists(targetFile))
         {
             File.Delete(targetFile);
         }
-        if (s_2912.Equals(_dir))
-        {
-            Preparser1 pp = new(targetFile);
-            pp.Run(File.ReadAllLines(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _eded, _ext))));
-        }
-        else
-        {
-            CopyFile(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _eded, _ext)), targetFile);
-        }
+        CopyFile(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _eded, _ext)), targetFile);
         foreach (string unc in _uncls)
         {
             CopyFile(
@@ -1336,68 +1296,13 @@ public class EdifactDownloader
         _uncl = s_uncl;
         _unsl = s_unsl;
 
-        if (s_1911.Equals(_directory))
-        {
-            _uncl = s_trcl;
-        }
-        else if (s_2912.Equals(_directory))
-        {
-            _uncl = s_edcl;
-        }
-        else if (s_1921.Equals(_directory))
-        {
-            _uncl = s_trcl;
-        }
-        else if (s_2932.Equals(_directory))
-        {
-            _uncl = s_edcl;
-        }
-        if (
-            s_2912.Equals(_directory)
-            || s_1911.Equals(_directory)
-            || s_1921.Equals(_directory)
-            || s_2932.Equals(_directory)
-        )
-        {
-        }
-        else if (s_s93a.Equals(_directory))
-        {
-            _mPostfix = s_postfix_S;
-        }
-        else
-        {
-            _mPostfix = s_postfix_D;
-        }
+        _mPostfix = s_postfix_D;
     }
 
     private Uri GetRequestUri()
     {
         Uri requestUri;
-        if (s_1911.Equals(_dir))
-        {
-            requestUri = new Uri(string.Format(s_uriFormat, s_webSite, s_path911));
-        }
-        else if (s_2912.Equals(_dir))
-        {
-            requestUri = new Uri(string.Format(s_uriFormat, s_webSite, s_path912));
-        }
-        else if (s_1921.Equals(_dir))
-        {
-            requestUri = new Uri(string.Format(s_uriFormat, s_webSite, s_path921));
-        }
-        else if (s_2932.Equals(_dir))
-        {
-            requestUri = new Uri(string.Format(s_uriFormat, s_webSite, s_path932));
-        }
-        else if (s_d93a.Equals(_dir, StringComparison.OrdinalIgnoreCase))
-        {
-            requestUri = new Uri(string.Format(s_uriFormat, s_webSite, s_path93a));
-        }
-        else if (s_s93a.Equals(_dir, StringComparison.OrdinalIgnoreCase))
-        {
-            requestUri = new Uri(string.Format(s_uriFormat, s_webSite, s_pathS93a));
-        }
-        else if (
+        if (
             string.Compare(_dir, s_d20b, StringComparison.OrdinalIgnoreCase) < 0
             || string.Compare(_dir, s_d9, StringComparison.OrdinalIgnoreCase) > 0
         )
