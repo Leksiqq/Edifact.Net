@@ -3,6 +3,7 @@
 internal enum Waiting
 {
     None,
+    Unknown,
     Message,
     Directory,
     Namespace,
@@ -10,4 +11,8 @@ internal enum Waiting
     TargetFolder,
     TmpFolder,
     ExternalUnzipCommandLineFormat,
+    SchemaDocument,
+    Output,
+    PaddingLength,
+    Help
 }

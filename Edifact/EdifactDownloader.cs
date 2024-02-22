@@ -24,7 +24,7 @@ public class EdifactDownloader
     private const string s_rmRegexTuningName = "Net.Leksi.Edifact.Properties.regex_tuning";
     private const string s_rmFixedName = "Net.Leksi.Edifact.Properties.fixed";
     private const string s_rmUnslName = "Net.Leksi.Edifact.Properties.unsl";
-    private const string s_rmErrorsName = "Net.Leksi.Edifact.Properties.errors";
+    private const string s_rmLabelsName = "Net.Leksi.Edifact.Properties.labels";
     private const string s_typeAlreadyDeclared = "TYPE_ALREADY_DECLARED";
     private const string s_directoryFormat = "D{0:00}{1}";
     private const string s_defaultTargetDirectory = "xsd";
@@ -136,7 +136,7 @@ public class EdifactDownloader
     private static readonly ResourceManager s_rmRegexTuning;
     private static readonly ResourceManager s_rmFixed;
     private static readonly ResourceManager s_rmUnsl;
-    private static readonly ResourceManager s_rmErrors;
+    private static readonly ResourceManager s_rmLabels;
     private static readonly Regex _reExternalUnzip = new("^\\s*(?<cmd>(?:\\\"[^\"]+\\\")|(?:[^\\s]+))(?<args>.+)$");
     private static readonly Regex _reRepr = new("(a?n?)((?:\\.\\.)?)(\\d+)");
     private static readonly List<string> _directories = [];
@@ -172,7 +172,7 @@ public class EdifactDownloader
         s_rmRegexTuning = new ResourceManager(s_rmRegexTuningName, Assembly.GetExecutingAssembly());
         s_rmFixed = new ResourceManager(s_rmFixedName, Assembly.GetExecutingAssembly());
         s_rmUnsl = new ResourceManager(s_rmUnslName, Assembly.GetExecutingAssembly());
-        s_rmErrors = new ResourceManager(s_rmErrorsName, Assembly.GetExecutingAssembly());
+        s_rmLabels = new ResourceManager(s_rmLabelsName, Assembly.GetExecutingAssembly());
     }
     public EdifactDownloader(EdifactDownloaderOptions options, ILogger<EdifactDownloader>? logger = null)
     {
@@ -251,7 +251,7 @@ public class EdifactDownloader
             }
             return;
         }
-        _logger?.LogInformation(s_logMessage, string.Format(s_rmErrors.GetString(s_receivingDirectory)!, _directory));
+        _logger?.LogInformation(s_logMessage, string.Format(s_rmLabels.GetString(s_receivingDirectory)!, _directory));
 
         try
         {
@@ -423,7 +423,7 @@ public class EdifactDownloader
                 )
             )
             {
-                _logger?.LogWarning(s_logMessage, string.Format(s_rmErrors.GetString(s_messageNotFound)!, edmd, _directory));
+                _logger?.LogWarning(s_logMessage, string.Format(s_rmLabels.GetString(s_messageNotFound)!, edmd, _directory));
                 continue;
             }
 
@@ -579,7 +579,7 @@ public class EdifactDownloader
                 )
             )
             {
-                throw new Exception(s_rmErrors.GetString(s_invalidStructure));
+                throw new Exception(s_rmLabels.GetString(s_invalidStructure));
             }
             if (min_occurs != 1 || max_occurs != 1)
             {
@@ -600,7 +600,7 @@ public class EdifactDownloader
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, s_logMessage, string.Format(s_rmErrors.GetString(s_exceptionParsingMessage)!, message, _directory, Path.GetFileName(file), mp.LineNumber));
+            _logger?.LogError(ex, s_logMessage, string.Format(s_rmLabels.GetString(s_exceptionParsingMessage)!, message, _directory, Path.GetFileName(file), mp.LineNumber));
         }
     }
     private void ListMessages(List<string> list, string ext)
@@ -632,7 +632,7 @@ public class EdifactDownloader
             {
                 if (num_items == 0)
                 {
-                    _logger?.LogWarning(s_logMessage, string.Format(s_rmErrors.GetString(s_noItemsForElement)!, _directory, elName));
+                    _logger?.LogWarning(s_logMessage, string.Format(s_rmLabels.GetString(s_noItemsForElement)!, _directory, elName));
                 }
             }
             elName = name;
@@ -693,7 +693,7 @@ public class EdifactDownloader
         {
             if (num_items == 0)
             {
-                _logger?.LogWarning(s_logMessage, string.Format(s_rmErrors.GetString(s_noItemsForElement)!, _directory, elName));
+                _logger?.LogWarning(s_logMessage, string.Format(s_rmLabels.GetString(s_noItemsForElement)!, _directory, elName));
             }
         }
         SaveXmlDocument(s_segments);
@@ -773,7 +773,7 @@ public class EdifactDownloader
             {
                 if (num_items == 0)
                 {
-                    _logger?.LogWarning(s_logMessage, string.Format(s_rmErrors.GetString(s_noItemsForComplexType)!, _directory, elName));
+                    _logger?.LogWarning(s_logMessage, string.Format(s_rmLabels.GetString(s_noItemsForComplexType)!, _directory, elName));
                 }
             }
             elName = name;
@@ -816,7 +816,7 @@ public class EdifactDownloader
         {
             if (num_items == 0)
             {
-                _logger?.LogWarning(s_logMessage, string.Format(s_rmErrors.GetString(s_noItemsForComplexType)!, _directory, elName));
+                _logger?.LogWarning(s_logMessage, string.Format(s_rmLabels.GetString(s_noItemsForComplexType)!, _directory, elName));
             }
         }
         SaveXmlDocument(s_types);
@@ -1023,7 +1023,7 @@ public class EdifactDownloader
         ep.Run(data);
         if (_num_elements == 0)
         {
-            _logger?.LogWarning(s_logMessage, string.Format(s_rmErrors.GetString(s_noSimpleTypes)!, _directory));
+            _logger?.LogWarning(s_logMessage, string.Format(s_rmLabels.GetString(s_noSimpleTypes)!, _directory));
         }
         SaveXmlDocument(s_simpleTypes);
     }
@@ -1156,7 +1156,7 @@ public class EdifactDownloader
             {
                 _logger?.LogCritical(
                     s_logMessage,
-                    string.Format(s_rmErrors.GetString(s_fileNotFoundFormat)!, 'C', _directory)
+                    string.Format(s_rmLabels.GetString(s_fileNotFoundFormat)!, 'C', _directory)
                 );
                 return;
             }
@@ -1170,7 +1170,7 @@ public class EdifactDownloader
             {
                 _logger?.LogCritical(
                     s_logMessage,
-                    string.Format(s_rmErrors.GetString(s_fileNotFoundFormat)!, 'S', _directory)
+                    string.Format(s_rmLabels.GetString(s_fileNotFoundFormat)!, 'S', _directory)
                 );
                 return;
             }
@@ -1184,7 +1184,7 @@ public class EdifactDownloader
             {
                 _logger?.LogCritical(
                     s_logMessage,
-                    string.Format(s_rmErrors.GetString(s_fileNotFoundFormat)!, 'E', _directory)
+                    string.Format(s_rmLabels.GetString(s_fileNotFoundFormat)!, 'E', _directory)
                 );
                 return;
             }
@@ -1236,7 +1236,7 @@ public class EdifactDownloader
                     );
                     if (unl.Count > 0)
                     {
-                        _unsl_message = string.Format(s_rmErrors.GetString(s_unslMessageFormat)!, _directory, _directories[di]);
+                        _unsl_message = string.Format(s_rmLabels.GetString(s_unslMessageFormat)!, _directory, _directories[di]);
                         _unsl = s_unsl_;
                         break;
                     }
@@ -1264,7 +1264,7 @@ public class EdifactDownloader
                 && de.Value is byte[] bytes
             )
             {
-                _logger?.LogInformation(s_logMessage, string.Format(s_rmErrors.GetString(s_loadFixedFile)!, key));
+                _logger?.LogInformation(s_logMessage, string.Format(s_rmLabels.GetString(s_loadFixedFile)!, key));
                 string target = Path.Combine(_tmpDir, Path.GetFileName(key));
                 File.WriteAllBytes(target, bytes);
             }
@@ -1364,7 +1364,7 @@ public class EdifactDownloader
                     }
                     else
                     {
-                        _logger?.LogError(s_logMessage, string.Format(s_rmErrors.GetString(s_failedUnzip)!, file));
+                        _logger?.LogError(s_logMessage, string.Format(s_rmLabels.GetString(s_failedUnzip)!, file));
                         throw;
                     }
                 }
@@ -1417,7 +1417,7 @@ public class EdifactDownloader
         {
             _logger?.LogInformation(
                 s_logMessage,
-                string.Format(s_rmErrors.GetString(s_usingExternalUnzip)!, commandLine)
+                string.Format(s_rmLabels.GetString(s_usingExternalUnzip)!, commandLine)
             );
             Process unzip = new()
             {

@@ -118,51 +118,128 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="UNKNOWN_SEGMENT" xml:space="preserve">
-    <value>Неизвестный сегмент '{0}' встретился в строке {L0}, колонке {C0}.</value>
+    <value>Unknown segment '{0}' was found at line {L0}, col {C0}.</value>
   </data>
   <data name="UNEXPECTED_SEGMENT" xml:space="preserve">
-    <value>Неподходящий сегмент '{0}' встретился в строке {L0}, колонке {C0}.</value>
+    <value>Unexpected segment '{0}' was found at line {L0}, col {C0}.</value>
+  </data>
+  <data name="EXPECTED_ELEMENT_NOT_FOUND" xml:space="preserve">
+    <value>Mandatory element '{0}/{1}' was not found at line {L0}, col {C0}.</value>
+  </data>
+  <data name="EXPECTED_SUB_ELEMENT_NOT_FOUND" xml:space="preserve">
+    <value>Mandatory sub-element '{0}/{1}/{2}' was not found at line {L0}, col {C0}.</value>
+  </data>
+  <data name="EXTRA_SUB_ELEMENT_FOUND" xml:space="preserve">
+    <value>Extra sub-element of '{0}/{1}' was found at line {L0}, col {C0}.</value>
+  </data>
+  <data name="EXTRA_ELEMENT_FOUND" xml:space="preserve">
+    <value>Extra element of '{0}' was found at line {L0}, col {C0}.</value>
+  </data>
+  <data name="FG" xml:space="preserve">
+    <value>functional group: {0}</value>
+  </data>
+  <data name="MESS" xml:space="preserve">
+    <value>message: {0}</value>
+  </data>
+  <data name="FG_ID_MISMATCH" xml:space="preserve">
+    <value>FUNCTIONAL GROUP REFERENCE NUMBER '{0}' at line {L0}, col {C0} mismatches '{1}' at line {L1}, col {C1}.</value>
+  </data>
+  <data name="MESSAGE_ID_MISMATCH" xml:space="preserve">
+    <value>MESSAGE REFERENCE NUMBER '{0}' at line {L0}, col {C0} mismatches '{1}' at line {L1}, col {C1}.</value>
+  </data>
+  <data name="NUMBER_OF_SEGMENTS_MISMATCH" xml:space="preserve">
+    <value>NUMBER OF SEGMENTS IN THE MESSAGE '{0}' at line {L0}, col {C0} mismatches actual '{1}'.</value>
+  </data>
+  <data name="NUMBER_OF_MESSAGES_MISMATCH" xml:space="preserve">
+    <value>NUMBER OF MESSAGES '{0}' at line {L0}, col {C0} mismatches actual '{1}'.</value>
+  </data>
+  <data name="INTERCHANGE_ID_MISMATCH" xml:space="preserve">
+    <value>INTERCHANGE CONTROL REFERENCE '{0}' at line {L0}, col {C0} mismatches '{1}' at line {L1}, col {C1}.</value>
+  </data>
+  <data name="INCOMPLETE_SEGMENT" xml:space="preserve">
+    <value>The segment '{0}' is incomplete. List of possible elements expected: '{1}' at line {L0}, col {C0}.</value>
+  </data>
+  <data name="INCOMPLETE_ELEMENT" xml:space="preserve">
+    <value>The segment '{0}/{1}' is incomplete. List of possible elements expected: '{2}' at line {L0}, col {C0}.</value>
+  </data>
+  <data name="INVALID_ELEMENT_VALUE" xml:space="preserve">
+    <value>The element '{1}/{2}' has invalid value '{0}' according to its datatype at line {L0}, col {C0}.</value>
+  </data>
+  <data name="INVALID_SUB_ELEMENT_VALUE" xml:space="preserve">
+    <value>The sub-element '{1}/{2}/{3}' has invalid value '{0}' according to its datatype at line {L0}, col {C0}.</value>
   </data>
   <data name="FAILED_UNZIP" xml:space="preserve">
-    <value>Ошибка распаковки {0}. Попробуйте использовать внешний архиватор.</value>
+    <value>Failed unzip {0}, try use external unzip program.</value>
   </data>
   <data name="USING_EXTERNAL_UNZIP" xml:space="preserve">
-    <value>Используется внешний архиватор: {0}</value>
+    <value>Using external unzip: {0}</value>
   </data>
   <data name="FILE_FOR_DIRECTORY_NOT_FOUND" xml:space="preserve">
-    <value>Файл '{0}' для директории '{1}' не обнаружен.</value>
+    <value>'{0}' File for directory '{1}' not found.</value>
   </data>
   <data name="UNSL_MESSAGE" xml:space="preserve">
-    <value>'{0}': используется 'unsl' файл для директории '{1}'.</value>
+    <value>{0}: using 'unsl' File for directory '{1}'.</value>
   </data>
   <data name="RECEIVING_DIRECTORY" xml:space="preserve">
-    <value>Получаем директорию {0}.</value>
+    <value>Receiving directory: {0}</value>
   </data>
   <data name="DIRECTORY_NOT_FOUND" xml:space="preserve">
-    <value>Директория '{0}' не обнаружена.</value>
+    <value>Directory '{0}' not found.</value>
   </data>
   <data name="NO_ENUM_SIMPLE_TYPES" xml:space="preserve">
-    <value>'{0}': не обнаружены простые перечислимые типы.</value>
+    <value>{0}: no simple types with enumeration found.</value>
   </data>
   <data name="MESSAGE_NOT_FOUND" xml:space="preserve">
-    <value>Файл '{0}' для директории '{1}'не обнаружен.</value>
+    <value>File '{0}' for directory '{1}' not found.</value>
   </data>
   <data name="LOAD_FIXED_FILE" xml:space="preserve">
-    <value>Загружается исправленный файл: {0}.</value>
+    <value>Loading fixed file: {0}.</value>
   </data>
   <data name="INVALID_STRUCTURE" xml:space="preserve">
-    <value>Неверная структура.</value>
+    <value>Invalid structure.</value>
   </data>
   <data name="EXCEPTION_PARSING_MESSAGE" xml:space="preserve">
-    <value>Ошибка построения сообщения '{0}' для директории '{1}' в {2}:{3}</value>
+    <value>Error while building message '{0}' for directory '{1}' at {2}:{3}</value>
   </data>
   <data name="NO_ITEMS_FOR_ELEMENT" xml:space="preserve">
-    <value>'{0}': не обнаружено items элемента '{1}'</value>
+    <value>'{0}': no items for element '{1}' found.</value>
   </data>
   <data name="NO_ITEMS_FOR_COMPLEX_TYPE" xml:space="preserve">
-    <value>'{0}': не обнаружено items  сложного типа '{1}'</value>
+    <value>'{0}': no items for complex type '{1}' found.</value>
   </data>
   <data name="NO_SIMPLE_TYPES" xml:space="preserve">
-    <value>'{0}': не обнаружены простые типы. </value>
+    <value>'{0}': no simple types found. </value>
+  </data>
+  <data name="DESC_NOT_FOUND" xml:space="preserve">
+    <value>{0}: 'Desc:' not found.</value>
+  </data>
+  <data name="EDIFACT_DOWNLOADER_USAGE" xml:space="preserve">
+    <value>Usage: {0} ARGS 
+ARGS:
+  /m, --message  {{MESSAGE|#}}                             - message type (# for no message)
+  /d, --directory  DIRECTORY                               - message directory
+  /n, --ns NS                                              - EDIFACT namespace substitution
+  /t, --target-folder  PATH                                - target folder where schemas will be placed
+  --tmp-folder PATH                                        - temporary folder
+  /p, --proxy  http[s]://[USER[:PASSWORD]@]ADDRESS:PORT    - use proxy for download
+  --external-unzip FORMAT                                  - command line for external unzip program - 
+                                                             C#-style format string, where {{0}} means output directory
+                                                             and {{1}} means input file path</value>
+  </data>
+  <data name="KEY_ALREADY_USED" xml:space="preserve">
+    <value>The key '{0}' is already used.</value>
+  </data>
+  <data name="MISSED_KEY_VALUE" xml:space="preserve">
+    <value>The value for key '{0}' is missed.</value>
+  </data>
+  <data name="UNKNOWN_KEY" xml:space="preserve">
+    <value>The key '{0}' is unknown.</value>
+  </data>
+  <data name="SCHEMA2TREE_USAGE" xml:space="preserve">
+    <value>Usage: {0} ARGS
+ARGS:
+/s, --schema PATH                  - path to XML Schema file. 
+/o PATH                            - path to output file.
+/p, --padding SIZE                 - size of padding.</value>
   </data>
 </root>

@@ -11,25 +11,18 @@ namespace Net.Leksi.Edifact;
 public class EdfifactDownloaderCLI : BackgroundService
 {
     private const string s_logMessage = "{message}";
-    private const string s_rmResource1 = "Net.Leksi.Edifact.Properties.errors";
+    private const string s_edifactDownloaderUsage = "EDIFACT_DOWNLOADER_USAGE";
     private const string s_directoryNotFound = "DIRECTORY_NOT_FOUND";
-
     private static readonly Regex s_reProxy = new("^(https?\\://)(?:([^\\s:]+)(?::(.+))?@)?(.*)$");
 
     private readonly IServiceProvider _services;
-    private readonly string _directoryNotFoundFormat;
     private readonly EdifactDownloader _downloader;
 
     private readonly ILogger<EdfifactDownloaderCLI>? _logger;
-
     public EdfifactDownloaderCLI(IServiceProvider services)
     {
         _services = services;
         _logger = services.GetService<ILogger<EdfifactDownloaderCLI>>();
-        _directoryNotFoundFormat = new ResourceManager(
-            s_rmResource1,
-            Assembly.GetExecutingAssembly()
-        ).GetString(s_directoryNotFound)!;
         _downloader = new(
             _services.GetRequiredService<EdifactDownloaderOptions>(),
             _services.GetService<ILogger<EdifactDownloader>>()
@@ -72,7 +65,7 @@ public class EdfifactDownloaderCLI : BackgroundService
 
     private void Downloader_DirectoryNotFound(object sender, DirectoryNotFoundEventArgs e)
     {
-        _logger?.LogError(s_logMessage, string.Format(_directoryNotFoundFormat, e.Directory));
+        _logger?.LogError(s_logMessage, string.Format(CommonCLI.LabelsResourceManager.GetString(s_directoryNotFound)!, e.Directory));
     }
 
 
@@ -80,24 +73,25 @@ public class EdfifactDownloaderCLI : BackgroundService
     {
         EdifactDownloaderOptions options = new();
 
-        Waiting waiting = Waiting.None;
+        string? prevArg = null;
 
         foreach (string arg in args)
         {
+            Waiting waiting = GetWaiting(prevArg);
             if (waiting is Waiting.Message)
             {
                 options.Message = arg;
-                waiting = Waiting.None;
+                prevArg = null;
             }
             else if (waiting is Waiting.Directory)
             {
                 options.Directory = arg;
-                waiting = Waiting.None;
+                prevArg = null;
             }
             else if (waiting is Waiting.Namespace)
             {
                 options.Namespace = arg;
-                waiting = Waiting.None;
+                prevArg = null;
             }
             else if (waiting is Waiting.Proxy)
             {
@@ -122,116 +116,147 @@ public class EdfifactDownloaderCLI : BackgroundService
                     Usage();
                     return null;
                 }
-                waiting = Waiting.None;
+                prevArg = null;
             }
             else if (waiting is Waiting.TargetFolder)
             {
                 options.TargetFolder = arg;
-                waiting = Waiting.None;
+                prevArg = null;
             }
             else if (waiting is Waiting.TmpFolder)
             {
                 options.TmpFolder = arg;
-                waiting = Waiting.None;
+                prevArg = null;
             }
             else if (waiting is Waiting.ExternalUnzipCommandLineFormat)
             {
                 options.ExternalUnzipCommandLineFormat = arg;
-                waiting = Waiting.None;
+                prevArg = null;
             }
-            else if (arg.Equals("/m", StringComparison.OrdinalIgnoreCase) || arg.Equals("--message", StringComparison.OrdinalIgnoreCase))
+            else if (waiting is not Waiting.None)
             {
-                if (options.Message is { })
+                CommonCLI.MissedArgumentError(prevArg!);
+                Usage();
+                return null;
+            }
+            else
+            {
+                waiting = GetWaiting(arg);
+                if (waiting is Waiting.Message)
                 {
-                    AlreadyUsed(arg);
+                    if (options.Message is { })
+                    {
+                        CommonCLI.AlreadyUsed(arg);
+                        Usage();
+                        return null;
+                    }
+                    prevArg = arg;
+                }
+                else if (waiting is Waiting.Directory)
+                {
+                    if (options.Directory is { })
+                    {
+                        CommonCLI.AlreadyUsed(arg);
+                        Usage();
+                        return null;
+                    }
+                    prevArg = arg;
+                }
+                else if (waiting is Waiting.Namespace)
+                {
+                    if (options.Namespace is { })
+                    {
+                        CommonCLI.AlreadyUsed(arg);
+                        Usage();
+                        return null;
+                    }
+                    prevArg = arg;
+                }
+                else if (waiting is Waiting.TargetFolder)
+                {
+                    if (options.Namespace is { })
+                    {
+                        CommonCLI.AlreadyUsed(arg);
+                        Usage();
+                        return null;
+                    }
+                    prevArg = arg;
+                }
+                else if (waiting is Waiting.TmpFolder)
+                {
+                    if (options.Namespace is { })
+                    {
+                        CommonCLI.AlreadyUsed(arg);
+                        Usage();
+                        return null;
+                    }
+                    prevArg = arg;
+                }
+                else if (waiting is Waiting.ExternalUnzipCommandLineFormat)
+                {
+                    if (options.ExternalUnzipCommandLineFormat is { })
+                    {
+                        CommonCLI.AlreadyUsed(arg);
+                        Usage();
+                        return null;
+                    }
+                    prevArg = arg;
+                }
+                else if (waiting is Waiting.Proxy)
+                {
+                    if (options.Proxy is { })
+                    {
+                        CommonCLI.AlreadyUsed(arg);
+                        Usage();
+                        return null;
+                    }
+                    prevArg = arg;
+                }
+                else if(waiting is Waiting.Help)
+                {
                     Usage();
                     return null;
                 }
-                waiting = Waiting.Message;
-            }
-            else if (arg.Equals("/d", StringComparison.OrdinalIgnoreCase) || arg.Equals("--directory", StringComparison.OrdinalIgnoreCase))
-            {
-                if (options.Directory is { })
+                else
                 {
-                    AlreadyUsed(arg);
+                    CommonCLI.UnknownArgumentError(arg);
                     Usage();
                     return null;
                 }
-                waiting = Waiting.Directory;
             }
-            else if (arg.Equals("/n", StringComparison.OrdinalIgnoreCase) || arg.Equals("--ns", StringComparison.OrdinalIgnoreCase))
-            {
-                if (options.Namespace is { })
-                {
-                    AlreadyUsed(arg);
-                    Usage();
-                    return null;
-                }
-                waiting = Waiting.Namespace;
-            }
-            else if (arg.Equals("/t", StringComparison.OrdinalIgnoreCase) || arg.Equals("--target-folder", StringComparison.OrdinalIgnoreCase))
-            {
-                if (options.Namespace is { })
-                {
-                    AlreadyUsed(arg);
-                    Usage();
-                    return null;
-                }
-                waiting = Waiting.TargetFolder;
-            }
-            else if (arg.Equals("--tmp-folder", StringComparison.OrdinalIgnoreCase))
-            {
-                if (options.Namespace is { })
-                {
-                    AlreadyUsed(arg);
-                    Usage();
-                    return null;
-                }
-                waiting = Waiting.TmpFolder;
-            }
-            else if (arg.Equals("--external-unzip", StringComparison.OrdinalIgnoreCase))
-            {
-                if (options.ExternalUnzipCommandLineFormat is { })
-                {
-                    AlreadyUsed(arg);
-                    Usage();
-                    return null;
-                }
-                waiting = Waiting.ExternalUnzipCommandLineFormat;
-            }
-            else if (arg.Equals("/p", StringComparison.OrdinalIgnoreCase) || arg.Equals("--proxy", StringComparison.OrdinalIgnoreCase))
-            {
-                if (options.Proxy is { })
-                {
-                    AlreadyUsed(arg);
-                    Usage();
-                    return null;
-                }
-                waiting = Waiting.Proxy;
-            }
+        }
+        if (GetWaiting(prevArg) is not Waiting.None)
+        {
+            CommonCLI.MissedArgumentError(prevArg!);
+            Usage();
+            return null;
         }
         return options;
     }
-
-    private static void AlreadyUsed(string arg)
+    private static Waiting GetWaiting(string? arg)
     {
-        Console.WriteLine($"The key {arg} is already used!");
+        return arg switch
+        {
+            "/t" or "--target-folder" => Waiting.TargetFolder,
+            "/m" or "--message" => Waiting.Message,
+            "/d" or "--directory" => Waiting.Directory,
+            "/n" or "--ns" => Waiting.Namespace,
+            "--tmp-folder" => Waiting.TmpFolder,
+            "--external-unzip" => Waiting.ExternalUnzipCommandLineFormat,
+            "/p" or "--proxy" => Waiting.Proxy,
+            "/?" or "--help" => Waiting.Help,
+            null => Waiting.None,
+            _ => Waiting.Unknown
+        };
     }
-
     private static void Usage()
     {
-        Console.WriteLine(string.Format(@"usage: {0} ARGS ...
-ARGS:
-  /m, --message  {{MESSAGE|#}}                             - message type (# for no message)
-  /d, --directory  DIRECTORY                               - message directory
-  /n, --ns NS                                              - EDIFACT namespace substitution
-  /t, --target-folder  PATH                                - target folder where schemas will be placed
-  --tmp-folder PATH                                        - temporary folder
-  /p, --proxy  http[s]://[USER[:PASSWORD]@]ADDRESS:PORT    - use proxy for download
-  --external-unzip FORMAT                                  - command line for external unzip program - 
-                                                             C#-style format string, where {{0}} means output directory
-                                                             and {{1}} means input file path 
-", Path.GetFileName(Assembly.GetExecutingAssembly().Location)));
+        Console.WriteLine(
+            string.Format(
+                CommonCLI.LabelsResourceManager.GetString(s_edifactDownloaderUsage)!, 
+                Path.GetFileName(Environment.ProcessPath)
+            )
+        );
     }
 
 

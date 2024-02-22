@@ -1,12 +1,15 @@
-﻿using System.Text;
+﻿using System.Resources;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Schema;
+using System.Xml.XPath;
 
 namespace Net.Leksi.Edifact;
 
 public class Schema2Tree
 {
+    internal const int s_deafultPadLen = 80;
     private const string s_message = "MESSAGE";
     private const string s_notEdifactSchema = "Not EDIFACT schema!";
     private const string s_htmlBegin = @"<html>
@@ -36,21 +39,44 @@ public class Schema2Tree
     private const string s_repMandFormat = "x{0} (M)";
     private const string s_messageTrailer = "&#x2514;&#x2500;<b>UNT</b> Mesage trailer";
     private const string s_space = " ";
+    private const string s_notSchema = "Source file does not contains XML Schema.";
     private static  readonly Regex s_re = new("^(?:[^&]*(&[^;]+;|<[^>]*>))*[^&]*$");
     private static readonly Regex s_reCollapseSpaces = new("( )+");
 
     private readonly StringBuilder _sb = new();
-    private int _padLen = 80;
+    private int _padLen;
     private TextWriter? _output;
 
-    public async Task TranslateAsync(string file, TextWriter output, int padLen, string ns)
+    public async Task TranslateAsync(XmlReader schemaDocument, TextWriter output, int padLen = s_deafultPadLen)
     {
         _padLen = padLen;
         _output = output;
-        XmlQualifiedName root_qname = new(s_message, ns);
         XmlNameTable xmlNameTable = new NameTable();
+        XmlDocument xml = new(xmlNameTable);
+        xml.Load(schemaDocument);
+
+        if(xml.DocumentElement!.NamespaceURI != Properties.Resources.schema_ns)
+        {
+            throw new Exception(s_notSchema);
+        }
+        Console.WriteLine(schemaDocument.BaseURI);
+        XmlNamespaceManager man = new(xmlNameTable);
+        man.AddNamespace(xml.DocumentElement.Prefix, xml.DocumentElement!.NamespaceURI);
+        XPathNavigator nav = xml.CreateNavigator()!;
+        XPathNavigator? schema = nav.SelectSingleNode(string.Format("/{0}:schema", xml.DocumentElement.Prefix), man);
+        if(schema is null)
+        {
+            throw new Exception(s_notSchema);
+        }
+        string ns = schema.SelectSingleNode("@targetNamespace")?.Value ?? string.Empty;
+
+        XmlQualifiedName root_qname = new(s_message, ns);
         XmlSchemaSet xmlSchemaSet = new(xmlNameTable);
-        xmlSchemaSet.Add(ns, file);
+
+        StringReader sr = new(xml.OuterXml);
+        XmlSchema xmlSchema = new();
+        xmlSchema.SourceUri = schemaDocument.BaseURI;
+        xmlSchemaSet.Add(xmlSchema);
         xmlSchemaSet.Compile();
         if (xmlSchemaSet.GlobalElements[root_qname] is not XmlSchemaElement root)
         {
