@@ -1,9 +1,3 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Net.Leksi.Edifact;
-using System.Xml;
+﻿using Net.Leksi.Edifact;
 
-await Schema2TreeCLI.RunAsync(args, builder =>
-{
-    builder.Services.AddSingleton<XmlResolver, Resolver>();
-
-});
+await Schema2TreeCLI.RunAsync(args);

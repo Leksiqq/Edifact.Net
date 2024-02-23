@@ -8,7 +8,7 @@ public class EdifactDownloaderOptions
     public string? Directory { get; set; }
     public string? Namespace { get; set; }
     public WebProxy? Proxy { get; set; }
-    public string? TargetFolder { get; set; }
+    public Uri? TargetUri { get; set; }
     public string? TmpFolder { get; set; }
     public string? ExternalUnzipCommandLineFormat {  get; set; }
 }

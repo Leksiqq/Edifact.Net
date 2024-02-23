@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System.Collections;
 using System.Diagnostics;
 using System.Globalization;
@@ -13,7 +14,7 @@ using System.Xml.XPath;
 
 namespace Net.Leksi.Edifact;
 
-public class EdifactDownloader
+public class EdifactDownloader: IDownloader
 {
     public event DirectoryNotFoundEventHandler? DirectoryNotFound;
 
@@ -51,6 +52,8 @@ public class EdifactDownloader
     private const string s_unsl = "unsl";
     private const string s_trcl = "trcl-";
     private const string s_edcl = "edcl-";
+    private const string s_idcd = "idcd";
+    private const string s_idsd = "idsd";
     private const string s_filePatternFormat = "{0}*.{1}";
     private const string s_unslFileNameFormat = "{0}{1}.{2}";
     private const string s_unslMessageFormat = "UNSL_MESSAGE";
@@ -131,6 +134,7 @@ public class EdifactDownloader
     private const string s_0052 = "0052";
     private const string s_0054 = "0054";
     private const string s_0065 = "0065";
+    private const string s_downloadMessage = "DOWNLOAD_MESSAGE";
     #endregion const
 
     private static readonly ResourceManager s_rmRegexTuning;
@@ -150,6 +154,7 @@ public class EdifactDownloader
     private readonly ILogger<EdifactDownloader>? _logger;
     private readonly string _tmpDir;
     private readonly XmlNamespaceManager _man;
+    private readonly XmlResolver ?_xmlResolver;
 
     private string? _directory;
     private string _dir = null!;
@@ -163,6 +168,8 @@ public class EdifactDownloader
     private string _edcd = null!;
     private string _edsd = null!;
     private string _eded = null!;
+    private string _idcd = null!;
+    private string _idsd = null!;
     private string _mPostfix = string.Empty;
     private int _num_elements = 0;
     private int _num_sys_elements = 0;
@@ -174,11 +181,12 @@ public class EdifactDownloader
         s_rmUnsl = new ResourceManager(s_rmUnslName, Assembly.GetExecutingAssembly());
         s_rmLabels = new ResourceManager(s_rmLabelsName, Assembly.GetExecutingAssembly());
     }
-    public EdifactDownloader(EdifactDownloaderOptions options, ILogger<EdifactDownloader>? logger = null)
+    public EdifactDownloader(IServiceProvider services)
     {
-        _options = options;
+        _options = services.GetRequiredService<EdifactDownloaderOptions>();
 
-        _logger = logger;
+        _logger = services.GetService<ILogger<EdifactDownloader>>();
+        _xmlResolver = services.GetService<XmlResolver>();
 
         _reTypeAlreadyDeclared = new Regex(s_rmRegexTuning.GetString(s_typeAlreadyDeclared)!);
         for (int i = 1994; i <= DateTime.Now.Year; i++)
@@ -192,13 +200,13 @@ public class EdifactDownloader
                 _directories.Add(string.Format(s_directoryFormat, i % 100, 'C').ToUpper());
             }
         }
-        if (_options.TargetFolder is null)
+        if (_options.TargetUri is null)
         {
             _targetDirectory = s_defaultTargetDirectory;
         }
         else
         {
-            _targetDirectory = _options.TargetFolder;
+            _targetDirectory = _options.TargetUri.AbsolutePath;
         }
         if (_options.TmpFolder is { } && !Directory.Exists(Path.GetFullPath(_options.TmpFolder)))
         {
@@ -296,8 +304,10 @@ public class EdifactDownloader
     private void BuildSchemas()
     {
         File.WriteAllText(Path.Combine(_targetDirectory, s_edifact_xsd), ReplaceNs(Properties.Resources.edifact));
-        XmlSchemaSet? xmlSchemaSet = new(_xsd.NameTable);
-
+        XmlSchemaSet? xmlSchemaSet = new(_xsd.NameTable)
+        {
+            XmlResolver = _xmlResolver
+        };
         xmlSchemaSet.ValidationEventHandler += ValidationEventHandler;
 
         DeleteTmpFile(s_simpleTypes);
@@ -320,7 +330,7 @@ public class EdifactDownloader
         MakeSimpleTypes(
             File.ReadAllLines(
                 Path.Combine(
-                    _preparedDir, 
+                    _preparedDir,
                     string.Format(s_fileNameFormat, _eded, _ext)
                 )
             )
@@ -365,8 +375,16 @@ public class EdifactDownloader
         MakeTypes(
             File.ReadAllLines(
                 Path.Combine(
-                    _preparedDir, 
+                    _preparedDir,
                     string.Format(s_fileNameFormat, _edcd, _ext)
+                )
+            )
+        );
+        MakeTypes(
+            File.ReadAllLines(
+                Path.Combine(
+                    _preparedDir,
+                    string.Format(s_fileNameFormat, _idcd, _ext)
                 )
             )
         );
@@ -380,6 +398,14 @@ public class EdifactDownloader
                 Path.Combine(
                     _preparedDir,
                     string.Format(s_fileNameFormat, _edsd, _ext)
+                )
+            )
+        );
+        MakeSegments(
+            File.ReadAllLines(
+                Path.Combine(
+                    _preparedDir,
+                    string.Format(s_fileNameFormat, _idsd, _ext)
                 )
             )
         );
@@ -408,6 +434,7 @@ public class EdifactDownloader
 
         foreach (string message in messages)
         {
+            _logger?.LogInformation(s_logMessage, string.Format(s_rmLabels.GetString(s_downloadMessage)!, message, _directory));
             if ("d96b".Equals(_dir))
             {
                 new Compiler96B().Run(_tmpDir, _directory!, message);
@@ -447,11 +474,14 @@ public class EdifactDownloader
                 )
             )
             {
-
-                IEnumerator ie = xmlSchemaSet.Schemas().GetEnumerator();
-                if (ie.MoveNext())
+                List<XmlSchema> schemas = [];
+                foreach(XmlSchema schema in xmlSchemaSet.Schemas().Cast<XmlSchema>())
                 {
-                    xmlSchemaSet.Remove((XmlSchema)ie.Current);
+                    schemas.Add(schema);
+                }
+                foreach(XmlSchema schema in schemas)
+                {
+                    xmlSchemaSet.Remove(schema);
                 }
 
                 xmlSchemaSet.Add(
@@ -473,6 +503,7 @@ public class EdifactDownloader
                         string.Format(s_xsdFileNameFormat, message)
                     )
                 );
+                xmlSchemaSet.Compile();
             }
         }
         xmlSchemaSet = null;
@@ -709,10 +740,13 @@ public class EdifactDownloader
         {
             prev_max_occurs += max_occurs;
             prev_min_occurs += min_occurs;
-            el = (XmlElement)seq.CreateNavigator()!
-                .SelectSingleNode(s_lastElement, _man)!
-                .UnderlyingObject!
-            ;
+            XPathNavigator n1 = seq.CreateNavigator()!;
+            XPathNavigator n2 = n1.SelectSingleNode(s_lastElement, _man)!;
+            el = (XmlElement)n2.UnderlyingObject!;
+            //el = (XmlElement)seq.CreateNavigator()!
+            //    .SelectSingleNode(s_lastElement, _man)!
+            //    .UnderlyingObject!
+            //;
         }
         else
         {
@@ -1056,7 +1090,15 @@ public class EdifactDownloader
         }
         else
         {
-            Console.WriteLine(args.Message);
+            switch (args.Severity)
+            {
+                case XmlSeverityType.Warning:
+                    _logger?.LogWarning(s_logMessage, args.Message);
+                    break;
+                case XmlSeverityType.Error:
+                    _logger?.LogError(s_logMessage, args.Message);
+                    break;
+            }
         }
     }
     private void RemoveDuplicatedType(string selector, string type_name)
@@ -1104,18 +1146,25 @@ public class EdifactDownloader
     }
     private void CopyNeededFilesToPreparedDirectory()
     {
-        string targetFile = Path.Combine(_preparedDir, string.Format(s_fileNameFormat, _edsd, _ext));
 
         if (!Directory.Exists(_preparedDir))
         {
             Directory.CreateDirectory(_preparedDir);
         }
 
+        string targetFile = Path.Combine(_preparedDir, string.Format(s_fileNameFormat, _edsd, _ext));
         if (File.Exists(targetFile))
         {
             File.Delete(targetFile);
         }
         CopyFile(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _edsd, _ext)), targetFile);
+
+        targetFile = Path.Combine(_preparedDir, string.Format(s_fileNameFormat, _idsd, _ext));
+        if (File.Exists(targetFile))
+        {
+            File.Delete(targetFile);
+        }
+        CopyFile(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _idsd, _ext)), targetFile);
 
         targetFile = Path.Combine(_preparedDir, string.Format(s_fileNameFormat, _edcd, _ext));
         if (File.Exists(targetFile))
@@ -1123,6 +1172,13 @@ public class EdifactDownloader
             File.Delete(targetFile);
         }
         CopyFile(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _edcd, _ext)), targetFile);
+
+        targetFile = Path.Combine(_preparedDir, string.Format(s_fileNameFormat, _idcd, _ext));
+        if (File.Exists(targetFile))
+        {
+            File.Delete(targetFile);
+        }
+        CopyFile(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _idcd, _ext)), targetFile);
 
         targetFile = Path.Combine(_preparedDir, string.Format(s_fileNameFormat, _eded, _ext));
         if (File.Exists(targetFile))
@@ -1162,6 +1218,8 @@ public class EdifactDownloader
             }
         }
 
+        _idcd = s_idcd;
+
         _edsd = s_edsd;
         if (!File.Exists(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _edsd, _ext))))
         {
@@ -1189,6 +1247,9 @@ public class EdifactDownloader
                 return;
             }
         }
+
+        _idcd = s_idcd;
+        _idsd = s_idsd;
 
         _uncls = Directory.GetFiles(_tmpDir, string.Format(s_filePatternFormat, _uncl, _ext));
         List<string> unl = new(Directory.GetFiles(_tmpDir, string.Format(s_filePatternFormat, _unsl, _ext)));

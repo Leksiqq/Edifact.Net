@@ -55,6 +55,7 @@ internal class SCParser : PartsParser
 
     void on_line(string line)
     {
+        Console.WriteLine(line);
         Match m;
         while (true)
         {

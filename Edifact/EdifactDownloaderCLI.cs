@@ -2,13 +2,12 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System.Net;
-using System.Reflection;
-using System.Resources;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace Net.Leksi.Edifact;
 
-public class EdfifactDownloaderCLI : BackgroundService
+public class EdifactDownloaderCLI : BackgroundService
 {
     private const string s_logMessage = "{message}";
     private const string s_edifactDownloaderUsage = "EDIFACT_DOWNLOADER_USAGE";
@@ -16,17 +15,14 @@ public class EdfifactDownloaderCLI : BackgroundService
     private static readonly Regex s_reProxy = new("^(https?\\://)(?:([^\\s:]+)(?::(.+))?@)?(.*)$");
 
     private readonly IServiceProvider _services;
-    private readonly EdifactDownloader _downloader;
+    private readonly IDownloader _downloader;
 
-    private readonly ILogger<EdfifactDownloaderCLI>? _logger;
-    public EdfifactDownloaderCLI(IServiceProvider services)
+    private readonly ILogger<EdifactDownloaderCLI>? _logger;
+    public EdifactDownloaderCLI(IServiceProvider services)
     {
         _services = services;
-        _logger = services.GetService<ILogger<EdfifactDownloaderCLI>>();
-        _downloader = new(
-            _services.GetRequiredService<EdifactDownloaderOptions>(),
-            _services.GetService<ILogger<EdifactDownloader>>()
-        );
+        _logger = services.GetService<ILogger<EdifactDownloaderCLI>>();
+        _downloader = _services.GetRequiredService<IDownloader>();
         _downloader.DirectoryNotFound += Downloader_DirectoryNotFound;
     }
 
@@ -41,8 +37,10 @@ public class EdfifactDownloaderCLI : BackgroundService
 
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
+        builder.Services.AddSingleton<IDownloader, EdifactDownloader1>();
+        builder.Services.AddSingleton<XmlResolver, Resolver>();
         builder.Services.AddSingleton(options);
-        builder.Services.AddHostedService<EdfifactDownloaderCLI>();
+        builder.Services.AddHostedService<EdifactDownloaderCLI>();
 
         IHost host = builder.Build();
         await host.RunAsync();
@@ -120,7 +118,7 @@ public class EdfifactDownloaderCLI : BackgroundService
             }
             else if (waiting is Waiting.TargetFolder)
             {
-                options.TargetFolder = arg;
+                options.TargetUri = new Uri(arg);
                 prevArg = null;
             }
             else if (waiting is Waiting.TmpFolder)

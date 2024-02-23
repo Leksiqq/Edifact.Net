@@ -121,6 +121,6 @@
     <value>^The '.*:(E\d{4})' element is invalid - The value '(.*)' is invalid according to its datatype '.*:E\d{4}'.*$</value>
   </data>
   <data name="TYPE_ALREADY_DECLARED" xml:space="preserve">
-    <value>^The complexType '.*:([\w\d]+)' has already been declared\.$</value>
+    <value>^The\s+complexType\s+'.*?\:([^']+)'\s+has\s+already\s+been\s+declared\.$</value>
   </data>
 </root>

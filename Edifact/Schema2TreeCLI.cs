@@ -8,7 +8,7 @@ public class Schema2TreeCLI(IServiceProvider services) : BackgroundService
 {
     private readonly Schema2Tree _schema2Tree = new();
     private readonly Schema2TreeOptions _optoins = services.GetRequiredService<Schema2TreeOptions>();
-    public static async Task RunAsync(string[] args, Action<IHostApplicationBuilder> configure)
+    public static async Task RunAsync(string[] args)
     {
         Schema2TreeOptions? options = Create(args);
 
@@ -18,8 +18,8 @@ public class Schema2TreeCLI(IServiceProvider services) : BackgroundService
         }
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
-        configure?.Invoke(builder);
 
+        builder.Services.AddSingleton<XmlResolver, Resolver>();
         builder.Services.AddSingleton(options);
         builder.Services.AddHostedService<Schema2TreeCLI>();
 

@@ -187,4 +187,7 @@
   <data name="UNKNOWN_KEY" xml:space="preserve">
     <value>Неизвестный ключ '{0}'.</value>
   </data>
+  <data name="DOWNLOAD_MESSAGE" xml:space="preserve">
+    <value>Получаем сообщение '{0}:{1}'.</value>
+  </data>
 </root>

@@ -242,4 +242,7 @@ ARGS:
 /o PATH                            - path to output file.
 /p, --padding SIZE                 - size of padding.</value>
   </data>
+  <data name="DOWNLOAD_MESSAGE" xml:space="preserve">
+    <value>Downloading message '{0}:{1}'.</value>
+  </data>
 </root>
