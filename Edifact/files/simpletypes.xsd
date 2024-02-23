@@ -8,7 +8,7 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="qualified" attributeFormDefault="unqualified"
 >
-  <xs:include schemaLocation="..\..\edifact.xsd" />
+  <xs:include schemaLocation="edifact.xsd" />
   <xs:complexType name="E0001">
     <xs:simpleContent>
       <xs:restriction base="E">

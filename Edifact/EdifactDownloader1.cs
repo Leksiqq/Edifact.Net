@@ -1,15 +1,13 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Reflection;
-using System.Reflection.PortableExecutable;
 using System.Resources;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
-using System.Xml.Linq;
+using System.Xml.Schema;
 using System.Xml.XPath;
 
 namespace Net.Leksi.Edifact;
@@ -20,7 +18,8 @@ public partial class EdifactDownloader1 : IDownloader
 
     private static readonly List<string> s_directories = [];
     private static readonly Regex s_reExternalUnzip = new("^\\s*(?<cmd>(?:\\\"[^\"]+\\\")|(?:[^\\s]+))(?<args>.+)$");
-    private static readonly Regex _reRepr = new("(a?n?)((?:\\.\\.)?)(\\d+)");
+    private static readonly Regex s_reRepr = new("(a?n?)((?:\\.\\.)?)(\\d+)");
+    private static readonly Regex s_reXmlNs = new($"\\s(?<attr>targetNamespace|xmlns)\\s*=\\s*\"{Properties.Resources.edifact_ns}\"");
     private static readonly ResourceManager s_rmLabels;
 
     private readonly ILogger<EdifactDownloader>? _logger;
@@ -33,6 +32,9 @@ public partial class EdifactDownloader1 : IDownloader
     private string? _eded;
     private string? _ext;
 
+    internal string Ns => !string.IsNullOrEmpty(_options.Namespace) 
+        ? _options.Namespace 
+        : Properties.Resources.edifact_ns;
     static EdifactDownloader1()
     {
         for (int i = 1994; i <= DateTime.Now.Year; i++)
@@ -134,9 +136,15 @@ public partial class EdifactDownloader1 : IDownloader
                 )
             )
         );
+        XmlSchemaSet schemaSet = new() {
+            XmlResolver = _xmlResolver
+        };
+        schemaSet.Add(Ns, Path.Combine(_tmpDir, s_simpleTypesXsd));
+
     }
     private async Task MakeSimpleTypesAsync(TextReader reader)
     {
+        SaveXmlDocument(InitXmlDocument(s_edifact), Path.Combine(_tmpDir, s_edifactXsd));
         XmlDocument doc = InitXmlDocument(s_simpleTypes);
         SimpleTypesParser parser = new();
         await foreach (SimpleType st in parser.ParseAsync(reader))
@@ -144,9 +152,6 @@ public partial class EdifactDownloader1 : IDownloader
             XmlElement ct = doc.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns);
             ct.SetAttribute(s_name, null, string.Format(s_renameElementFormat, st.Code));
             XmlElement simpleContent = doc.CreateElement(s_xsPrefix, s_simpleContent, Properties.Resources.schema_ns);
-            XmlElement restriction = doc.CreateElement(s_xsPrefix, s_restriction, Properties.Resources.schema_ns);
-            simpleContent.AppendChild(restriction);
-            ct.AppendChild(simpleContent);
 
             if(
                 !string.IsNullOrEmpty(st.Name)
@@ -160,7 +165,7 @@ public partial class EdifactDownloader1 : IDownloader
                 {
                     XmlElement documentation = doc.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
                     documentation.SetAttribute(s_name, _options.Namespace, s_name);
-                    documentation.AppendChild(doc.CreateTextNode(st.Description));
+                    documentation.AppendChild(doc.CreateTextNode(st.Name));
                     ann.AppendChild(documentation);
                 }
                 if (!string.IsNullOrEmpty(st.Description))
@@ -174,24 +179,28 @@ public partial class EdifactDownloader1 : IDownloader
                 {
                     XmlElement documentation = doc.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
                     documentation.SetAttribute(s_name, _options.Namespace, s_note);
-                    documentation.AppendChild(doc.CreateTextNode(st.Description));
+                    documentation.AppendChild(doc.CreateTextNode(st.Note));
                     ann.AppendChild(documentation);
                 }
                 if (!string.IsNullOrEmpty(st.Change))
                 {
                     XmlElement documentation = doc.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
                     documentation.SetAttribute(s_name, _options.Namespace, s_change);
-                    documentation.AppendChild(doc.CreateTextNode(st.Description));
+                    documentation.AppendChild(doc.CreateTextNode(st.Change));
                     ann.AppendChild(documentation);
                 }
+                ct.AppendChild(ann);
             }
             if(!string.IsNullOrEmpty(st.Representation))
             {
+                XmlElement restriction = doc.CreateElement(s_xsPrefix, s_restriction, Properties.Resources.schema_ns);
                 ApplyRepresentation(restriction, st.Representation);
+                simpleContent.AppendChild(restriction);
             }
+            ct.AppendChild(simpleContent);
             doc.DocumentElement!.AppendChild(ct);
         }
-        SaveXmlDocument(doc, Path.Combine(_tmpDir, s_simpleTypesFileName));
+        SaveXmlDocument(doc, Path.Combine(_tmpDir, s_simpleTypesXsd));
         
     }
     private void SaveXmlDocument(XmlDocument doc, string path)
@@ -211,7 +220,7 @@ public partial class EdifactDownloader1 : IDownloader
         int min_occurs = 0;
         int max_occurs = 1;
         bool number = false;
-        Match m = _reRepr.Match(repr);
+        Match m = s_reRepr.Match(repr);
         if (m.Success)
         {
             if (s_n.Equals(m.Groups[1].Captures[0].Value))
@@ -281,7 +290,7 @@ public partial class EdifactDownloader1 : IDownloader
     {
         if (_options.Namespace is { })
         {
-            return str.Replace(Properties.Resources.edifact_ns, _options.Namespace);
+            return s_reXmlNs.Replace(str, m => string.Format("{0}=\"{1}\"", m.Groups["attr"].Value, _options.Namespace));
         }
         else
         {
@@ -291,7 +300,7 @@ public partial class EdifactDownloader1 : IDownloader
     private XmlDocument InitXmlDocument(string fname)
     {
         XmlDocument result = new();
-        result.LoadXml(ReplaceNs(Properties.Resources.ResourceManager.GetString(fname, Properties.Resources.Culture)!));
+        result.LoadXml(ReplaceNs(Properties.Resources.ResourceManager.GetString(fname)!));
         XPathNavigator nav = result.CreateNavigator()!;
         XPathNodeIterator ni1 = nav.Select(s_commentsXPath);
         if (ni1.MoveNext())

@@ -15,6 +15,8 @@ public partial class EdifactDownloader1: IDownloader
     private const string s_directoryFormat = "D{0:00}{1}";
     private const string s_directoryNotFound = "DIRECTORY_NOT_FOUND";
     private const string s_documentation = "documentation";
+    private const string s_edifact = "edifact";
+    private const string s_edifactXsd = "edifact.xsd";
     private const string s_failedUnzip = "FAILED_UNZIP";
     private const string s_fileNameFormat = "{0}.{1}";
     private const string s_length = "length";
@@ -39,7 +41,7 @@ public partial class EdifactDownloader1: IDownloader
     private const string s_schema = "schema";
     private const string s_simpleContent = "simpleContent";
     private const string s_simpleTypes = "simpletypes";
-    private const string s_simpleTypesFileName = "simpletypes.xsd";
+    private const string s_simpleTypesXsd = "simpletypes.xsd";
     private const string s_sourceArchiveDir = "--source";
     private const string s_unMessageFormat = " UN/{0} ";
     private const string s_uriFormat = "{0}{1}";

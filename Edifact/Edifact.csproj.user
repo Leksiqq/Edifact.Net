@@ -16,16 +16,16 @@
     <None Update="files\edifact.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Update="files\un\d\message.xsd">
+    <None Update="files\message.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Update="files\un\d\segments.xsd">
+    <None Update="files\segments.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Update="files\un\d\simpletypes.xsd">
+    <None Update="files\simpletypes.xsd">
       <SubType>Designer</SubType>
     </None>
-    <None Update="files\un\d\types.xsd">
+    <None Update="files\types.xsd">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
