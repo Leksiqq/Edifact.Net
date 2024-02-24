@@ -215,6 +215,10 @@ public class EdifactDownloaderCLI : BackgroundService
                     Usage();
                     return null;
                 }
+                else if(waiting is Waiting.None)
+                {
+
+                }
                 else
                 {
                     CommonCLI.UnknownArgumentError(arg);

@@ -27,17 +27,21 @@ public partial class EdifactDownloader1 : IDownloader
     private readonly string _tmpDir;
     private readonly HttpClient _wc = new();
     private readonly XmlResolver? _xmlResolver;
+    private readonly XmlNamespaceManager _man;
+    private readonly NameTable _nameTable = new();
 
     private string? _directory;
     private string? _eded;
+    private string? _edcd;
+    private string? _uncl;
     private string? _ext;
 
-    internal string Ns => !string.IsNullOrEmpty(_options.Namespace) 
-        ? _options.Namespace 
+    internal string Ns => !string.IsNullOrEmpty(_options.Namespace)
+        ? _options.Namespace
         : Properties.Resources.edifact_ns;
     static EdifactDownloader1()
     {
-        for (int i = 1994; i <= DateTime.Now.Year; i++)
+        for (int i = 1998; i <= DateTime.Now.Year; i++)
         {
             for (char c = 'A'; c <= 'B'; c++)
             {
@@ -69,6 +73,8 @@ public partial class EdifactDownloader1 : IDownloader
             _tmpDir = tempDirectory;
         }
         _directory = _options.Directory?.ToUpper();
+        _man = new XmlNamespaceManager(_nameTable);
+        _man.AddNamespace(s_xsPrefix, Properties.Resources.schema_ns);
     }
     public async Task DownloadAsync(CancellationToken stoppingToken)
     {
@@ -77,13 +83,7 @@ public partial class EdifactDownloader1 : IDownloader
             foreach (string d in s_directories)
             {
                 _directory = d;
-                try
-                {
-                    await DownloadAsync(stoppingToken);
-                }
-                catch (Exception)
-                {
-                }
+                await DownloadAsync(stoppingToken);
             }
             return;
         }
@@ -126,82 +126,141 @@ public partial class EdifactDownloader1 : IDownloader
 
     private async Task BuildSchemasAsync()
     {
-        await MakeSimpleTypesAsync(
-            new StreamReader(
+        SaveXmlDocument(InitXmlDocument(s_edifact), Path.Combine(_tmpDir, s_edifactXsd));
+
+        using TextReader eded = new StreamReader(
                 File.OpenRead(
                     Path.Combine(
-                        _tmpDir, 
+                        _tmpDir,
                         string.Format(s_fileNameFormat, _eded, _ext)
                     )
                 )
-            )
-        );
+            );
+        using TextReader uncl = new StreamReader(
+                File.OpenRead(
+                    Path.Combine(
+                        _tmpDir,
+                        string.Format(s_fileNameFormat, _uncl, _ext)
+                    )
+                )
+            );
+        await MakeSimpleTypesAsync(eded, uncl);
+
+        using TextReader edcd = new StreamReader(
+                File.OpenRead(
+                    Path.Combine(
+                        _tmpDir,
+                        string.Format(s_fileNameFormat, _edcd, _ext)
+                    )
+                )
+            );
+        await MakeTypesAsync(edcd);
         XmlSchemaSet schemaSet = new() {
             XmlResolver = _xmlResolver
         };
+        schemaSet.ValidationEventHandler += SchemaSet_ValidationEventHandler;
         schemaSet.Add(Ns, Path.Combine(_tmpDir, s_simpleTypesXsd));
 
     }
-    private async Task MakeSimpleTypesAsync(TextReader reader)
+
+    private void SchemaSet_ValidationEventHandler(object? sender, ValidationEventArgs e)
     {
-        SaveXmlDocument(InitXmlDocument(s_edifact), Path.Combine(_tmpDir, s_edifactXsd));
+        switch (e.Severity)
+        {
+            case XmlSeverityType.Warning:
+                _logger?.LogWarning(s_logMessage, e.Message);
+                break;
+            case XmlSeverityType.Error:
+                _logger?.LogWarning(s_logMessage, e.Message);
+                break;
+        }
+    }
+    private async Task MakeTypesAsync(TextReader reader)
+    {
+        //XmlDocument doc = InitXmlDocument(s_types);
+        //CompositeParser parser = new();
+        //await foreach (Composite c in parser.ParseAsync(reader))
+        //{
+        //    Console.WriteLine($"{c.Code}, {c.Name}, {c.Properties.Count}");
+        //}
+        //SaveXmlDocument(doc, Path.Combine(_tmpDir, s_typesXsd));
+    }
+    private async Task MakeSimpleTypesAsync(TextReader ededReader, TextReader unclReader)
+    {
         XmlDocument doc = InitXmlDocument(s_simpleTypes);
-        SimpleTypesParser parser = new();
-        await foreach (SimpleType st in parser.ParseAsync(reader))
+        DataElementParser parser = new();
+        await foreach (DataElement st in parser.ParseAsync(ededReader))
         {
             XmlElement ct = doc.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns);
             ct.SetAttribute(s_name, null, string.Format(s_renameElementFormat, st.Code));
+            CreateAnnotation(ct, st);
             XmlElement simpleContent = doc.CreateElement(s_xsPrefix, s_simpleContent, Properties.Resources.schema_ns);
-
-            if(
-                !string.IsNullOrEmpty(st.Name)
-                || !string.IsNullOrEmpty(st.Description)
-                || !string.IsNullOrEmpty(st.Change) 
-                || !string.IsNullOrEmpty(st.Note)
-            )
-            {
-                XmlElement ann = doc.CreateElement(s_xsPrefix, s_annotation, Properties.Resources.schema_ns);
-                if (!string.IsNullOrEmpty(st.Name))
-                {
-                    XmlElement documentation = doc.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
-                    documentation.SetAttribute(s_name, _options.Namespace, s_name);
-                    documentation.AppendChild(doc.CreateTextNode(st.Name));
-                    ann.AppendChild(documentation);
-                }
-                if (!string.IsNullOrEmpty(st.Description))
-                {
-                    XmlElement documentation = doc.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
-                    documentation.SetAttribute(s_name, _options.Namespace, s_description);
-                    documentation.AppendChild(doc.CreateTextNode(st.Description));
-                    ann.AppendChild(documentation);
-                }
-                if (!string.IsNullOrEmpty(st.Note))
-                {
-                    XmlElement documentation = doc.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
-                    documentation.SetAttribute(s_name, _options.Namespace, s_note);
-                    documentation.AppendChild(doc.CreateTextNode(st.Note));
-                    ann.AppendChild(documentation);
-                }
-                if (!string.IsNullOrEmpty(st.Change))
-                {
-                    XmlElement documentation = doc.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
-                    documentation.SetAttribute(s_name, _options.Namespace, s_change);
-                    documentation.AppendChild(doc.CreateTextNode(st.Change));
-                    ann.AppendChild(documentation);
-                }
-                ct.AppendChild(ann);
-            }
-            if(!string.IsNullOrEmpty(st.Representation))
+            if (!string.IsNullOrEmpty(st.Representation))
             {
                 XmlElement restriction = doc.CreateElement(s_xsPrefix, s_restriction, Properties.Resources.schema_ns);
+                restriction.SetAttribute("base", "E");
                 ApplyRepresentation(restriction, st.Representation);
                 simpleContent.AppendChild(restriction);
             }
             ct.AppendChild(simpleContent);
             doc.DocumentElement!.AppendChild(ct);
         }
+        EnumerationParser enumerationParser = new();
+        await foreach (Enumeration en in enumerationParser.ParseAsync(unclReader))
+        {
+            XmlElement restriction = (XmlElement)doc.CreateNavigator()!
+                .SelectSingleNode(
+                    string.Format("/xs:schema/xs:complexType[@name='E{0}']/xs:simpleContent/xs:restriction", en.TypeCode),
+                    _man
+                )?.UnderlyingObject! ?? throw new Exception($"Data element '{en.TypeCode}' not found.");
+            XmlElement enumeration = doc.CreateElement(s_xsPrefix, "enumeration", Properties.Resources.schema_ns);
+            enumeration.SetAttribute("value", en.Code);
+            CreateAnnotation(enumeration, en);
+            restriction.AppendChild(enumeration);
+        }
         SaveXmlDocument(doc, Path.Combine(_tmpDir, s_simpleTypesXsd));
-        
+
+    }
+    private static void CreateAnnotation(XmlElement element, DataElement simpleType)
+    {
+        if (
+            !string.IsNullOrEmpty(simpleType.Name)
+            || !string.IsNullOrEmpty(simpleType.Description)
+            || !string.IsNullOrEmpty(simpleType.Change)
+            || !string.IsNullOrEmpty(simpleType.Note)
+        )
+        {
+            XmlElement ann = element.OwnerDocument.CreateElement(s_xsPrefix, s_annotation, Properties.Resources.schema_ns);
+            if (!string.IsNullOrEmpty(simpleType.Name))
+            {
+                XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
+                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_name);
+                documentation.AppendChild(element.OwnerDocument.CreateTextNode(simpleType.Name));
+                ann.AppendChild(documentation);
+            }
+            if (!string.IsNullOrEmpty(simpleType.Description))
+            {
+                XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
+                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_description);
+                documentation.AppendChild(element.OwnerDocument.CreateTextNode(simpleType.Description));
+                ann.AppendChild(documentation);
+            }
+            if (!string.IsNullOrEmpty(simpleType.Note))
+            {
+                XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
+                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_note);
+                documentation.AppendChild(element.OwnerDocument.CreateTextNode(simpleType.Note));
+                ann.AppendChild(documentation);
+            }
+            if (!string.IsNullOrEmpty(simpleType.Change))
+            {
+                XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
+                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_change);
+                documentation.AppendChild(element.OwnerDocument.CreateTextNode(simpleType.Change));
+                ann.AppendChild(documentation);
+            }
+            element.AppendChild(ann);
+        }
     }
     private void SaveXmlDocument(XmlDocument doc, string path)
     {
@@ -310,6 +369,8 @@ public partial class EdifactDownloader1 : IDownloader
             ni1.Current.InsertBefore(nav1);
             ni1.Current.DeleteSelf();
         }
+
+        result.DocumentElement!.SetAttribute(s_annotationPrefixDeclaration, Properties.Resources.annotation_ns);
         return result;
     }
     private void InitContext()
@@ -330,6 +391,8 @@ public partial class EdifactDownloader1 : IDownloader
             }
         }
         _eded = "EDED";
+        _edcd = "EDCD";
+        _uncl = "UNCL";
         _ext = _directory![1..];
     }
     private void ExtractAll(Stream stream)

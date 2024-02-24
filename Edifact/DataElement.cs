@@ -1,6 +1,6 @@
 ﻿namespace Net.Leksi.Edifact;
 
-internal class SimpleType
+internal class DataElement
 {
     internal string? Code { get; set; }
     internal string? Name { get; set; }

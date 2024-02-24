@@ -61,6 +61,15 @@ namespace Net.Leksi.Edifact.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на http://leksi.net/annotation.
+        /// </summary>
+        internal static string annotation_ns {
+            get {
+                return ResourceManager.GetString("annotation_ns", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
         ///&lt;!-- UN --&gt;
         ///&lt;!-- The file was automatically generated --&gt;

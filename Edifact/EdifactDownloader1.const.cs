@@ -3,6 +3,7 @@
 public partial class EdifactDownloader1: IDownloader
 {
     private const string s_annotation = "annotation";
+    private const string s_annotationPrefixDeclaration = "xmlns:an";
     private const string s_args = "args";
     private const string s_change = "change";
     private const string s_cmd = "cmd";
@@ -43,6 +44,8 @@ public partial class EdifactDownloader1: IDownloader
     private const string s_simpleTypes = "simpletypes";
     private const string s_simpleTypesXsd = "simpletypes.xsd";
     private const string s_sourceArchiveDir = "--source";
+    private const string s_types = "types";
+    private const string s_typesXsd = "types.xsd";
     private const string s_unMessageFormat = " UN/{0} ";
     private const string s_uriFormat = "{0}{1}";
     private const string s_usingExternalUnzip = "USING_EXTERNAL_UNZIP";

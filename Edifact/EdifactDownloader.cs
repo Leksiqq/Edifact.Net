@@ -380,14 +380,14 @@ public class EdifactDownloader: IDownloader
                 )
             )
         );
-        MakeTypes(
-            File.ReadAllLines(
-                Path.Combine(
-                    _preparedDir,
-                    string.Format(s_fileNameFormat, _idcd, _ext)
-                )
-            )
-        );
+        //MakeTypes(
+        //    File.ReadAllLines(
+        //        Path.Combine(
+        //            _preparedDir,
+        //            string.Format(s_fileNameFormat, _idcd, _ext)
+        //        )
+        //    )
+        //);
         xmlSchemaSet.Add(
             ReplaceNs(Properties.Resources.edifact_ns),
             Path.Combine(targetDirectory, s_typesFileName)
@@ -401,14 +401,14 @@ public class EdifactDownloader: IDownloader
                 )
             )
         );
-        MakeSegments(
-            File.ReadAllLines(
-                Path.Combine(
-                    _preparedDir,
-                    string.Format(s_fileNameFormat, _idsd, _ext)
-                )
-            )
-        );
+        //MakeSegments(
+        //    File.ReadAllLines(
+        //        Path.Combine(
+        //            _preparedDir,
+        //            string.Format(s_fileNameFormat, _idsd, _ext)
+        //        )
+        //    )
+        //);
         xmlSchemaSet.Add(
             ReplaceNs(Properties.Resources.edifact_ns),
             Path.Combine(targetDirectory, s_segmentsFileName)
@@ -1097,6 +1097,7 @@ public class EdifactDownloader: IDownloader
                     break;
                 case XmlSeverityType.Error:
                     _logger?.LogError(s_logMessage, args.Message);
+                    throw args.Exception;
                     break;
             }
         }
