@@ -7,6 +7,7 @@ using System.Resources;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.XPath;
 
@@ -35,13 +36,14 @@ public partial class EdifactDownloader1 : IDownloader
     private string? _edcd;
     private string? _uncl;
     private string? _ext;
-
+    private string _hrChars = s_minus;
+ 
     internal string Ns => !string.IsNullOrEmpty(_options.Namespace)
         ? _options.Namespace
         : Properties.Resources.edifact_ns;
     static EdifactDownloader1()
     {
-        for (int i = 1998; i <= DateTime.Now.Year; i++)
+        for (int i = 1997; i <= DateTime.Now.Year; i++)
         {
             for (char c = 'A'; c <= 'B'; c++)
             {
@@ -87,6 +89,17 @@ public partial class EdifactDownloader1 : IDownloader
             }
             return;
         }
+        if(
+            (_directory.CompareTo("D99Z") < 0 && _directory.CompareTo(s_directories[0]) >= 0)
+            || (_directory.CompareTo("D00") >= 0 && _directory.CompareTo("D01C") < 0)
+        )
+        {
+            _hrChars = "?";
+        }
+        else
+        {
+            _hrChars = "-";
+        }
         _logger?.LogInformation(s_logMessage, string.Format(s_rmLabels.GetString(s_receivingDirectory)!, _directory));
         try
         {
@@ -98,7 +111,14 @@ public partial class EdifactDownloader1 : IDownloader
 
                 HttpResponseMessage response = await _wc.GetAsync(requestUri, stoppingToken);
 
-                ExtractAll(response.Content.ReadAsStream(stoppingToken));
+                if(
+                    response.StatusCode != System.Net.HttpStatusCode.OK
+                    || !ExtractAll(response.Content.ReadAsStream(stoppingToken))
+                )
+                {
+                    DirectoryNotFound?.Invoke(this, new DirectoryNotFoundEventArgs { Directory = _directory! });
+                    throw new FileNotFoundException(requestUri.OriginalString);
+                }
 
                 await BuildSchemasAsync();
             }
@@ -134,7 +154,8 @@ public partial class EdifactDownloader1 : IDownloader
                         _tmpDir,
                         string.Format(s_fileNameFormat, _eded, _ext)
                     )
-                )
+                ),
+                Encoding.ASCII
             );
         using TextReader uncl = new StreamReader(
                 File.OpenRead(
@@ -142,7 +163,8 @@ public partial class EdifactDownloader1 : IDownloader
                         _tmpDir,
                         string.Format(s_fileNameFormat, _uncl, _ext)
                     )
-                )
+                ),
+                Encoding.ASCII
             );
         await MakeSimpleTypesAsync(eded, uncl);
 
@@ -152,7 +174,8 @@ public partial class EdifactDownloader1 : IDownloader
                         _tmpDir,
                         string.Format(s_fileNameFormat, _edcd, _ext)
                     )
-                )
+                ),
+                Encoding.ASCII
             );
         await MakeTypesAsync(edcd);
         XmlSchemaSet schemaSet = new() {
@@ -177,18 +200,20 @@ public partial class EdifactDownloader1 : IDownloader
     }
     private async Task MakeTypesAsync(TextReader reader)
     {
-        //XmlDocument doc = InitXmlDocument(s_types);
-        //CompositeParser parser = new();
-        //await foreach (Composite c in parser.ParseAsync(reader))
-        //{
-        //    Console.WriteLine($"{c.Code}, {c.Name}, {c.Properties.Count}");
-        //}
-        //SaveXmlDocument(doc, Path.Combine(_tmpDir, s_typesXsd));
+        XmlDocument doc = InitXmlDocument(s_types);
+        SaveXmlDocument(doc, Path.Combine(_tmpDir, string.Format(s_fileNameFormat, s_typesXsd, "src")));
+        CompositeParser parser = new(_hrChars);
+        await foreach (Composite c in parser.ParseAsync(reader))
+        {
+            Console.WriteLine($"{c.Code}, {c.Name}, {c.Properties.Count}");
+        }
+        SaveXmlDocument(doc, Path.Combine(_tmpDir, s_typesXsd));
     }
     private async Task MakeSimpleTypesAsync(TextReader ededReader, TextReader unclReader)
     {
         XmlDocument doc = InitXmlDocument(s_simpleTypes);
-        DataElementParser parser = new();
+        SaveXmlDocument(doc, Path.Combine(_tmpDir, string.Format(s_fileNameFormat, s_simpleTypesXsd, "src")));
+        DataElementParser parser = new(_hrChars);
         await foreach (DataElement st in parser.ParseAsync(ededReader))
         {
             XmlElement ct = doc.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns);
@@ -205,7 +230,7 @@ public partial class EdifactDownloader1 : IDownloader
             ct.AppendChild(simpleContent);
             doc.DocumentElement!.AppendChild(ct);
         }
-        EnumerationParser enumerationParser = new();
+        EnumerationParser enumerationParser = new(_hrChars);
         await foreach (Enumeration en in enumerationParser.ParseAsync(unclReader))
         {
             XmlElement restriction = (XmlElement)doc.CreateNavigator()!
@@ -218,7 +243,12 @@ public partial class EdifactDownloader1 : IDownloader
             CreateAnnotation(enumeration, en);
             restriction.AppendChild(enumeration);
         }
-        SaveXmlDocument(doc, Path.Combine(_tmpDir, s_simpleTypesXsd));
+        string targetFile = Path.Combine(_tmpDir, s_simpleTypesXsd);
+        SaveXmlDocument(doc, targetFile);
+        if(new FileInfo(targetFile).Length == new FileInfo(string.Format(s_fileNameFormat, targetFile, "src")).Length)
+        {
+            throw new Exception(string.Format(s_rmLabels.GetString(s_noSimpleTypesFound)!, _directory));
+        }
 
     }
     private static void CreateAnnotation(XmlElement element, DataElement simpleType)
@@ -395,26 +425,20 @@ public partial class EdifactDownloader1 : IDownloader
         _uncl = "UNCL";
         _ext = _directory![1..];
     }
-    private void ExtractAll(Stream stream)
+    private bool ExtractAll(Stream stream)
     {
-        ZipArchive zip;
-        try
-        {
-            zip = new(stream);
-        }
-        catch (Exception)
-        {
-            DirectoryNotFound?.Invoke(this, new DirectoryNotFoundEventArgs { Directory = _directory! });
-            throw;
-        }
         string sourceArchve = Path.Combine(_tmpDir, s_sourceArchiveDir);
         if (Directory.Exists(sourceArchve))
         {
             Directory.Delete(sourceArchve, true);
         }
         Directory.CreateDirectory(sourceArchve);
-        zip.ExtractToDirectory(sourceArchve);
-        zip.ExtractToDirectory(_tmpDir);
+        string srcFile = string.Format(s_fileNameFormat, _directory, "zip");
+        string src = Path.Combine(sourceArchve, srcFile);
+        using FileStream fileStream = File.OpenWrite(src);
+        stream.CopyTo(fileStream);
+        fileStream.Close();
+        File.Copy(src, Path.Combine(_tmpDir, srcFile));
 
         List<string> list = [];
         List<string> list1 = [];
@@ -431,7 +455,7 @@ public partial class EdifactDownloader1 : IDownloader
                 try
                 {
                     fs = new(file, FileMode.Open, FileAccess.Read);
-                    zip = new ZipArchive(fs);
+                    ZipArchive zip = new(fs);
                     zip.ExtractToDirectory(_tmpDir, true);
                 }
                 catch (Exception)
@@ -442,8 +466,7 @@ public partial class EdifactDownloader1 : IDownloader
                     }
                     else
                     {
-                        _logger?.LogError(s_logMessage, string.Format(s_rmLabels.GetString(s_failedUnzip)!, file));
-                        throw;
+                        _logger?.LogWarning(s_logMessage, string.Format(s_rmLabels.GetString(s_failedUnzip)!, file));
                     }
                 }
                 finally
@@ -481,10 +504,13 @@ public partial class EdifactDownloader1 : IDownloader
                 Directory.Delete(folder, true);
             }
         }
+        found = false;
         foreach (string file in Directory.GetFiles(_tmpDir))
         {
+            found = true;   
             File.SetAttributes(file, FileAttributes.Normal);
         }
+        return found;
     }
 
     private void UseExternalUnzip(string tmpDir, string file, string cmd)

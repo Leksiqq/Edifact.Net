@@ -190,4 +190,7 @@
   <data name="DOWNLOAD_MESSAGE" xml:space="preserve">
     <value>Получаем сообщение '{0}:{1}'.</value>
   </data>
+  <data name="NO_SIMPLE_TYPES_FOUND" xml:space="preserve">
+    <value>{0}: простые типы не обнаружены.</value>
+  </data>
 </root>

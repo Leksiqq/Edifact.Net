@@ -245,4 +245,7 @@ ARGS:
   <data name="DOWNLOAD_MESSAGE" xml:space="preserve">
     <value>Downloading message '{0}:{1}'.</value>
   </data>
+  <data name="NO_SIMPLE_TYPES_FOUND" xml:space="preserve">
+    <value>{0}: no simple types found.</value>
+  </data>
 </root>

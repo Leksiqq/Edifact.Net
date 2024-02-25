@@ -14,6 +14,10 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(Configuration)'=='Debug'">
+    <ProjectReference Include="..\..\StreamAbstraction\StreamAbstraction.csproj" />
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Update="Properties\fixed.Designer.cs">
       <DesignTime>True</DesignTime>

@@ -26,7 +26,7 @@ public class EdifactDownloaderCLI : BackgroundService
         _downloader.DirectoryNotFound += Downloader_DirectoryNotFound;
     }
 
-    public static async Task RunAsync(string[] args)
+    public static async Task RunAsync(string[] args, Action<IHostApplicationBuilder>? additionalConfig = null)
     {
         EdifactDownloaderOptions? options = Create(args);
 
@@ -40,6 +40,7 @@ public class EdifactDownloaderCLI : BackgroundService
         builder.Services.AddSingleton<IDownloader, EdifactDownloader1>();
         builder.Services.AddSingleton<XmlResolver, Resolver>();
         builder.Services.AddSingleton(options);
+        additionalConfig?.Invoke(builder);
         builder.Services.AddHostedService<EdifactDownloaderCLI>();
 
         IHost host = builder.Build();
@@ -72,6 +73,7 @@ public class EdifactDownloaderCLI : BackgroundService
         EdifactDownloaderOptions options = new();
 
         string? prevArg = null;
+        string? unkownArg = null;
 
         foreach (string arg in args)
         {
@@ -221,11 +223,17 @@ public class EdifactDownloaderCLI : BackgroundService
                 }
                 else
                 {
-                    CommonCLI.UnknownArgumentError(arg);
-                    Usage();
-                    return null;
+                    if (unkownArg is null)
+                    {
+                        unkownArg = arg;
+                    }
                 }
             }
+        }
+        if(unkownArg is { })
+        {
+            CommonCLI.UnknownArgumentError(unkownArg);
+            Usage();
         }
         if (GetWaiting(prevArg) is not Waiting.None)
         {

@@ -3,11 +3,12 @@ using System.Text;
 
 namespace Net.Leksi.Edifact;
 
-internal class EnumerationParser : Parser
+internal class EnumerationParser(string hrChars) : Parser(hrChars)
 {
     private enum State { None, TypeName, Name, Desc, Note }
-    private enum Selector { None, TypeName, Name, Desc, Note, Hr, DescRepr }
-    private static readonly Regex s_reTypeName = new("^(?:\\s*(?<change>[+*|#X-]+))?\\s+(?<code>\\d{4})\\s+(?<name>[^\\[]+)\\[[BCI]?\\]$");
+    private enum Selector { None, TypeNameBegin, TypeNameEnd, Name, Desc, Note, Hr, DescRepr }
+    private static readonly Regex s_reTypeNameBegin = new("^(?:\\s*(?<change>[+*|#X-]+))?\\s+(?<code>\\d{4})\\s+(?<name>[^[]+)");
+    private static readonly Regex s_reTypeNameEnd = new("^\\s*(?<name>[^[]+)\\[[BCI]?\\]$");
     private static readonly Regex s_reName = new("^(\\s*(?<change>[+*|#X-]+))?\\s+(?<code>[^\\s]+)\\s+(?<name>.+)$");
     private static readonly Regex s_reNote = new("^\\s+(?<rest>Note\\s*\\:(?<note>.*))$");
     private static readonly Regex s_reRest = new("^\\s*(?<rest>.+)$");
@@ -30,6 +31,7 @@ internal class EnumerationParser : Parser
             Selector selector = Selector.None;
             foreach (string line in lines)
             {
+                selector = Selector.None;
                 lastLine = line;
                 ++_lineNumber;
                 if (pos == 0)
@@ -37,9 +39,9 @@ internal class EnumerationParser : Parser
                     if (hrs > 0)
                     {
                         if (
-                            selector is Selector.None 
-                            && (m = s_reTypeName.Match(line)).Success 
-                            && (selector = Selector.TypeName) == selector
+                            selector is Selector.None
+                            && (m = s_reTypeNameBegin.Match(line)).Success
+                            && (selector = Selector.TypeNameBegin) == selector
                         )
                         {
                             if (type is { } || state is not State.None || typeCode is { } || sb.Length > 0)
@@ -48,6 +50,17 @@ internal class EnumerationParser : Parser
                             }
                             typeCode = m.Groups["code"].Value;
                             state = State.TypeName;
+                        }
+                        if (
+                            (selector is Selector.None || selector is Selector.TypeNameBegin)
+                            && (m = s_reTypeNameBegin.Match(line)).Success
+                            && (selector = Selector.TypeNameEnd) == selector
+                        )
+                        {
+                            if (type is { } || state is not State.TypeName || typeCode is null)
+                            {
+                                throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                            }
                         }
                         if (
                             selector is Selector.None
@@ -131,7 +144,7 @@ internal class EnumerationParser : Parser
                 {
                     if((m = s_reRest.Match(line)).Success)
                     {
-                        if(selector is Selector.Name)
+                        if(state is State.Name)
                         {
                             if(m.Groups["rest"].Index == nameOffset)
                             {

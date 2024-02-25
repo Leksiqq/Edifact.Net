@@ -26,9 +26,11 @@ public partial class EdifactDownloader1: IDownloader
     private const string s_maxLength = "maxLength";
     private const string s_minLength = "minLength";
     private const string s_minOccursPatternFormat = "{0},";
+    private const string s_minus = "-";
     private const string s_n = "n";
     private const string s_name = "name";
     private const string s_note = "note";
+    private const string s_noSimpleTypesFound = "NO_SIMPLE_TYPES_FOUND";
     private const string s_numberTypePatternFormat = "^-?([0-9]\\.?){{{0}{1}}}[0-9]$";
     private const string s_numberTypePattern = "^-?[^.]*\\.?[^.]+$";
     private const string s_receivingDirectory = "RECEIVING_DIRECTORY";

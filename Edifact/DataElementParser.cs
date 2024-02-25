@@ -1,17 +1,17 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
-using static Net.Leksi.Edifact.PartsParser;
 
 namespace Net.Leksi.Edifact;
 
-internal class DataElementParser: Parser
+internal class DataElementParser(string hrChars): Parser(hrChars)
 {
-    private enum State { None, Desc, Note }
-    private enum Selector { None, Name, Desc, Note, Repr, Hr }
-    private static readonly Regex s_reName = new("^(?:\\s*(?<change>[+*|#X-]+))?\\s+(?<code>\\d{4})\\s+(?<name>[^\\[]+)\\[[BCI]?\\]$");
+    private enum State { None, Name, Desc, Note }
+    private enum Selector { None, NameBegin, NameEnd, Desc, Note, Repr, Hr }
+    private static readonly Regex s_reNameBegin = new("^(?:\\s*(?<change>[+*|#X-]+))?\\s+(?<code>\\d{4})\\s+(?<name>[^[]+)");
+    private static readonly Regex s_reNameEnd = new("^\\s*(?<name>[^[]+)\\[[BCI]?\\]$");
     private static readonly Regex s_reDescription = new("\\s+Desc\\s*\\:(?<description>.*)$");
-    private static readonly Regex s_reNote = new("^\\s+Note\\s*\\:(?<note>.*)$");
-    private static readonly Regex s_reRepr = new("^\\s+Repr\\s*\\:(?<representation>.*)$");
+    private static readonly Regex s_reNote = new("^(?:\\s*[+*|#X-]+)?\\s+Note\\s*\\:(?<note>.*)$");
+    private static readonly Regex s_reRepr = new("^(?:\\s*[+*|#X-]+)?\\s+Repr\\s*\\:(?<representation>.*)$");
     internal async IAsyncEnumerable<DataElement> ParseAsync(TextReader reader)
     {
         StringBuilder sb = new();
@@ -27,6 +27,7 @@ internal class DataElementParser: Parser
             Selector selector = Selector.None;
             foreach (string line in lines)
             {
+                selector = Selector.None;
                 lastLine = line;
                 ++_lineNumber;
                 if (pos == 0)
@@ -35,20 +36,39 @@ internal class DataElementParser: Parser
                     {
                         if (
                             selector is Selector.None 
-                            && (m = s_reName.Match(line)).Success 
-                            && (selector = Selector.Name) == selector
+                            && (m = s_reNameBegin.Match(line)).Success 
+                            && (selector = Selector.NameBegin) == selector
                         )
                         {
-                            if (type is { } || state is not State.None)
+                            if (type is { } || state is not State.None || sb.Length > 0)
                             {
                                 throw new Exception($"Unexpected line ({_lineNumber}): {line}");
                             }
                             type = new DataElement
                             {
                                 Code = m.Groups["code"].Value,
-                                Name = m.Groups["name"].Value.Trim(),
                                 Change = m.Groups["change"].Value,
                             };
+                            sb.Append(m.Groups["name"].Value.Trim());
+                            state = State.Name;
+                        }
+                        if(
+                            (selector is Selector.None || selector is Selector.NameBegin)
+                            && (m = s_reNameEnd.Match(line)).Success
+                            && (selector = Selector.NameEnd) == selector
+                        )
+                        {
+                            if (type is null || state is not State.Name || sb.Length == 0)
+                            {
+                                throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                            }
+                            if(selector is Selector.None)
+                            {
+                                sb.Append(' ').Append(m.Groups["name"].Value.Trim());
+                            }
+                            type.Name = sb.ToString();
+                            sb.Clear();
+                            state = State.None;
                         }
                         if (
                             selector is Selector.None
@@ -93,7 +113,7 @@ internal class DataElementParser: Parser
                 }
                 else if(hrs > 0)
                 {
-                    if (type is null || (state is not State.Desc && state is not State.Note))
+                    if (type is null || (state is not State.Desc && state is not State.Note && state is not State.Name))
                     {
                         throw new Exception($"Unexpected line ({_lineNumber}): {line}");
                     }
@@ -117,9 +137,15 @@ internal class DataElementParser: Parser
                     sb.Clear();
                     state = State.None;
                 }
-                if (state is State.Note)
+                else if (state is State.Note)
                 {
                     type.Note = sb.ToString();
+                    sb.Clear();
+                    state = State.None;
+                }
+                else if (state is State.Name)
+                {
+                    type.Name = sb.ToString();
                     sb.Clear();
                     state = State.None;
                 }
