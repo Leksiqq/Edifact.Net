@@ -70,6 +70,31 @@ namespace Net.Leksi.Edifact.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        ///&lt;!-- UN --&gt;
+        ///&lt;!-- The file was automatically generated --&gt;
+        ///&lt;!-- Don&apos;t edit! --&gt;
+        ///&lt;xs:schema
+        ///  targetNamespace=&quot;EDIFACT&quot;
+        ///  xmlns=&quot;EDIFACT&quot;
+        ///  xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
+        ///  elementFormDefault=&quot;qualified&quot; attributeFormDefault=&quot;unqualified&quot;
+        ///&gt;
+        ///  &lt;xs:include schemaLocation=&quot;simpletypes.xsd&quot;/&gt;
+        ///  &lt;xs:complexType name=&quot;S001&quot;&gt;
+        ///    &lt;xs:annotation&gt;
+        ///      &lt;xs:documentation&gt;SYNTAX IDENTIFIER&lt;/xs:documentation&gt;
+        ///    &lt;/xs:annotation&gt;
+        ///    &lt;xs:sequence&gt;
+        ///      [остаток строки не уместился]&quot;;.
+        /// </summary>
+        internal static string composites {
+            get {
+                return ResourceManager.GetString("composites", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
         ///&lt;!-- UN --&gt;
         ///&lt;!-- The file was automatically generated --&gt;
@@ -101,6 +126,31 @@ namespace Net.Leksi.Edifact.Properties {
         internal static string edifact_ns {
             get {
                 return ResourceManager.GetString("edifact_ns", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        ///&lt;!-- UN --&gt;
+        ///&lt;!-- The file was automatically generated --&gt;
+        ///&lt;!-- Don&apos;t edit! --&gt;
+        ///&lt;xs:schema
+        ///  targetNamespace=&quot;EDIFACT&quot;
+        ///  xmlns=&quot;EDIFACT&quot;
+        ///  xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
+        ///  elementFormDefault=&quot;qualified&quot; attributeFormDefault=&quot;unqualified&quot;
+        ///&gt;
+        ///  &lt;xs:include schemaLocation=&quot;edifact.xsd&quot; /&gt;
+        ///  &lt;xs:complexType name=&quot;D0001&quot;&gt;
+        ///    &lt;xs:simpleContent&gt;
+        ///      &lt;xs:restriction base=&quot;D&quot;&gt;
+        ///        &lt;xs:pattern value=&quot;^\w{4}$&quot;/&gt;
+        ///      &lt;/xs:restriction&gt;
+        ///    &lt;/xs:s [остаток строки не уместился]&quot;;.
+        /// </summary>
+        internal static string elements {
+            get {
+                return ResourceManager.GetString("elements", resourceCulture);
             }
         }
         
@@ -167,56 +217,6 @@ namespace Net.Leksi.Edifact.Properties {
         internal static string segments {
             get {
                 return ResourceManager.GetString("segments", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-        ///&lt;!-- UN --&gt;
-        ///&lt;!-- The file was automatically generated --&gt;
-        ///&lt;!-- Don&apos;t edit! --&gt;
-        ///&lt;xs:schema
-        ///  targetNamespace=&quot;EDIFACT&quot;
-        ///  xmlns=&quot;EDIFACT&quot;
-        ///  xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
-        ///  elementFormDefault=&quot;qualified&quot; attributeFormDefault=&quot;unqualified&quot;
-        ///&gt;
-        ///  &lt;xs:include schemaLocation=&quot;edifact.xsd&quot; /&gt;
-        ///  &lt;xs:complexType name=&quot;E0001&quot;&gt;
-        ///    &lt;xs:simpleContent&gt;
-        ///      &lt;xs:restriction base=&quot;E&quot;&gt;
-        ///        &lt;xs:pattern value=&quot;^\w{4}$&quot;/&gt;
-        ///      &lt;/xs:restriction&gt;
-        ///    &lt;/xs:s [остаток строки не уместился]&quot;;.
-        /// </summary>
-        internal static string simpletypes {
-            get {
-                return ResourceManager.GetString("simpletypes", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
-        ///&lt;!-- UN --&gt;
-        ///&lt;!-- The file was automatically generated --&gt;
-        ///&lt;!-- Don&apos;t edit! --&gt;
-        ///&lt;xs:schema
-        ///  targetNamespace=&quot;EDIFACT&quot;
-        ///  xmlns=&quot;EDIFACT&quot;
-        ///  xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
-        ///  elementFormDefault=&quot;qualified&quot; attributeFormDefault=&quot;unqualified&quot;
-        ///&gt;
-        ///  &lt;xs:include schemaLocation=&quot;simpletypes.xsd&quot;/&gt;
-        ///  &lt;xs:complexType name=&quot;S001&quot;&gt;
-        ///    &lt;xs:annotation&gt;
-        ///      &lt;xs:documentation&gt;SYNTAX IDENTIFIER&lt;/xs:documentation&gt;
-        ///    &lt;/xs:annotation&gt;
-        ///    &lt;xs:sequence&gt;
-        ///      [остаток строки не уместился]&quot;;.
-        /// </summary>
-        internal static string types {
-            get {
-                return ResourceManager.GetString("types", resourceCulture);
             }
         }
     }

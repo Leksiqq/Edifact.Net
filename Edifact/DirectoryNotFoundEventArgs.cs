@@ -2,5 +2,6 @@
 
 public class DirectoryNotFoundEventArgs: EventArgs
 {
-    public string Directory { get; internal set; } = null!;
+    public string? Directory { get; internal set; }
+    public string? Url { get; internal set; }
 }

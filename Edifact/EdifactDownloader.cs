@@ -17,6 +17,7 @@ namespace Net.Leksi.Edifact;
 public class EdifactDownloader: IDownloader
 {
     public event DirectoryNotFoundEventHandler? DirectoryNotFound;
+    public event DirectoryDownloadedEventHandler? DirectoryDownloaded;
 
     #region const
     private const string s_webSite = "https://unece.org";

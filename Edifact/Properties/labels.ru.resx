@@ -139,13 +139,13 @@
     <value>Получаем директорию {0}.</value>
   </data>
   <data name="DIRECTORY_NOT_FOUND" xml:space="preserve">
-    <value>Директория '{0}' не обнаружена.</value>
+    <value>Директория '{0}' не обнаружена по ссылке '{1}'.</value>
   </data>
   <data name="NO_ENUM_SIMPLE_TYPES" xml:space="preserve">
     <value>'{0}': не обнаружены простые перечислимые типы.</value>
   </data>
   <data name="MESSAGE_NOT_FOUND" xml:space="preserve">
-    <value>Файл '{0}' для директории '{1}'не обнаружен.</value>
+    <value>Сообщение '{0}' для директории '{1}'не обнаружено.</value>
   </data>
   <data name="LOAD_FIXED_FILE" xml:space="preserve">
     <value>Загружается исправленный файл: {0}.</value>
@@ -192,5 +192,17 @@
   </data>
   <data name="NO_SIMPLE_TYPES_FOUND" xml:space="preserve">
     <value>{0}: простые типы не обнаружены.</value>
+  </data>
+  <data name="NO_TYPES_FOUND" xml:space="preserve">
+    <value>{0}: составные типы не обнаружены.</value>
+  </data>
+  <data name="NO_SEGMENTS_FOUND" xml:space="preserve">
+    <value>{0}: сегменты не обнаружены.</value>
+  </data>
+  <data name="UNEXPECTED_LINE" xml:space="preserve">
+    <value>Неожиданная строка ({0}): {1}</value>
+  </data>
+  <data name="DATA_ELEMENT_NOT_FOUND" xml:space="preserve">
+    <value>Элемент данных '{1}' не обнаружен.</value>
   </data>
 </root>

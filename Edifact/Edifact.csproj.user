@@ -13,20 +13,20 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Update="files\edifact.xsd">
+    <EmbeddedResource Update="files\edifact.xsd">
       <SubType>Designer</SubType>
-    </None>
-    <None Update="files\message.xsd">
+    </EmbeddedResource>
+    <EmbeddedResource Update="files\message.xsd">
       <SubType>Designer</SubType>
-    </None>
-    <None Update="files\segments.xsd">
+    </EmbeddedResource>
+    <EmbeddedResource Update="files\segments.xsd">
       <SubType>Designer</SubType>
-    </None>
-    <None Update="files\simpletypes.xsd">
+    </EmbeddedResource>
+    <EmbeddedResource Update="files\elements.xsd">
       <SubType>Designer</SubType>
-    </None>
-    <None Update="files\types.xsd">
+    </EmbeddedResource>
+    <EmbeddedResource Update="files\composites.xsd">
       <SubType>Designer</SubType>
-    </None>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

@@ -11,7 +11,7 @@
   <xs:include schemaLocation="segments.xsd"/>
   <xs:complexType name="MESSAGE">
     <xs:complexContent>
-      <xs:extension base="GENERIC-MESSAGE">
+      <xs:extension base="BASE-MESSAGE">
         <xs:sequence id="structure">
         </xs:sequence>
       </xs:extension>

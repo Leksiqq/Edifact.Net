@@ -10,12 +10,28 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="files\composites.xsd" />
+    <None Remove="files\edifact.xsd" />
+    <None Remove="files\elements.xsd" />
+    <None Remove="files\message.xsd" />
+    <None Remove="files\segments.xsd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="files\composites.xsd" />
+    <EmbeddedResource Include="files\edifact.xsd" />
+    <EmbeddedResource Include="files\elements.xsd" />
+    <EmbeddedResource Include="files\message.xsd" />
+    <EmbeddedResource Include="files\segments.xsd" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)'=='Debug'">
-    <ProjectReference Include="..\..\StreamAbstraction\StreamAbstraction.csproj" />
+    <ProjectReference Include="..\..\StreamsAbstraction\StreamsAbstraction.csproj" />
   </ItemGroup>
 
   <ItemGroup>

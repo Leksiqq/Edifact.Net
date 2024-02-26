@@ -1,18 +1,22 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
+using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
 
-internal class CompositeParser(string hrChars) : Parser(hrChars)
+internal class CompositeParser(string hrChars, char nameFirstChar) : Parser(hrChars)
 {
-    private static readonly Regex s_reName = new("^(?:\\s*(?<change>[+*|#X-]+))?\\s+(?<code>C\\d{3})\\s+(?<name>.+)$");
-    private static readonly Regex s_reDescription = new("\\s+Desc\\s*\\:(?<description>.*)$");
-    private static readonly Regex s_reNote = new("^(?:\\s*[+*|#X-]+)?\\s+Note\\s*\\:(?<note>.*)$");
-    private static readonly Regex s_reItemNameBegin = new("^(?:\\s*(?<change>[+*|#X-]+))?\\s*\\d{3}\\s+(?<code>\\d{4})\\s+(?<name>.+?)(?:[CM]\\s+a?n?\\d*\\.?\\.?\\d*|$)");
-    private static readonly Regex s_reItemNameEnd = new("^\\s*(?<name>.*?)(?<occurs>[CM])\\s+a?n?\\d*\\.?\\.?\\d*\\s*$");
     private enum State { None, Name, ItemName, Desc, Note }
     private enum Selector { None, Name, ItemNameBegin, ItemNameEnd, Desc, Note, Hr }
-    internal async IAsyncEnumerable<Composite> ParseAsync(TextReader reader)
+    private static readonly Regex s_reDescription = new("\\s+Desc\\s*\\:(?<description>.*)$");
+    private static readonly Regex s_reNote = new("^(?:\\s*[+*|#X-]+)?\\s+Note\\s*\\:(?<note>.*)$");
+    private static readonly Regex s_reItemNameBegin = new("^\\s*\\d{3}(?:\\s+(?<change>[+*|#X-]+))?\\s*(?<code>\\d{4})\\s+(?<name>.+?)(?:[CM]\\s+a?n?\\d*\\.?\\.?\\d*|$)");
+    private static readonly Regex s_reItemNameEnd = new("^\\s*(?<name>.*?)(?<minOccurs>[CM])\\s+a?n?\\d*\\.?\\.?\\d*\\s*$");
+    private readonly Regex _reName = new($"^(?:\\s*(?<change>[+*|#X-]+))?\\s*(?<code>{nameFirstChar}\\d{{3}})\\s+(?<name>.+)$");
+    internal async IAsyncEnumerable<Composite> ParseAsync(
+        TextReader reader, [EnumeratorCancellation] CancellationToken stoppingToken
+    )
     {
         StringBuilder sb = new();
         Composite? type = null;
@@ -20,7 +24,7 @@ internal class CompositeParser(string hrChars) : Parser(hrChars)
         string lastLine = string.Empty;
         _lineNumber = 0;
         State state = State.None;
-        await foreach (IEnumerable<string> lines in SplitByNewLineAsync(reader))
+        await foreach (IEnumerable<string> lines in SplitByNewLineAsync(reader, stoppingToken))
         {
             int pos = 0;
             Match m;
@@ -38,17 +42,27 @@ internal class CompositeParser(string hrChars) : Parser(hrChars)
                         && (selector = Selector.ItemNameBegin) == selector
                     )
                     {
-                        if (type is null || state is not State.None || sb.Length > 0)
+                        if (type is null)
                         {
-                            throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                            ThrowUnexpectedLine(_lineNumber, line);
                         }
-                        type.Properties.Add(
-                            new CompositeProperty
+                        if (state is State.ItemName)
+                        {
+                            type!.Elements.Last().Name = sb.ToString();
+                            sb.Clear();
+                            state = State.None;
+                        }
+                        if (state is not State.None || sb.Length > 0)
+                        {
+                            ThrowUnexpectedLine(_lineNumber, line);
+                        }
+                        type.Elements.Add(
+                            new Element
                             {
-                                Code = m.Groups["code"].Value,
+                                Code = m.Groups[s_code].Value,
                             }
                         );
-                        sb.Append(m.Groups["name"].Value.Trim());
+                        sb.Append(m.Groups[s_name].Value.Trim());
                         state = State.ItemName;
                     }
                     if (
@@ -57,20 +71,19 @@ internal class CompositeParser(string hrChars) : Parser(hrChars)
                     )
                     {
                         if (
-                            type is null || type.Properties.Count == 0
-                            || type.Properties.Last().Occurs is { }
+                            type is null 
+                            || type.Elements.Count == 0
+                            || type.Elements.Last().MinOccurs is { }
                             || state is not State.ItemName || sb.Length == 0
                         )
                         {
-                            throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                            ThrowUnexpectedLine(_lineNumber, line);
                         }
                         if (selector is Selector.None)
                         {
-                            sb.Append(m.Groups["name"].Value.Trim());
+                            sb.Append(m.Groups[s_name].Value.Trim());
                         }
-                        sb.Clear();
-                        type.Properties.Last().Occurs = m.Groups["occurs"].Value;
-                        state = State.None;
+                        type!.Elements.Last().MinOccurs = m.Groups[s_minOccurs].Value;
                         selector = Selector.ItemNameEnd;
                     }
                 }
@@ -82,21 +95,21 @@ internal class CompositeParser(string hrChars) : Parser(hrChars)
                         {
                             if (
                                 selector is Selector.None
-                                && (m = s_reName.Match(line)).Success
+                                && (m = _reName.Match(line)).Success
                                 && (selector = Selector.Name) == selector
                             )
                             {
                                 if (type is { } || state is not State.None || sb.Length > 0)
                                 {
-                                    throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                    ThrowUnexpectedLine(_lineNumber, line);
                                 }
                                 type = new Composite
                                 {
-                                    Code = m.Groups["code"].Value,
-                                    Change = m.Groups["change"].Value,
+                                    Code = m.Groups[s_code].Value,
+                                    Change = m.Groups[s_change].Value,
                                 };
                                 state = State.Name;
-                                sb.Append(m.Groups["name"].Value.Trim());
+                                sb.Append(m.Groups[s_name].Value.Trim());
                             }
                             if (
                                selector is Selector.None
@@ -106,10 +119,10 @@ internal class CompositeParser(string hrChars) : Parser(hrChars)
                             {
                                 if (type is null || sb.Length > 0 || state is not State.None)
                                 {
-                                    throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                    ThrowUnexpectedLine(_lineNumber, line);
                                 }
                                 state = selector switch { Selector.Desc => State.Desc, _ => State.Note };
-                                string group = selector switch { Selector.Desc => "description", _ => "note" };
+                                string group = selector switch { Selector.Desc => s_description, _ => s_note };
                                 sb.Append(m.Groups[group].Value.Trim());
                             }
                         }
@@ -119,9 +132,9 @@ internal class CompositeParser(string hrChars) : Parser(hrChars)
                             {
                                 if (type is null || state is not State.None || sb.Length > 0)
                                 {
-                                    throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                    ThrowUnexpectedLine(_lineNumber, line);
                                 }
-                                yield return type;
+                                yield return type!;
                                 type = null;
                             }
                             ++hrs;
@@ -129,9 +142,17 @@ internal class CompositeParser(string hrChars) : Parser(hrChars)
                     }
                     else if (hrs > 0)
                     {
-                        if (type is null || (state is not State.Desc && state is not State.Note && state is not State.ItemName))
+                        if (
+                            type is null 
+                            || (
+                                state is not State.Name
+                                && state is not State.Desc
+                                && state is not State.Note 
+                                && state is not State.ItemName
+                            )
+                        )
                         {
-                            throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                            ThrowUnexpectedLine(_lineNumber, line);
                         }
                         if (sb.Length > 0)
                         {
@@ -146,23 +167,29 @@ internal class CompositeParser(string hrChars) : Parser(hrChars)
             {
                 if (type is null)
                 {
-                    throw new Exception($"Unexpected line ({_lineNumber}): {lastLine}");
+                    ThrowUnexpectedLine(_lineNumber, lastLine);
                 }
                 if (state is State.Desc)
                 {
-                    type.Description = sb.ToString();
+                    type!.Description = sb.ToString();
                     sb.Clear();
                     state = State.None;
                 }
                 else if (state is State.Note)
                 {
-                    type.Note = sb.ToString();
+                    type!.Note = sb.ToString();
                     sb.Clear();
                     state = State.None;
                 }
                 else if (state is State.Name)
                 {
-                    type.Name = sb.ToString();
+                    type!.Name = sb.ToString();
+                    sb.Clear();
+                    state = State.None;
+                }
+                else if (state is State.ItemName)
+                {
+                    type!.Elements.Last().Name = sb.ToString();
                     sb.Clear();
                     state = State.None;
                 }

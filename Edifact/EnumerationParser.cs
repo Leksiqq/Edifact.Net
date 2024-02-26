@@ -1,5 +1,7 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
+using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
 
@@ -7,13 +9,15 @@ internal class EnumerationParser(string hrChars) : Parser(hrChars)
 {
     private enum State { None, TypeName, Name, Desc, Note }
     private enum Selector { None, TypeNameBegin, TypeNameEnd, Name, Desc, Note, Hr, DescRepr }
+
     private static readonly Regex s_reTypeNameBegin = new("^(?:\\s*(?<change>[+*|#X-]+))?\\s+(?<code>\\d{4})\\s+(?<name>[^[]+)");
-    private static readonly Regex s_reTypeNameEnd = new("^\\s*(?<name>[^[]+)\\[[BCI]?\\]$");
     private static readonly Regex s_reName = new("^(\\s*(?<change>[+*|#X-]+))?\\s+(?<code>[^\\s]+)\\s+(?<name>.+)$");
     private static readonly Regex s_reNote = new("^\\s+(?<rest>Note\\s*\\:(?<note>.*))$");
     private static readonly Regex s_reRest = new("^\\s*(?<rest>.+)$");
     private static readonly Regex s_reDescRepr = new("\\s+(?:Desc|Repr)\\s*\\:");
-    internal async IAsyncEnumerable<Enumeration> ParseAsync(TextReader reader)
+    internal async IAsyncEnumerable<Enumeration> ParseAsync(
+        TextReader reader, [EnumeratorCancellation] CancellationToken stoppingToken
+    )
     {
         int nameOffset = -1;
         int descOffset = -1;
@@ -24,7 +28,7 @@ internal class EnumerationParser(string hrChars) : Parser(hrChars)
         string? typeCode = null;
         _lineNumber = 0;
         State state = State.None;
-        await foreach (IEnumerable<string> lines in SplitByNewLineAsync(reader))
+        await foreach (IEnumerable<string> lines in SplitByNewLineAsync(reader, stoppingToken))
         {
             int pos = 0;
             Match m;
@@ -46,9 +50,9 @@ internal class EnumerationParser(string hrChars) : Parser(hrChars)
                         {
                             if (type is { } || state is not State.None || typeCode is { } || sb.Length > 0)
                             {
-                                throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                ThrowUnexpectedLine(_lineNumber, line);
                             }
-                            typeCode = m.Groups["code"].Value;
+                            typeCode = m.Groups[s_code].Value;
                             state = State.TypeName;
                         }
                         if (
@@ -59,7 +63,7 @@ internal class EnumerationParser(string hrChars) : Parser(hrChars)
                         {
                             if (type is { } || state is not State.TypeName || typeCode is null)
                             {
-                                throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                ThrowUnexpectedLine(_lineNumber, line);
                             }
                         }
                         if (
@@ -70,7 +74,7 @@ internal class EnumerationParser(string hrChars) : Parser(hrChars)
                         {
                             if (type is { } || state is not State.TypeName || typeCode is null || sb.Length > 0)
                             {
-                                throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                ThrowUnexpectedLine(_lineNumber, line);
                             }
                         }
                         if(
@@ -81,9 +85,9 @@ internal class EnumerationParser(string hrChars) : Parser(hrChars)
                         {
                             if(nameOffset == -1)
                             {
-                                nameOffset = m.Groups["name"].Index;
+                                nameOffset = m.Groups[s_name].Index;
                             }
-                            if (nameOffset != m.Groups["name"].Index)
+                            if (nameOffset != m.Groups[s_name].Index)
                             {
                                 selector = Selector.None;
                             }
@@ -99,15 +103,15 @@ internal class EnumerationParser(string hrChars) : Parser(hrChars)
                                 }
                                 if (state is not State.None || typeCode is null || sb.Length > 0)
                                 {
-                                    throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                    ThrowUnexpectedLine(_lineNumber, line);
                                 }
                                 type = new Enumeration
                                 {
-                                    Change = m.Groups["change"].Value,
+                                    Change = m.Groups[s_change].Value,
                                     TypeCode = typeCode,
-                                    Code = m.Groups["code"].Value,
+                                    Code = m.Groups[s_code].Value,
                                 };
-                                sb.Append(m.Groups["name"].Value.Trim());
+                                sb.Append(m.Groups[s_name].Value.Trim());
                                 state = State.Name;
                             }
                         }
@@ -117,11 +121,11 @@ internal class EnumerationParser(string hrChars) : Parser(hrChars)
                             && (selector = Selector.Note) == selector
                         )
                         {
-                            if(type is null || state is not State.None || nameOffset != m.Groups["rest"].Index || sb.Length > 0)
+                            if(type is null || state is not State.None || nameOffset != m.Groups[s_rest].Index || sb.Length > 0)
                             {
-                                throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                ThrowUnexpectedLine(_lineNumber, line);
                             }
-                            sb.Append(m.Groups["note"].Value.Trim());
+                            sb.Append(m.Groups[s_note].Value.Trim());
                             state = State.Note;
                         }
                     }
@@ -131,9 +135,9 @@ internal class EnumerationParser(string hrChars) : Parser(hrChars)
                         {
                             if (typeCode is null || type is null || state is not State.None || sb.Length > 0)
                             {
-                                throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                ThrowUnexpectedLine(_lineNumber, line);
                             }
-                            yield return type;
+                            yield return type!;
                             type = null;
                             typeCode = null;
                         }
@@ -146,25 +150,25 @@ internal class EnumerationParser(string hrChars) : Parser(hrChars)
                     {
                         if(state is State.Name)
                         {
-                            if(m.Groups["rest"].Index == nameOffset)
+                            if(m.Groups[s_rest].Index == nameOffset)
                             {
-                                sb.Append(' ').Append(m.Groups["rest"].Value.Trim());
+                                sb.Append(' ').Append(m.Groups[s_rest].Value.Trim());
                             }
-                            else if(m.Groups["rest"].Index > nameOffset)
+                            else if(m.Groups[s_rest].Index > nameOffset)
                             {
                                 if(descOffset == -1)
                                 {
-                                    descOffset = m.Groups["rest"].Index;
+                                    descOffset = m.Groups[s_rest].Index;
                                 }
-                                else if(m.Groups["rest"].Index < descOffset)
+                                else if(m.Groups[s_rest].Index < descOffset)
                                 {
-                                    throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                    ThrowUnexpectedLine(_lineNumber, line);
                                 }
                                 if (type is null || sb.Length == 0)
                                 {
-                                    throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                    ThrowUnexpectedLine(_lineNumber, line);
                                 }
-                                type.Name = sb.ToString();
+                                type!.Name = sb.ToString();
                                 sb.Clear();
                                 selector = Selector.Desc;
                                 state = State.Desc;
@@ -178,17 +182,17 @@ internal class EnumerationParser(string hrChars) : Parser(hrChars)
             {
                 if (type is null)
                 {
-                    throw new Exception($"Unexpected line ({_lineNumber}): {lastLine}");
+                    ThrowUnexpectedLine(_lineNumber, lastLine);
                 }
                 if (state is State.Desc)
                 {
-                    type.Description = sb.ToString();
+                    type!.Description = sb.ToString();
                     sb.Clear();
                     state = State.None;
                 }
                 else if (state is State.Note)
                 {
-                    type.Note = sb.ToString();
+                    type!.Note = sb.ToString();
                     sb.Clear();
                     state = State.None;
                 }

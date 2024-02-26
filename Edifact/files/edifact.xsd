@@ -8,7 +8,7 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="qualified" attributeFormDefault="unqualified"
 >
-  <xs:complexType name="GENERIC-MESSAGE" abstract="true">
+  <xs:complexType name="BASE-MESSAGE" abstract="true">
     <xs:sequence>
       <xs:element name="interchange">
         <xs:complexType>
@@ -20,11 +20,11 @@
       <xs:sequence id="structure"/>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="GENERIC-SEGMENT" abstract="true">
+  <xs:complexType name="BASE-SEGMENT" abstract="true">
     <xs:anyAttribute namespace="##any"/>
   </xs:complexType>
 
-  <xs:complexType name="E">
+  <xs:complexType name="D">
     <xs:simpleContent>
       <xs:extension base="xs:string">
         <xs:attribute name="loc">

@@ -1,5 +1,8 @@
-﻿using System.Text;
+﻿using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
+using static Net.Leksi.Edifact.Constants;
+using static Net.Leksi.Edifact.PartsParser;
 
 namespace Net.Leksi.Edifact;
 
@@ -7,12 +10,15 @@ internal class DataElementParser(string hrChars): Parser(hrChars)
 {
     private enum State { None, Name, Desc, Note }
     private enum Selector { None, NameBegin, NameEnd, Desc, Note, Repr, Hr }
+
     private static readonly Regex s_reNameBegin = new("^(?:\\s*(?<change>[+*|#X-]+))?\\s+(?<code>\\d{4})\\s+(?<name>[^[]+)");
     private static readonly Regex s_reNameEnd = new("^\\s*(?<name>[^[]+)\\[[BCI]?\\]$");
     private static readonly Regex s_reDescription = new("\\s+Desc\\s*\\:(?<description>.*)$");
     private static readonly Regex s_reNote = new("^(?:\\s*[+*|#X-]+)?\\s+Note\\s*\\:(?<note>.*)$");
     private static readonly Regex s_reRepr = new("^(?:\\s*[+*|#X-]+)?\\s+Repr\\s*\\:(?<representation>.*)$");
-    internal async IAsyncEnumerable<DataElement> ParseAsync(TextReader reader)
+    internal async IAsyncEnumerable<DataElement> ParseAsync(
+        TextReader reader, [EnumeratorCancellation] CancellationToken stoppingToken
+    )
     {
         StringBuilder sb = new();
         DataElement? type = null;
@@ -20,7 +26,7 @@ internal class DataElementParser(string hrChars): Parser(hrChars)
         string lastLine = string.Empty;
         _lineNumber = 0;
         State state = State.None;
-        await foreach (IEnumerable<string> lines in SplitByNewLineAsync(reader))
+        await foreach (IEnumerable<string> lines in SplitByNewLineAsync(reader, stoppingToken))
         {
             int pos = 0;
             Match m;
@@ -42,14 +48,14 @@ internal class DataElementParser(string hrChars): Parser(hrChars)
                         {
                             if (type is { } || state is not State.None || sb.Length > 0)
                             {
-                                throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                ThrowUnexpectedLine(_lineNumber, line);
                             }
                             type = new DataElement
                             {
-                                Code = m.Groups["code"].Value,
-                                Change = m.Groups["change"].Value,
+                                Code = m.Groups[s_code].Value,
+                                Change = m.Groups[s_change].Value,
                             };
-                            sb.Append(m.Groups["name"].Value.Trim());
+                            sb.Append(m.Groups[s_name].Value.Trim());
                             state = State.Name;
                         }
                         if(
@@ -60,13 +66,13 @@ internal class DataElementParser(string hrChars): Parser(hrChars)
                         {
                             if (type is null || state is not State.Name || sb.Length == 0)
                             {
-                                throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                ThrowUnexpectedLine(_lineNumber, line);
                             }
-                            if(selector is Selector.None)
+                            if (selector is Selector.None)
                             {
-                                sb.Append(' ').Append(m.Groups["name"].Value.Trim());
+                                sb.Append(' ').Append(m.Groups[s_name].Value.Trim());
                             }
-                            type.Name = sb.ToString();
+                            type!.Name = sb.ToString();
                             sb.Clear();
                             state = State.None;
                         }
@@ -78,10 +84,10 @@ internal class DataElementParser(string hrChars): Parser(hrChars)
                         {
                             if (type is null || sb.Length > 0 || state is not State.None)
                             {
-                                throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                ThrowUnexpectedLine(_lineNumber, line);
                             }
                             state = selector switch { Selector.Desc => State.Desc, _ => State.Note };
-                            string group = selector switch { Selector.Desc => "description", _ => "note" };
+                            string group = selector switch { Selector.Desc => s_description, _ => s_note };
                             sb.Append(m.Groups[group].Value.Trim());
                         }
                         if (
@@ -92,9 +98,9 @@ internal class DataElementParser(string hrChars): Parser(hrChars)
                         {
                             if (type is null || sb.Length > 0 || state is not State.None)
                             {
-                                throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                ThrowUnexpectedLine(_lineNumber, line);
                             }
-                            type.Representation = m.Groups["representation"].Value;
+                            type!.Representation = m.Groups[s_repr].Value;
                         }
                     }
                     if (selector is Selector.None && s_reHr.Match(line).Success && (selector = Selector.Hr) == selector)
@@ -103,9 +109,9 @@ internal class DataElementParser(string hrChars): Parser(hrChars)
                         {
                             if (type is null || state is not State.None || sb.Length > 0)
                             {
-                                throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                                ThrowUnexpectedLine(_lineNumber, line);
                             }
-                            yield return type;
+                            yield return type!;
                             type = null;
                         }
                         ++hrs;
@@ -113,11 +119,18 @@ internal class DataElementParser(string hrChars): Parser(hrChars)
                 }
                 else if(hrs > 0)
                 {
-                    if (type is null || (state is not State.Desc && state is not State.Note && state is not State.Name))
+                    if (
+                        type is null 
+                        || (
+                            state is not State.Desc 
+                            && state is not State.Note 
+                            && state is not State.Name
+                        )
+                    )
                     {
-                        throw new Exception($"Unexpected line ({_lineNumber}): {line}");
+                        ThrowUnexpectedLine(_lineNumber, line);
                     }
-                    if(sb.Length > 0)
+                    if (sb.Length > 0)
                     {
                         sb.Append(' ');
                     }
@@ -129,23 +142,23 @@ internal class DataElementParser(string hrChars): Parser(hrChars)
             {
                 if (type is null)
                 {
-                    throw new Exception($"Unexpected line ({_lineNumber}): {lastLine}");
+                    ThrowUnexpectedLine(_lineNumber, lastLine);
                 }
                 if (state is State.Desc)
                 {
-                    type.Description = sb.ToString();
+                    type!.Description = sb.ToString();
                     sb.Clear();
                     state = State.None;
                 }
                 else if (state is State.Note)
                 {
-                    type.Note = sb.ToString();
+                    type!.Note = sb.ToString();
                     sb.Clear();
                     state = State.None;
                 }
                 else if (state is State.Name)
                 {
-                    type.Name = sb.ToString();
+                    type!.Name = sb.ToString();
                     sb.Clear();
                     state = State.None;
                 }

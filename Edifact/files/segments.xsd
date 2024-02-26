@@ -8,7 +8,7 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="qualified" attributeFormDefault="unqualified"
 >
-  <xs:include schemaLocation="types.xsd"/>
+  <xs:include schemaLocation="composites.xsd"/>
   <xs:complexType name="UNB">
     <xs:annotation>
       <xs:documentation>Interchange Header</xs:documentation>
@@ -21,7 +21,7 @@
       </xs:documentation>
     </xs:annotation>
     <xs:complexContent>
-      <xs:extension base="GENERIC-SEGMENT">
+      <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
           <xs:element name="S001" type="S001">
             <xs:annotation>
@@ -43,7 +43,7 @@
               <xs:documentation>DATE/TIME OF PREPARATION</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="E0020" type="E0020">
+          <xs:element name="D0020" type="D0020">
             <xs:annotation>
               <xs:documentation>INTERCHANGE CONTROL REFERENCE</xs:documentation>
               <xs:documentation>Unique reference assigned by sender</xs:documentation>
@@ -54,28 +54,28 @@
               <xs:documentation>RECIPIENTS REFERENCE, PASSWORD</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="E0026" type="E0026" minOccurs="0">
+          <xs:element name="D0026" type="D0026" minOccurs="0">
             <xs:annotation>
               <xs:documentation>APPLICATION REFERENCE</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="E0029" type="E0029" minOccurs="0">
+          <xs:element name="D0029" type="D0029" minOccurs="0">
             <xs:annotation>
               <xs:documentation>PROCESSING PRIORITY CODE</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="E0031" type="E0031" minOccurs="0">
+          <xs:element name="D0031" type="D0031" minOccurs="0">
             <xs:annotation>
               <xs:documentation>ACKNOWLEDGEMENT REQUEST</xs:documentation>
               <xs:documentation>Set = 1 if sender requests acknowledgement, i.e. UNB and UNZ segments received and identified</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="E0032" type="E0032" minOccurs="0">
+          <xs:element name="D0032" type="D0032" minOccurs="0">
             <xs:annotation>
               <xs:documentation>COMMUNICATIONS AGREEMENT ID</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="E0035" type="E0035" minOccurs="0">
+          <xs:element name="D0035" type="D0035" minOccurs="0">
             <xs:annotation>
               <xs:documentation>TEST INDICATOR</xs:documentation>
               <xs:documentation>Set = 1 if the interchange is a test. Otherwise not used</xs:documentation>
@@ -91,9 +91,9 @@
       <xs:documentation>Function: To end and check the completeness of an interchange</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
-      <xs:extension base="GENERIC-SEGMENT">
+      <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
-          <xs:element name="E0036" type="E0036">
+          <xs:element name="D0036" type="D0036">
             <xs:annotation>
               <xs:documentation>INTERCHANGE CONTROL COUNT</xs:documentation>
               <xs:documentation>
@@ -102,7 +102,7 @@
               </xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="E0020" type="E0020">
+          <xs:element name="D0020" type="D0020">
             <xs:annotation>
               <xs:documentation>INTERCHANGE CONTROL REFERENCE</xs:documentation>
               <xs:documentation>Shall be identical to 0020 in UNB</xs:documentation>
@@ -118,9 +118,9 @@
       <xs:documentation>Function: To head, identify and specify a Functional Group</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
-      <xs:extension base="GENERIC-SEGMENT">
+      <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
-          <xs:element name="E0038" type="E0038">
+          <xs:element name="D0038" type="D0038">
             <xs:annotation>
               <xs:documentation>FUNCTIONAL GROUP IDENTIFICATION</xs:documentation>
               <xs:documentation>Identifies the one message type in the functional group</xs:documentation>
@@ -141,13 +141,13 @@
               <xs:documentation>DATE/TIME OF PREPARATION</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="E0048" type="E0048">
+          <xs:element name="D0048" type="D0048">
             <xs:annotation>
               <xs:documentation>FUNCTIONAL GROUP REFERENCE NUMBER</xs:documentation>
               <xs:documentation>Unique reference number assigned by sender's division, department etc.</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="E0051" type="E0051">
+          <xs:element name="D0051" type="D0051">
             <xs:annotation>
               <xs:documentation>CONTROLLING AGENCY</xs:documentation>
               <xs:documentation>Code to identify the agency controlling the specification, maintenance and publication of the message type</xs:documentation>
@@ -158,7 +158,7 @@
               <xs:documentation>MESSAGE VERSION</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="E0058" type="E0058" minOccurs="0">
+          <xs:element name="D0058" type="D0058" minOccurs="0">
             <xs:annotation>
               <xs:documentation>APPLICATION PASSWORD</xs:documentation>
               <xs:documentation>
@@ -176,15 +176,15 @@
       <xs:documentation>Function: To end and check the completeness of a Functional Group</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
-      <xs:extension base="GENERIC-SEGMENT">
+      <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
-          <xs:element name="E0060" type="E0060">
+          <xs:element name="D0060" type="D0060">
             <xs:annotation>
               <xs:documentation>NUMBER OF MESSAGES</xs:documentation>
               <xs:documentation>The count of the number of messages in the functional group</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="E0048" type="E0048">
+          <xs:element name="D0048" type="D0048">
             <xs:annotation>
               <xs:documentation>FUNCTIONAL GROUP REFERENCE NUMBER</xs:documentation>
               <xs:documentation>Shall be identical to 0048 in UNG</xs:documentation>
@@ -200,9 +200,9 @@
       <xs:documentation>Function: To head, identify and specify a Message</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
-      <xs:extension base="GENERIC-SEGMENT">
+      <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
-          <xs:element name="E0062" type="E0062">
+          <xs:element name="D0062" type="D0062">
             <xs:annotation>
               <xs:documentation>MESSAGE REFERENCE NUMBER</xs:documentation>
               <xs:documentation>A sender's unique message reference</xs:documentation>
@@ -213,7 +213,7 @@
               <xs:documentation>MESSAGE IDENTIFIER</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="E0068" type="E0068" minOccurs="0">
+          <xs:element name="D0068" type="D0068" minOccurs="0">
             <xs:annotation>
               <xs:documentation>COMMON ACCESS REFERENCE</xs:documentation>
               <xs:documentation>
@@ -237,15 +237,15 @@
       <xs:documentation>Function: To end and check the completeness of a Message</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
-      <xs:extension base="GENERIC-SEGMENT">
+      <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
-          <xs:element name="E0074" type="E0074" minOccurs="0">
+          <xs:element name="D0074" type="D0074" minOccurs="0">
             <xs:annotation>
               <xs:documentation>NUMBER OF SEGMENTS IN THE MESSAGE</xs:documentation>
               <xs:documentation>Control count including UNH and UNT</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="E0062" type="E0062">
+          <xs:element name="D0062" type="D0062">
             <xs:annotation>
               <xs:documentation>MESSAGE REFERENCE NUMBER</xs:documentation>
               <xs:documentation>Shall be identical to 0062 in UNH</xs:documentation>
@@ -264,9 +264,9 @@
       </xs:documentation>
     </xs:annotation>
     <xs:complexContent>
-      <xs:extension base="GENERIC-SEGMENT">
+      <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
-          <xs:element name="E0081" type="E0081">
+          <xs:element name="D0081" type="D0081">
             <xs:annotation>
               <xs:documentation>SECTION IDENTIFICATION</xs:documentation>
               <xs:documentation>

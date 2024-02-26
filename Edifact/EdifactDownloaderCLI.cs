@@ -24,9 +24,21 @@ public class EdifactDownloaderCLI : BackgroundService
         _logger = services.GetService<ILogger<EdifactDownloaderCLI>>();
         _downloader = _services.GetRequiredService<IDownloader>();
         _downloader.DirectoryNotFound += Downloader_DirectoryNotFound;
+        _downloader.DirectoryDownloaded += _downloader_DirectoryDownloaded;
     }
 
-    public static async Task RunAsync(string[] args, Action<IHostApplicationBuilder>? additionalConfig = null)
+    private void _downloader_DirectoryDownloaded(object sender, DirectoryDownloadedEventArgs e)
+    {
+        if(e.Files is { })
+        {
+            foreach (string file in e.Files)
+            {
+                Console.WriteLine(file);
+            }
+        }
+    }
+
+    public static async Task RunAsync(string[] args)
     {
         EdifactDownloaderOptions? options = Create(args);
 
@@ -38,9 +50,7 @@ public class EdifactDownloaderCLI : BackgroundService
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
         builder.Services.AddSingleton<IDownloader, EdifactDownloader1>();
-        builder.Services.AddSingleton<XmlResolver, Resolver>();
         builder.Services.AddSingleton(options);
-        additionalConfig?.Invoke(builder);
         builder.Services.AddHostedService<EdifactDownloaderCLI>();
 
         IHost host = builder.Build();
@@ -64,7 +74,7 @@ public class EdifactDownloaderCLI : BackgroundService
 
     private void Downloader_DirectoryNotFound(object sender, DirectoryNotFoundEventArgs e)
     {
-        _logger?.LogError(s_logMessage, string.Format(CommonCLI.LabelsResourceManager.GetString(s_directoryNotFound)!, e.Directory));
+        _logger?.LogError(s_logMessage, string.Format(CommonCLI.LabelsResourceManager.GetString(s_directoryNotFound)!, e.Directory, e.Url));
     }
 
 

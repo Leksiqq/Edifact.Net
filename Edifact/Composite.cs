@@ -2,5 +2,5 @@
 
 internal class Composite: DataElement
 {
-    internal List<CompositeProperty> Properties { get; private init; } = [];
+    internal List<Element> Elements { get; private init; } = [];
 }
