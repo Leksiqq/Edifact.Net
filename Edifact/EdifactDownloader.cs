@@ -213,9 +213,9 @@ public class EdifactDownloader: IDownloader
         {
             throw new Exception(string.Format(s_directoryNotExistsFormat, _options.TmpFolder));
         }
-        if (_options.Directory is { })
+        if (_options.Directories is { })
         {
-            _directory = _options.Directory.ToUpper();
+            _directory = _options.Directories.ToUpper();
         }
         _tmpDir = _options.TmpFolder is { } ? Path.GetFullPath(_options.TmpFolder) : Path.GetTempPath();
         if (_options.TmpFolder is null)

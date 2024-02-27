@@ -1,17 +1,15 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Globalization;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Xml;
+using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
 
 public class EdifactDownloaderCLI : BackgroundService
 {
-    private const string s_logMessage = "{message}";
-    private const string s_edifactDownloaderUsage = "EDIFACT_DOWNLOADER_USAGE";
-    private const string s_directoryNotFound = "DIRECTORY_NOT_FOUND";
     private static readonly Regex s_reProxy = new("^(https?\\://)(?:([^\\s:]+)(?::(.+))?@)?(.*)$");
 
     private readonly IServiceProvider _services;
@@ -33,7 +31,7 @@ public class EdifactDownloaderCLI : BackgroundService
         {
             foreach (string file in e.Files)
             {
-                Console.WriteLine(file);
+                //Console.WriteLine(file);
             }
         }
     }
@@ -59,7 +57,6 @@ public class EdifactDownloaderCLI : BackgroundService
     }
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-
         try
         {
             await _downloader.DownloadAsync(stoppingToken);
@@ -93,9 +90,9 @@ public class EdifactDownloaderCLI : BackgroundService
                 options.Message = arg;
                 prevArg = null;
             }
-            else if (waiting is Waiting.Directory)
+            else if (waiting is Waiting.Directories)
             {
-                options.Directory = arg;
+                options.Directories = arg;
                 prevArg = null;
             }
             else if (waiting is Waiting.Namespace)
@@ -143,6 +140,14 @@ public class EdifactDownloaderCLI : BackgroundService
                 options.ExternalUnzipCommandLineFormat = arg;
                 prevArg = null;
             }
+            else if(waiting is Waiting.ConnectionTimeout)
+            {
+                if(int.TryParse(arg, out int timeout))
+                {
+                    options.ConnectionTimeout = timeout;
+                }
+                prevArg = null;
+            }
             else if (waiting is not Waiting.None)
             {
                 CommonCLI.MissedArgumentError(prevArg!);
@@ -162,9 +167,9 @@ public class EdifactDownloaderCLI : BackgroundService
                     }
                     prevArg = arg;
                 }
-                else if (waiting is Waiting.Directory)
+                else if (waiting is Waiting.Directories)
                 {
-                    if (options.Directory is { })
+                    if (options.Directories is { })
                     {
                         CommonCLI.AlreadyUsed(arg);
                         Usage();
@@ -222,7 +227,17 @@ public class EdifactDownloaderCLI : BackgroundService
                     }
                     prevArg = arg;
                 }
-                else if(waiting is Waiting.Help)
+                else if (waiting is Waiting.ConnectionTimeout)
+                {
+                    if (options.ConnectionTimeout is { })
+                    {
+                        CommonCLI.AlreadyUsed(arg);
+                        Usage();
+                        return null;
+                    }
+                    prevArg = arg;
+                }
+                else if (waiting is Waiting.Help)
                 {
                     Usage();
                     return null;
@@ -259,9 +274,10 @@ public class EdifactDownloaderCLI : BackgroundService
         {
             "/t" or "--target-folder" => Waiting.TargetFolder,
             "/m" or "--message" => Waiting.Message,
-            "/d" or "--directory" => Waiting.Directory,
+            "/d" or "--directories" => Waiting.Directories,
             "/n" or "--ns" => Waiting.Namespace,
             "--tmp-folder" => Waiting.TmpFolder,
+            "--connection-timeout" => Waiting.ConnectionTimeout,
             "--external-unzip" => Waiting.ExternalUnzipCommandLineFormat,
             "/p" or "--proxy" => Waiting.Proxy,
             "/?" or "--help" => Waiting.Help,

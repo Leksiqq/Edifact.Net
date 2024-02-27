@@ -11,7 +11,7 @@ internal class CompositeParser(string hrChars, char nameFirstChar) : Parser(hrCh
     private enum Selector { None, Name, ItemNameBegin, ItemNameEnd, Desc, Note, Hr }
     private static readonly Regex s_reDescription = new("\\s+Desc\\s*\\:(?<description>.*)$");
     private static readonly Regex s_reNote = new("^(?:\\s*[+*|#X-]+)?\\s+Note\\s*\\:(?<note>.*)$");
-    private static readonly Regex s_reItemNameBegin = new("^\\s*\\d{3}(?:\\s+(?<change>[+*|#X-]+))?\\s*(?<code>\\d{4})\\s+(?<name>.+?)(?:[CM]\\s+a?n?\\d*\\.?\\.?\\d*|$)");
+    private static readonly Regex s_reItemNameBegin = new("^\\s*(?<position>\\d{3})(?:\\s+(?<change>[+*|#X-]+))?\\s*(?<code>\\d{4})\\s+(?<name>.+?)(?:[CM]\\s+a?n?\\d*\\.?\\.?\\d*|$)");
     private static readonly Regex s_reItemNameEnd = new("^\\s*(?<name>.*?)(?<minOccurs>[CM])\\s+a?n?\\d*\\.?\\.?\\d*\\s*$");
     private readonly Regex _reName = new($"^(?:\\s*(?<change>[+*|#X-]+))?\\s*(?<code>{nameFirstChar}\\d{{3}})\\s+(?<name>.+)$");
     internal async IAsyncEnumerable<Composite> ParseAsync(
@@ -56,10 +56,11 @@ internal class CompositeParser(string hrChars, char nameFirstChar) : Parser(hrCh
                         {
                             ThrowUnexpectedLine(_lineNumber, line);
                         }
-                        type.Elements.Add(
+                        type!.Elements.Add(
                             new Element
                             {
                                 Code = m.Groups[s_code].Value,
+                                Position = m.Groups[s_position].Value,
                             }
                         );
                         sb.Append(m.Groups[s_name].Value.Trim());
@@ -156,7 +157,14 @@ internal class CompositeParser(string hrChars, char nameFirstChar) : Parser(hrCh
                         }
                         if (sb.Length > 0)
                         {
-                            sb.Append(' ');
+                            if(state is State.ItemName)
+                            {
+                                sb.Append(' ');
+                            }
+                            else
+                            {
+                                sb.AppendLine();
+                            }
                         }
                         sb.Append(line.Trim());
                     }

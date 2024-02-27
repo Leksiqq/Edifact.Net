@@ -5,7 +5,7 @@ internal enum Waiting
     None,
     Unknown,
     Message,
-    Directory,
+    Directories,
     Namespace,
     Proxy,
     TargetFolder,
@@ -14,5 +14,6 @@ internal enum Waiting
     SchemaDocument,
     Output,
     PaddingLength,
-    Help
+    Help,
+    ConnectionTimeout
 }

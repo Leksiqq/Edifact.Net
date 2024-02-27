@@ -246,4 +246,112 @@
       </xs:element>
     </xs:sequence>
   </xs:complexType>
+  <xs:complexType name="S300">
+    <xs:annotation>
+      <xs:documentation an:name="name">DATE AND/OR TIME OF INITIATION</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="D0338" type="D0338" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Event date</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0314" type="D0314" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Event time</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0336" type="D0336" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Time offset</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="S301">
+    <xs:annotation>
+      <xs:documentation an:name="name">STATUS OF TRANSFER - INTERACTIVE</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="D0320" type="D0320" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Sender sequence number</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0323" type="D0323" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Transfer position, coded</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0325" type="D0325" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Duplicate Indicator</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="S302">
+    <xs:annotation>
+      <xs:documentation an:name="name">DIALOGUE REFERENCE</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="D0300" type="D0300">
+        <xs:annotation>
+          <xs:documentation an:name="name">Initiator control reference</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0303" type="D0303" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Initiator reference identification</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0051" type="D0051" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Controlling agency, coded</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0304" type="D0304" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Responder control reference</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="S306">
+    <xs:annotation>
+      <xs:documentation an:name="name">INTERACTIVE MESSAGE IDENTIFIER</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="D0065" type="D0065">
+        <xs:annotation>
+          <xs:documentation an:name="name">Message type</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0052" type="D0052">
+        <xs:annotation>
+          <xs:documentation an:name="name">Message version number</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0054" type="D0054">
+        <xs:annotation>
+          <xs:documentation an:name="name">Message release number</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0113" type="D0113" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Message type sub-function identification</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0051" type="D0051" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Controlling agency, coded</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0057" type="D0057" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Association assigned code</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
 </xs:schema>

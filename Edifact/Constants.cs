@@ -5,6 +5,8 @@ namespace Net.Leksi.Edifact;
 
 internal static class Constants
 {
+    internal const string s_0 = "0";
+    internal const string s_1 = "1";
     internal const string s_annotation = "annotation";
     internal const string s_annotationPrefixDeclaration = "xmlns:an";
     internal const string s_args = "args";
@@ -27,7 +29,8 @@ internal static class Constants
     internal const string s_d01c = "D01C";
     internal const string s_d16a = "D16A";
     internal const string s_d20b = "D20B";
-    internal const string s_d9 = "D9";
+    internal const string s_d79 = "D79";
+    internal const string s_d8 = "D8";
     internal const string s_d99z = "D99Z";
     internal const string s_dataElementNotFound = "DATA_ELEMENT_NOT_FOUND";
     internal const string s_description = "description";
@@ -37,6 +40,7 @@ internal static class Constants
     internal const string s_documentation = "documentation";
     internal const string s_edcd = "EDCD";
     internal const string s_eded = "EDED";
+    internal const string s_edifactDownloaderUsage = "EDIFACT_DOWNLOADER_USAGE";
     internal const string s_uncl = "UNCL";
     internal const string s_edifact = "edifact";
     internal const string s_edifactXsd = "edifact.xsd";
@@ -48,9 +52,12 @@ internal static class Constants
     internal const string s_extension = "extension";
     internal const string s_failedUnzip = "FAILED_UNZIP";
     internal const string s_fileNameFormat = "{0}.{1}";
+    internal const string s_finish = "finish";
     internal const string s_function = "function";
     internal const string s_idcd = "IDCD";
     internal const string s_idsd = "IDSD";
+    internal const string s_interval = "interval";
+    internal const string s_invalidDirectoryNameOrInterval = "INVALID_DIRECTORY_NAME_OR_INTERVAL";
     internal const string s_length = "length";
     internal const string s_logMessage = "{message}";
     internal const string s_m = "M";
@@ -72,25 +79,29 @@ internal static class Constants
     internal const string s_noTypesFound = "NO_TYPES_FOUND";
     internal const string s_numberTypePatternFormat = "^-?([0-9]\\.?){{{0}{1}}}[0-9]$";
     internal const string s_numberTypePattern = "^-?[^.]*\\.?[^.]+$";
-    internal const string s_receivingDirectory = "RECEIVING_DIRECTORY";
-    internal const string s_renameElementFormat = "D{0}";
-    internal const string s_rest = "rest";
-    internal const string s_restriction = "restriction";
-    internal const string s_rmLabelsName = "Net.Leksi.Edifact.Properties.labels";
     internal const string s_path1 = "/DAM/trade/untdid/{0}/{1}.zip";
     internal const string s_path2 = "/fileadmin/DAM/trade/untdid/{0}/{1}.zip";
     internal const string s_parentXPath = "..";
     internal const string s_pattern = "pattern";
+    internal const string s_position = "position";
+    internal const string s_receivingDirectory = "RECEIVING_DIRECTORY";
+    internal const string s_renameElementFormat = "D{0}";
     internal const string s_replaceNsFormat = "{0}=\"{1}\"";
     internal const string s_repr = "representation";
+    internal const string s_rest = "rest";
+    internal const string s_restriction = "restriction";
+    internal const string s_rmLabelsName = "Net.Leksi.Edifact.Properties.labels";
     internal const string s_schema = "schema";
+    internal const string s_segmentGroupNameFormat = "SG{0}";
     internal const string s_segments = "segments";
     internal const string s_segmentsXsd = "segments.xsd";
+    internal const string s_selectStructureSequenceXPath = "//xs:sequence[@id='structure'][1]";
     internal const string s_sequence = "sequence";
     internal const string s_sharp = "#";
     internal const string s_simpleContent = "simpleContent";
     internal const string s_sourceArchiveDir = "--source";
     internal const string s_src = "src";
+    internal const string s_start = "start";
     internal const string s_type = "type";
     internal const string s_typeForEnumXPathFormat = "/xs:schema/xs:complexType[@name='D{0}']/xs:simpleContent/xs:restriction";
     internal const string s_uih = "UIH";

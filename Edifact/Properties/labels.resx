@@ -216,12 +216,14 @@
   <data name="EDIFACT_DOWNLOADER_USAGE" xml:space="preserve">
     <value>Usage: {0} ARGS 
 ARGS:
-  /m, --message  {{MESSAGE|#}}                             - message type (# for no message)
-  /d, --directory  DIRECTORY                               - message directory
+  /m, --message  {{MESSAGE|#}}                               - message type (# for no message, all messages if omitted)
+  /d, --directories  LIST                                  - message directory(ies) divided with commas and minuses
+                                                             for intervals (for example: "D97B,D10A-D11B")
   /n, --ns NS                                              - EDIFACT namespace substitution
   /t, --target-folder  PATH                                - target folder where schemas will be placed
   --tmp-folder PATH                                        - temporary folder
   /p, --proxy  http[s]://[USER[:PASSWORD]@]ADDRESS:PORT    - use proxy for download
+  --connection-timeout  SECONDS                            - connection timeout of web client    
   --external-unzip FORMAT                                  - command line for external unzip program - 
                                                              C#-style format string, where {{0}} means output directory
                                                              and {{1}} means input file path</value>
@@ -259,5 +261,8 @@ ARGS:
   </data>
   <data name="DATA_ELEMENT_NOT_FOUND" xml:space="preserve">
     <value>Data element '{1}' not found.</value>
+  </data>
+  <data name="INVALID_DIRECTORY_NAME_OR_INTERVAL" xml:space="preserve">
+    <value>Invalid directory name or interval: '{0}'.</value>
   </data>
 </root>

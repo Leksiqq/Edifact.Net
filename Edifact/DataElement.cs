@@ -9,4 +9,5 @@ internal class DataElement
     internal string? Representation { get; set; }
     internal string? Note { get; set; }
     internal string? Function { get; set; }
+    internal string? Position { get; set; }
 }

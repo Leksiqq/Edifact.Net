@@ -13,7 +13,7 @@ internal class SegmentParser(string hrChars, char nameFirstChar) : Parser(hrChar
     private static readonly Regex s_reName = new("^(?:\\s*(?<change>[+*|#X-]+))?\\s*(?<code>[A-Z]{3})\\s+(?<name>.+)$");
     private static readonly Regex s_reFunction = new("\\s+Function\\s*\\:(?<function>.*)$");
     private static readonly Regex s_reNote = new("\\s+Note\\s*\\:(?<note>.*)$");
-    private readonly Regex _reItemName = new($"^\\s*\\d{{3}}(?:\\s+(?<change>[+*|#X-]+))?\\s*(?<code>[\\d{nameFirstChar}]\\d{{3}})\\s+(?<name>.+?)\\s+(?<minOccurs>[CM])\\s+(?<maxOccurs>\\d*)\\s*a?n?\\d*\\.?\\.?\\d*$");
+    private readonly Regex _reItemName = new($"^\\s*(?<position>\\d{{3}})(?:\\s+(?<change>[+*|#X-]+))?\\s*(?<code>[\\d{nameFirstChar}]\\d{{3}})\\s+(?<name>.+?)\\s+(?<minOccurs>[CM])\\s+(?<maxOccurs>\\d*)\\s*a?n?\\d*\\.?\\.?\\d*$");
     internal async IAsyncEnumerable<Segment> ParseAsync(
         TextReader reader, [EnumeratorCancellation] CancellationToken stoppingToken
     )
@@ -53,6 +53,7 @@ internal class SegmentParser(string hrChars, char nameFirstChar) : Parser(hrChar
                                 Code = m.Groups[s_code].Value,
                                 Name = m.Groups[s_name].Value.Trim(),
                                 Change = m.Groups[s_change].Value.Trim(),
+                                Components = [],
                             };
                         }
                         if (
@@ -65,13 +66,14 @@ internal class SegmentParser(string hrChars, char nameFirstChar) : Parser(hrChar
                             {
                                 ThrowUnexpectedLine(_lineNumber, line);
                             }
-                            type!.Components.Add(new Component
+                            type!.Components!.Add(new Component
                             {
                                 Code = m.Groups[s_code].Value,
                                 Name = m.Groups[s_name].Value.Trim(),
                                 Change = m.Groups[s_change].Value.Trim(),
                                 MinOccurs = m.Groups[s_minOccurs].Value,
                                 MaxOccurs = m.Groups[s_maxOccurs].Value,
+                                Position = m.Groups[s_position].Value,
                             });
                         }
                         if (

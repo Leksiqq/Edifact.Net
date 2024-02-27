@@ -2,7 +2,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using static Net.Leksi.Edifact.Constants;
-using static Net.Leksi.Edifact.PartsParser;
 
 namespace Net.Leksi.Edifact;
 
@@ -132,7 +131,14 @@ internal class DataElementParser(string hrChars): Parser(hrChars)
                     }
                     if (sb.Length > 0)
                     {
-                        sb.Append(' ');
+                        if(state is State.Name)
+                        {
+                            sb.Append(' ');
+                        }
+                        else
+                        {
+                            sb.AppendLine();
+                        }
                     }
                     sb.Append(line.Trim());
                 }

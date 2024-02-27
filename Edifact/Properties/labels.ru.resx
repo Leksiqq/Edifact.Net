@@ -168,15 +168,18 @@
   <data name="EDIFACT_DOWNLOADER_USAGE" xml:space="preserve">
     <value>Использование: {0} АРГУМЕНТЫ 
 АРГУМЕНТЫ:
-  /m, --message  {{MESSAGE|#}}                               - тип сообщения (# если загрузка сообщений не требуется)
-  /d, --directory  DIRECTORY                               - директория сообщений
+  /m, --message  {{MESSAGE|#}}                               - тип сообщения (# если загрузка сообщений не требуется, 
+                                                             все сообщения, если опущен)
+  /d, --directories  LIST                                  - директория(и) сообщений, разделённые запятыми и минусами
+						             для интервала (например: "D97B,D10A-D11B")
   /n, --ns NS                                              - пространство имён генерируемых схем (по умолчанию EDIFACT)
   /t, --target-folder  PATH                                - каталог для размещения сгенерированных схем
   --tmp-folder PATH                                        - временный каталог
   /p, --proxy  http[s]://[USER[:PASSWORD]@]ADDRESS:PORT    - использовать прокси сервер для скачивания
+  --connection-timeout  SECONDS                            - таймаут соединения веб-клиента    
   --external-unzip FORMAT                                  - командная строка для внешнего распаковщика - 
-                                                             строка формата в стиле C#, где {{0}} означает выходной каталог,
-                                                             а {{1}} путь к архивному файлу</value>
+                                                             строка формата в стиле C#, где {{0}} означает выходной 
+                                                             каталог, а {{1}} путь к архивному файлу</value>
   </data>
   <data name="KEY_ALREADY_USED" xml:space="preserve">
     <value>Ключ '{0}' уже был применён.</value>
@@ -204,5 +207,8 @@
   </data>
   <data name="DATA_ELEMENT_NOT_FOUND" xml:space="preserve">
     <value>Элемент данных '{1}' не обнаружен.</value>
+  </data>
+  <data name="INVALID_DIRECTORY_NAME_OR_INTERVAL" xml:space="preserve">
+    <value>Неверное имя директории или интервал: {0}.</value>
   </data>
 </root>

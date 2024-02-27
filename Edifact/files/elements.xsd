@@ -7,6 +7,7 @@
   xmlns="EDIFACT"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="qualified" attributeFormDefault="unqualified"
+  xmlns:an="http://leksi.net/annotation"
 >
   <xs:include schemaLocation="edifact.xsd" />
   <xs:complexType name="D0001">
@@ -251,6 +252,113 @@
     <xs:simpleContent>
       <xs:restriction base="D">
         <xs:pattern value="^\w$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0113">
+    <xs:annotation>
+      <xs:documentation an:name="name">Message type sub-function identification</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="6"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0300">
+    <xs:annotation>
+      <xs:documentation an:name="name">Initiator control reference</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="35"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0303">
+    <xs:annotation>
+      <xs:documentation an:name="name">Initiator reference identification</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="35"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0304">
+    <xs:annotation>
+      <xs:documentation an:name="name">Responder control reference</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="35"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0314">
+    <xs:annotation>
+      <xs:documentation an:name="name">Event time</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="15"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0320">
+    <xs:annotation>
+      <xs:documentation an:name="name">Sender sequence number</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:pattern value="^\d{1,6}$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0323">
+    <xs:annotation>
+      <xs:documentation an:name="name">Transfer position, coded</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:pattern value="^\w$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0325">
+    <xs:annotation>
+      <xs:documentation an:name="name">Duplicate Indicator</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:pattern value="^\w$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0336">
+    <xs:annotation>
+      <xs:documentation an:name="name">Time offset</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:pattern value="^\d{1,4}$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0338">
+    <xs:annotation>
+      <xs:documentation an:name="name">Event date</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:pattern value="^\d{1,8}$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0340">
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="35"/>
       </xs:restriction>
     </xs:simpleContent>
   </xs:complexType>
