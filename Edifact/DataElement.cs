@@ -1,13 +1,13 @@
 ﻿namespace Net.Leksi.Edifact;
 
-internal class DataElement
+public class DataElement
 {
-    internal string? Code { get; set; }
-    internal string? Name { get; set; }
-    internal string? Change { get; set; }
-    internal string? Description { get; set; }
-    internal string? Representation { get; set; }
-    internal string? Note { get; set; }
-    internal string? Function { get; set; }
-    internal string? Position { get; set; }
+    public string? Code { get; set; }
+    public string? Name { get; set; }
+    public string? Change { get; set; }
+    public string? Description { get; set; }
+    public string? Representation { get; set; }
+    public string? Note { get; set; }
+    public string? Function { get; set; }
+    public string? Position { get; set; }
 }

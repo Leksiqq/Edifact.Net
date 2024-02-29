@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Collections;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO.Compression;
 using System.Reflection;
@@ -11,212 +10,67 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.XPath;
+using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
 
-public class EdifactDownloader: IDownloader
+public class EdifactDownloader : IDownloader
 {
     public event DirectoryNotFoundEventHandler? DirectoryNotFound;
     public event DirectoryDownloadedEventHandler? DirectoryDownloaded;
 
-    #region const
-    private const string s_webSite = "https://unece.org";
-    private const string s_webSite1 = "https://www.unece.org";
-    private const string s_directoryNotExistsFormat = "Directory not exists: {0}";
-    private const string s_rmRegexTuningName = "Net.Leksi.Edifact.Properties.regex_tuning";
-    private const string s_rmFixedName = "Net.Leksi.Edifact.Properties.fixed";
-    private const string s_rmUnslName = "Net.Leksi.Edifact.Properties.unsl";
-    private const string s_rmLabelsName = "Net.Leksi.Edifact.Properties.labels";
-    private const string s_typeAlreadyDeclared = "TYPE_ALREADY_DECLARED";
-    private const string s_directoryFormat = "D{0:00}{1}";
-    private const string s_defaultTargetDirectory = "xsd";
-    private const string s_pathDam = "/DAM/trade/untdid/{0}/{1}.zip";
-    private const string s_pathNoDam = "/fileadmin/DAM/trade/untdid/{0}/{1}.zip";
-    private const string s_uriFormat = "{0}{1}";
-    private const string s_fileNameFormat = "{0}.{1}";
-    private const string s_messagePattern = "^([A-Z]{{6}}){0}\\.{1}$";
-    private const string s_fileNotFoundFormat = "FILE_FOR_DIRECTORY_NOT_FOUND";
-    private const string s_slash = "\\";
-    private const string s_d20b = "D20B";
-    private const string s_d9 = "D9";
-    private const string s_un = "UN";
-    private const string s_postfix_S = "_S";
-    private const string s_postfix_D = "_D";
-    private const string s_edcd = "edcd";
-    private const string s_d96b = "D96B";
-    private const string s_trcd = "trcd";
-    private const string s_edsd = "edsd";
-    private const string s_trsd = "trsd";
-    private const string s_eded = "eded";
-    private const string s_tred = "tred";
-    private const string s_uncl = "uncl";
-    private const string s_unsl = "unsl";
-    private const string s_trcl = "trcl-";
-    private const string s_edcl = "edcl-";
-    private const string s_idcd = "idcd";
-    private const string s_idsd = "idsd";
-    private const string s_filePatternFormat = "{0}*.{1}";
-    private const string s_unslFileNameFormat = "{0}{1}.{2}";
-    private const string s_unslMessageFormat = "UNSL_MESSAGE";
-    private const string s_unsl_ = "unsl-";
-    private const string s_sourceArchiveDir = "--source";
-    private const string s_preparedFilesDir = "--prepared";
-    private const string s_failedUnzip = "FAILED_UNZIP";
-    private const string s_usingExternalUnzip = "USING_EXTERNAL_UNZIP";
-    private const string s_cmd = "cmd";
-    private const string s_args = "args";
-    private const string s_zipPattern = "*.zip";
-    private const string s_logMessage = "{message}";
-    private const string s_receivingDirectory = "RECEIVING_DIRECTORY";
-    private const string s_d16a = "D16A";
-    private const string s_macosx = "__MACOSX";
-    private const string s_edifact_xsd = "edifact.xsd";
-    private const string s_xsdFileNameFormat = "{0}.xsd";
-    private const string s_tmpXsdFileNameFormat = "_{0}.xsd";
-    private const string s_duplicatedTypeXPathFormat = "//xs:complexType[@name='{0}'][2]";
-    private const string s_simpleTypesFileName = "simpletypes.xsd";
-    private const string s_typesFileName = "types.xsd";
-    private const string s_segmentsFileName = "segments.xsd";
-    private const string s_sharp = "#";
-    private const string s_messageNotFound = "MESSAGE_NOT_FOUND";
-    private const string s_loadFixedFile = "LOAD_FIXED_FILE";
-    private const string s_commentsXPath = "/comment()[1]";
-    private const string s_unMessageFormat = " UN/{0} ";
-    private const string s_message = "message";
-    private const string s_sequenceIdStructureXPath = "//xs:sequence[@id='structure']";
-    private const string s_xsPrefix = "xs";
-    private const string s_element = "element";
-    private const string s_elementByNameXPathFormat = "xs:element[@name='{0}']";
-    private const string s_name = "name";
-    private const string s_type = "type";
-    private const string s_sg_ = "SG-";
-    private const string s_complexType = "complexType";
-    private const string s_sequence = "sequence";
-    private const string s_lastElementComplexTypeSequenceXPath = "xs:element[last()]/xs:complexType/xs:sequence";
-    private const string s_ancestorSequenceXPath = "ancestor::xs:sequence[1]";
-    private const string s_sequenceIdStructureElementXPath = "//xs:sequence[@id='structure']//xs:element";
-    private const string s_sgNameFormat = "SG-{0}";
-    private const string s_ancestorElement = "ancestor::xs:element[1]";
-    private const string s_invalidStructure = "INVALID_STRUCTURE";
-    private const string s_minOccurs = "minOccurs";
-    private const string s_maxOccurs = "maxOccurs";
-    private const string s_exceptionParsingMessage = "EXCEPTION_PARSING_MESSAGE";
-    private const string s_segments = "segments";
-    private const string s_schema = "schema";
-    private const string s_noItemsForElement = "NO_ITEMS_FOR_ELEMENT";
-    private const string s_parentXPath = "..";
-    private const string s_annotation = "annotation";
-    private const string s_documentation = "documentation";
-    private const string s_changeIndicatorFormat = "Change indicator: {0}";
-    private const string s_complexContent = "complexContent";
-    private const string s_extension = "extension";
-    private const string s_upComplexContentExtension = "../xs:complexContent/xs:extension";
-    private const string s_base = "base";
-    private const string s_genericSegment = "GENERIC-SEGMENT";
-    private const string s_lastElement = "xs:element[last()]";
-    private const string s_renameElementFormat = "E{0}";
-    private const string s_types = "types";
-    private const string s_simpleTypes = "simpletypes";
-    private const string s_noItemsForComplexType = "NO_ITEMS_FOR_COMPLEX_TYPE";
-    private const string s_complexTypeByNameRestrictionFormat = "xs:complexType[@name='E{0:0000}']//xs:restriction";
-    private const string s_enumeration = "enumeration";
-    private const string s_value = "value";
-    private const string s_e = "E";
-    private const string s_n = "n";
-    private const string s_pattern = "pattern";
-    private const string s_numberTypePatternFormat = "^-?([0-9]\\.?){{{0}{1}}}[0-9]$";
-    private const string s_minOccursPatternFormat = "{0},";
-    private const string s_numberTypePattern1Format = "^-?[^.]*\\.?[^.]+$";
-    private const string s_length = "length";
-    private const string s_minLength = "minLength";
-    private const string s_maxLength = "maxLength";
-    private const string s_noSimpleTypes = "NO_SIMPLE_TYPES";
-    private const string s_0051 = "0051";
-    private const string s_0052 = "0052";
-    private const string s_0054 = "0054";
-    private const string s_0065 = "0065";
-    private const string s_downloadMessage = "DOWNLOAD_MESSAGE";
-    #endregion const
-
-    private static readonly ResourceManager s_rmRegexTuning;
+    private static readonly List<string> s_directories = [];
+    private static readonly Regex s_reRepr = new("(a?n?)((?:\\.\\.)?)(\\d+)");
+    private static readonly Regex s_reMessageName = new("^(?<name>[A-Z]{6})_D$");
+    private static readonly Regex s_reXmlNs = new($"\\s(?<attr>targetNamespace|xmlns)\\s*=\\s*\"{Properties.Resources.edifact_ns}\"");
+    private static readonly Regex s_reOccursNote = new("The\\s+component\\s+(?<code>\\d{4})\\s+-\\s+[^-]+\\s+-\\s+occurs\\s+(?<maxOccurs>\\d+)\\s+times\\s+in\\s+the\\s+composite");
+    private static readonly Regex s_reDirectoriesInterval = new("^(?<start>D\\d{2}[A-Z])(?<interval>\\s*-\\s*(?<finish>D\\d{2}[A-Z])?)?$");
+    private static readonly DirectoryComparer s_directoryComparer = new();
     private static readonly ResourceManager s_rmFixed;
-    private static readonly ResourceManager s_rmUnsl;
-    private static readonly ResourceManager s_rmLabels;
-    private static readonly Regex _reExternalUnzip = new("^\\s*(?<cmd>(?:\\\"[^\"]+\\\")|(?:[^\\s]+))(?<args>.+)$");
-    private static readonly Regex _reRepr = new("(a?n?)((?:\\.\\.)?)(\\d+)");
-    private static readonly List<string> _directories = [];
 
-    private readonly EdifactDownloaderOptions _options;
-    private readonly Regex _reTypeAlreadyDeclared;
-    private readonly HttpClient _wc = new();
-    private readonly XmlDocument _xsd = new();
-    private readonly string _targetDirectory;
-    private readonly string _preparedDir;
     private readonly ILogger<EdifactDownloader>? _logger;
+    private readonly EdifactDownloaderOptions _options;
     private readonly string _tmpDir;
+    private readonly HttpClient _wc = new();
+    private readonly XmlResolver? _xmlResolver;
     private readonly XmlNamespaceManager _man;
-    private readonly XmlResolver ?_xmlResolver;
+    private readonly NameTable _nameTable = new();
+    private readonly List<string> _generatedFiles = [];
+    private readonly List<string> _requestedDirectories = [];
 
     private string? _directory;
-    private string _dir = null!;
-    private string _fname = null!;
-    private string _ext = null!;
-    private string _uncl = null!;
-    private string _unsl = null!;
-    private string[] _uncls = null!;
-    private string[] _unsls = null!;
-    private string _unsl_message = null!;
-    private string _edcd = null!;
-    private string _edsd = null!;
-    private string _eded = null!;
-    private string _idcd = null!;
-    private string _idsd = null!;
-    private string _mPostfix = string.Empty;
-    private int _num_elements = 0;
-    private int _num_sys_elements = 0;
-
+    private string? _eded;
+    private string? _edcd;
+    private string? _idcd;
+    private string? _edsd;
+    private string? _idsd;
+    private string? _uncl;
+    private string? _ext;
+    private string _hrChars = s_minus;
+    internal string Ns => !string.IsNullOrEmpty(_options.Namespace)
+        ? _options.Namespace
+        : Properties.Resources.edifact_ns;
     static EdifactDownloader()
     {
-        s_rmRegexTuning = new ResourceManager(s_rmRegexTuningName, Assembly.GetExecutingAssembly());
-        s_rmFixed = new ResourceManager(s_rmFixedName, Assembly.GetExecutingAssembly());
-        s_rmUnsl = new ResourceManager(s_rmUnslName, Assembly.GetExecutingAssembly());
-        s_rmLabels = new ResourceManager(s_rmLabelsName, Assembly.GetExecutingAssembly());
+        s_rmFixed = new ResourceManager($"{typeof(Properties.Resources).Namespace}.{s_rmFixedName}", Assembly.GetExecutingAssembly());
+        for (int i = 1997; i <= DateTime.Now.Year; i++)
+        {
+            for (char c = 'A'; c <= 'B'; c++)
+            {
+                s_directories.Add(string.Format(s_directoryFormat, i % 100, c).ToUpper());
+            }
+            if (i == 2001)
+            {
+                s_directories.Add(string.Format(s_directoryFormat, i % 100, 'C').ToUpper());
+            }
+        }
     }
     public EdifactDownloader(IServiceProvider services)
     {
         _options = services.GetRequiredService<EdifactDownloaderOptions>();
 
         _logger = services.GetService<ILogger<EdifactDownloader>>();
-        _xmlResolver = services.GetService<XmlResolver>();
-
-        _reTypeAlreadyDeclared = new Regex(s_rmRegexTuning.GetString(s_typeAlreadyDeclared)!);
-        for (int i = 1994; i <= DateTime.Now.Year; i++)
-        {
-            for (char c = 'A'; c <= 'B'; c++)
-            {
-                _directories.Add(string.Format(s_directoryFormat, i % 100, c).ToUpper());
-            }
-            if (i == 2001)
-            {
-                _directories.Add(string.Format(s_directoryFormat, i % 100, 'C').ToUpper());
-            }
-        }
-        if (_options.TargetUri is null)
-        {
-            _targetDirectory = s_defaultTargetDirectory;
-        }
-        else
-        {
-            _targetDirectory = _options.TargetUri.AbsolutePath;
-        }
-        if (_options.TmpFolder is { } && !Directory.Exists(Path.GetFullPath(_options.TmpFolder)))
-        {
-            throw new Exception(string.Format(s_directoryNotExistsFormat, _options.TmpFolder));
-        }
-        if (_options.Directories is { })
-        {
-            _directory = _options.Directories.ToUpper();
-        }
+        _xmlResolver = new Resolver(services);
         _tmpDir = _options.TmpFolder is { } ? Path.GetFullPath(_options.TmpFolder) : Path.GetTempPath();
         if (_options.TmpFolder is null)
         {
@@ -229,65 +83,141 @@ public class EdifactDownloader: IDownloader
 
             _tmpDir = tempDirectory;
         }
-        if (!_tmpDir.EndsWith('\\'))
-        {
-            _tmpDir += s_slash;
-        }
-        if (!Directory.Exists(_targetDirectory))
-        {
-            Directory.CreateDirectory(_targetDirectory);
-        }
-        _preparedDir = Path.Combine(_tmpDir, s_preparedFilesDir);
-
-        _man = new XmlNamespaceManager(_xsd.NameTable);
+        _man = new XmlNamespaceManager(_nameTable);
         _man.AddNamespace(s_xsPrefix, Properties.Resources.schema_ns);
+        if(_options.ConnectionTimeout is int timeout)
+        {
+            _wc.Timeout = TimeSpan.FromSeconds(timeout);
+        }
+        if(_options.Directories is { })
+        {
+            string[] parts = [.. 
+                _options.Directories.Split(
+                    ',', 
+                    StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries
+                )
+                .Select(v => v.ToUpper())
+                .OrderBy(v => v, s_directoryComparer)
+            ];
+            foreach( string part in parts )
+            {
+                Match m = s_reDirectoriesInterval.Match(part);
+                if (
+                    !m.Success 
+                    || (
+                        !string.IsNullOrEmpty(m.Groups[s_finish].Value) 
+                        && s_directoryComparer.Compare(m.Groups[s_finish].Value, m.Groups[s_start].Value) < 0
+                    )
+                )
+                {
+                    throw new Exception(string.Format(s_rmLabels.GetString(s_invalidDirectoryNameOrInterval)!, part));
+                }
+                string start = m.Groups[s_start].Value;
+                _requestedDirectories.Add(start);
+                if (!string.IsNullOrEmpty(m.Groups[s_interval].Value))
+                {
+                    string finish = !string.IsNullOrEmpty(m.Groups[s_finish].Value) ? m.Groups[s_finish].Value : s_d79;
+                    int pos = 0;
+                    for(
+                        ; 
+                        (
+                            pos < s_directories.Count 
+                            && s_directoryComparer.Compare(s_directories[pos], start) < 0
+                        ); 
+                        ++pos
+                    ) { }
+                    for (
+                        ;
+                        (
+                            pos < s_directories.Count
+                            && s_directoryComparer.Compare(s_directories[pos], start) >= 0
+                            && s_directoryComparer.Compare(s_directories[pos], finish) <= 0
+                        );
+                        ++pos
+                    ) 
+                    {
+                        if(
+                            s_directoryComparer.Compare(s_directories[pos], start) > 0
+                            && s_directoryComparer.Compare(s_directories[pos], finish) < 0
+                        )
+                        {
+                            _requestedDirectories.Add(s_directories[pos]);
+                        }
+                    }
+                    if (!string.IsNullOrEmpty(m.Groups[s_finish].Value))
+                    {
+                        _requestedDirectories.Add(finish);
+                    }
+                }
+            }
+        }
+        else
+        {
+            _requestedDirectories.AddRange(s_directories);
+        }
     }
-
     public async Task DownloadAsync(CancellationToken stoppingToken)
     {
         if (_directory is null)
         {
-            foreach (string d in _directories)
+            foreach (string d in _requestedDirectories)
             {
                 _directory = d;
-                try
-                {
-                    await DownloadAsync(stoppingToken);
-                }
-                catch (Exception)
-                {
-                }
+                await DownloadAsync(stoppingToken);
             }
             return;
         }
+        _generatedFiles.Clear();
+        if(s_directoryComparer.Compare(_directory, s_d01c) < 0)
+        {
+            _hrChars = "\\xC4";
+        }
+        else
+        {
+            _hrChars = s_minus;
+        }
         _logger?.LogInformation(s_logMessage, string.Format(s_rmLabels.GetString(s_receivingDirectory)!, _directory));
-
         try
         {
-            InitContext();
-
-            Uri requestUri = GetRequestUri();
-
-            HttpResponseMessage response = await _wc.GetAsync(requestUri, stoppingToken);
-
-            ExtractAll(response.Content.ReadAsStream(stoppingToken));
-
-            LoadFixedFilesFromResources();
-
-            if (s_d96b.Equals(_directory))
+            if (s_directories.Contains(_directory))
             {
-                new Compiler96B().Run(_tmpDir, _directory, null);
+                InitContext();
+
+                Uri requestUri = GetRequestUri();
+
+                HttpResponseMessage response = await _wc.GetAsync(requestUri, stoppingToken);
+
+                if(
+                    response.StatusCode != System.Net.HttpStatusCode.OK
+                    || !ExtractAll(response.Content.ReadAsStream(stoppingToken))
+                )
+                {
+                    DirectoryNotFound?.Invoke(this, new DirectoryNotFoundEventArgs
+                    {
+                        Directory = _directory!,
+                        Url = requestUri.OriginalString
+                    }); ;
+                }
+                else
+                {
+                    LoadFixedFilesFromResources();
+
+                    await BuildSchemasAsync(stoppingToken);
+                    DirectoryDownloaded?.Invoke(this, new DirectoryDownloadedEventArgs
+                    {
+                        Directory = _directory,
+                        Files = [.. _generatedFiles],
+                    });
+                }
             }
-
-            PrepareFilesLists();
-
-            CopyNeededFilesToPreparedDirectory();
-
-            BuildSchemas();
+            else
+            {
+                _logger?.LogWarning(s_logMessage, string.Format(s_rmLabels.GetString(s_directoryNotFound)!, _directory));
+            }
         }
         catch (Exception ex)
         {
-            if(ex is not InvalidDataException)
+            if (ex is not InvalidDataException)
             {
                 _logger?.LogError(ex, s_logMessage, ex.Message);
             }
@@ -302,235 +232,613 @@ public class EdifactDownloader: IDownloader
         }
     }
 
-    private void BuildSchemas()
+    private async Task BuildSchemasAsync(CancellationToken stoppingToken)
     {
-        File.WriteAllText(Path.Combine(_targetDirectory, s_edifact_xsd), ReplaceNs(Properties.Resources.edifact));
-        XmlSchemaSet? xmlSchemaSet = new(_xsd.NameTable)
-        {
+        string targetFile = Path.Combine(_tmpDir, s_edifactXsd);
+        SaveXmlDocument(InitXmlDocument(s_edifact), targetFile);
+        _generatedFiles.Add(targetFile);
+
+        await MakeElementsAsync(stoppingToken);
+
+        await MakeCompositesAsync(stoppingToken);
+
+        await MakeSegmentsAsync(stoppingToken);
+
+        XmlSchemaSet schemaSet = new(_nameTable) {
             XmlResolver = _xmlResolver
         };
-        xmlSchemaSet.ValidationEventHandler += ValidationEventHandler;
+        schemaSet.ValidationEventHandler += SchemaSet_ValidationEventHandler;
+        schemaSet.Add(Ns, Path.Combine(_tmpDir, s_segmentsXsd));
+        schemaSet.Compile();
 
-        DeleteTmpFile(s_simpleTypes);
-        DeleteTmpFile(s_types);
-        DeleteTmpFile(s_segments);
+        await MakeMessagesAsync(schemaSet, stoppingToken);
+    }
 
-        CultureInfo ci = Thread.CurrentThread.CurrentUICulture;
-        Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-
-        string targetDirectory = Path.Combine(_targetDirectory, s_un, _directory!);
-        if (Directory.Exists(targetDirectory))
+    private async Task MakeMessagesAsync(XmlSchemaSet schemaSet, CancellationToken stoppingToken)
+    {
+        if(_options.Message != s_sharp)
         {
-            Directory.Delete(targetDirectory, true);
-        }
-        Directory.CreateDirectory(targetDirectory);
-
-        _num_elements = 0;
-        _num_sys_elements = 0;
-
-        MakeSimpleTypes(
-            File.ReadAllLines(
-                Path.Combine(
-                    _preparedDir,
-                    string.Format(s_fileNameFormat, _eded, _ext)
+            string[] messages = Directory.GetFiles(
+                _tmpDir, 
+                string.Format(
+                    s_messagesPatternFormat,
+                    _options.Message ?? s_asterisk, 
+                    _ext
                 )
             )
+                .Select(f => s_reMessageName.Match(Path.GetFileNameWithoutExtension(f)))
+                .Where(m => m.Success)
+                .Select(m => m.Groups[s_name].Value)
+                .ToArray()
+            ;
+            if (_options.Message is { } && messages.Length == 0)
+            {
+                throw new Exception(string.Format(s_rmLabels.GetString("MESSAGE_NOT_FOUND")!, _directory, _options.Message));
+            }
+            foreach (string mess in messages)
+            {
+                await MakeMessageAsync(schemaSet, mess, stoppingToken);
+            }
+        }
+    }
+
+    private async Task MakeMessageAsync(XmlSchemaSet schemaSet, string mess, CancellationToken stoppingToken)
+    {
+        XmlDocument doc = InitXmlDocument(s_message);
+        string targetFile = Path.Combine(_tmpDir, string.Format(s_fileNameFormat, mess, s_xsd));
+        SaveXmlDocument(
+            doc,
+            string.Format(
+                s_fileNameFormat,
+                targetFile,
+                s_src
+            )
         );
-        foreach (string unc in _uncls)
+        using TextReader reader = new StreamReader(
+                File.OpenRead(
+                    Path.Combine(
+                        _tmpDir,
+                        string.Format(s_messagesPatternFormat, mess, _ext)
+                    )
+                ),
+                Encoding.Latin1
+            );
+        MessageParser parser = new(_hrChars);
+        Stack<Segment> segmentGroupsStack = [];
+        Stack<int> positionStack = [];
+        Stack<XmlElement> sequenceStack = [];
+        Dictionary<string, XmlElement> elementsByPosition = [];
+        sequenceStack.Push(
+            (XmlElement)doc.CreateNavigator()!
+                .SelectSingleNode(s_selectStructureSequenceXPath, _man)!
+                .UnderlyingObject!
+        );
+        try
         {
-            MakeCodelist(
-                File.ReadAllLines(
-                    Path.Combine(_preparedDir, Path.GetFileName(unc))
+            await foreach (Segment? segment in parser.ParseAsync(reader, stoppingToken))
+            {
+                if (elementsByPosition.TryGetValue(segment.Position!, out XmlElement? el))
+                {
+                    if(segment.MinOccurs != s_m)
+                    {
+                        el.SetAttribute(s_minOccurs, s_0);
+                    }
+                    if(segment.MaxOccurs != s_1)
+                    {
+                        el.SetAttribute(s_maxOccurs, segment.MaxOccurs);
+                    }
+                }
+                else
+                {
+                    while (
+                        segmentGroupsStack.Count > 0
+                        && positionStack.Peek() == segmentGroupsStack.Peek().Children!.Length
+                    )
+                    {
+                        segmentGroupsStack.Pop();
+                        positionStack.Pop();
+                        sequenceStack.Pop();
+                    }
+                    if (segmentGroupsStack.Count == 0 || segmentGroupsStack.Peek().Children![positionStack.Peek()] == segment.Code)
+                    {
+                        XmlElement element = doc.CreateElement(s_xsPrefix, s_element, Properties.Resources.schema_ns);
+                        elementsByPosition.Add(segment.Position!, element);
+                        sequenceStack.Peek().AppendChild(element);
+                        element.SetAttribute(s_name, segment.Code);
+                        CreateAnnotation(element, segment);
+                        if (segmentGroupsStack.Count > 0)
+                        {
+                            positionStack.Push(positionStack.Pop() + 1);
+                        }
+                        if (s_reSegmentGroup.IsMatch(segment.Code!))
+                        {
+                            segmentGroupsStack.Push(segment);
+                            positionStack.Push(0);
+                            XmlElement ct = doc.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns);
+                            element.AppendChild(ct);
+                            XmlElement seq = doc.CreateElement(s_xsPrefix, s_sequence, Properties.Resources.schema_ns);
+                            ct.AppendChild(seq);
+                            sequenceStack.Push(seq);
+                        }
+                        else
+                        {
+                            element.SetAttribute(s_type, segment.Code);
+                        }
+                    }
+                    else if(segmentGroupsStack.Count > 0)
+                    {
+                        throw new Exception(
+                            string.Format(s_rmLabels.GetString("INVALID_SEQUENCE")!, 
+                                mess,
+                                segment.Position, 
+                                segmentGroupsStack.Peek().Children![positionStack.Peek()], 
+                                segment.Code
+                            )
+                        );
+                    }
+                }
+            }
+            if (segmentGroupsStack.Count > 0)
+            {
+                throw new Exception();
+            }
+            SaveXmlDocument(doc, targetFile);
+            if (new FileInfo(targetFile).Length == new FileInfo(string.Format(s_fileNameFormat, targetFile, s_src)).Length)
+            {
+                throw new Exception(string.Format(s_rmLabels.GetString(s_noSegmentsFound)!, _directory));
+            }
+            XmlSchemaSet mesageSchemaSet = new()
+            {
+                XmlResolver = _xmlResolver
+            };
+            mesageSchemaSet.ValidationEventHandler += SchemaSet_ValidationEventHandler;
+            mesageSchemaSet.Add(schemaSet);
+            mesageSchemaSet.Add(Ns, targetFile);
+            mesageSchemaSet.Compile();
+
+            _generatedFiles.Add(targetFile);
+        }
+        catch (Exception ex)
+        {
+            throw new AggregateException(mess, ex);
+        }
+    }
+
+    private async Task MakeSegmentsAsync(CancellationToken stoppingToken)
+    {
+        XmlDocument doc = InitXmlDocument(s_segments);
+        SaveXmlDocument(doc, Path.Combine(_tmpDir, string.Format(s_fileNameFormat, s_segmentsXsd, s_src)));
+
+        using TextReader edsd = new StreamReader(
+                File.OpenRead(
+                    Path.Combine(
+                        _tmpDir,
+                        string.Format(s_fileNameFormat, _edsd, _ext)
+                    )
+                ),
+                Encoding.Latin1
+            );
+        await MakeSegmentsOfUsageMeanAsync(doc, edsd, 'C', stoppingToken);
+        using TextReader idsd = new StreamReader(
+                File.OpenRead(
+                    Path.Combine(
+                        _tmpDir,
+                        string.Format(s_fileNameFormat, _idsd, _ext)
+                    )
+                ),
+                Encoding.Latin1
+            );
+        await MakeSegmentsOfUsageMeanAsync(doc, idsd, 'E', stoppingToken);
+        string targetFile = Path.Combine(_tmpDir, s_segmentsXsd);
+        SaveXmlDocument(doc, targetFile);
+        if (new FileInfo(targetFile).Length == new FileInfo(string.Format(s_fileNameFormat, targetFile, s_src)).Length)
+        {
+            throw new Exception(string.Format(s_rmLabels.GetString(s_noSegmentsFound)!, _directory));
+        }
+        _generatedFiles.Add(targetFile);
+    }
+
+    private async Task MakeSegmentsOfUsageMeanAsync(XmlDocument doc, TextReader reader, char nameFirstChar, CancellationToken stoppingToken)
+    {
+        Dictionary<string, int[]> occurs = [];
+        Dictionary<string, Element> elements = [];
+        List<string> codes = [];
+
+        SegmentParser parser = new(_hrChars, nameFirstChar);
+        await foreach (Segment segment in parser.ParseAsync(reader, stoppingToken))
+        {
+            XmlElement complexType = doc.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns);
+            doc.DocumentElement!.AppendChild(complexType);
+            complexType.SetAttribute(s_name, null, segment.Code);
+            CreateAnnotation(complexType, segment);
+
+            XmlElement complexContent = doc.CreateElement(s_xsPrefix, s_complexContent, Properties.Resources.schema_ns);
+            complexType.AppendChild(complexContent);
+
+            XmlElement extension = doc.CreateElement(s_xsPrefix, s_extension, Properties.Resources.schema_ns);
+            complexContent.AppendChild(extension);
+            extension.SetAttribute(s_base, s_baseSegment);
+
+            XmlElement sequence = doc.CreateElement(s_xsPrefix, s_sequence, Properties.Resources.schema_ns);
+            extension.AppendChild(sequence);
+
+            elements.Clear();
+            occurs.Clear();
+            codes.Clear();
+
+            foreach (Component component in segment.Components!)
+            {
+                if (!int.TryParse(component.MaxOccurs!, out int maxOccurs))
+                {
+                    maxOccurs = 1;
+                }
+                if (occurs.TryGetValue(component.Code!, out int[]? occur))
+                {
+                    occur[1] += maxOccurs;
+                    if (component.MinOccurs == s_m)
+                    {
+                        ++occur[0];
+                    }
+                }
+                else
+                {
+                    codes.Add(component.Code!);
+                    occurs.Add(component.Code!, [component.MinOccurs == s_m ? 1 : 0, maxOccurs]);
+                    elements.Add(component.Code!, component);
+                }
+            }
+            foreach (string code in codes)
+            {
+                XmlElement element = doc.CreateElement(s_xsPrefix, s_element, Properties.Resources.schema_ns);
+                string name = code.StartsWith(nameFirstChar) ? code : string.Format(s_renameElementFormat, code);
+                element.SetAttribute(s_name, null, name);
+                element.SetAttribute(s_type, null, name);
+                if (occurs[code][0] != 1)
+                {
+                    element.SetAttribute(s_minOccurs, null, occurs[code][0].ToString());
+                }
+                if (occurs[code][1] != 1)
+                {
+                    element.SetAttribute(s_maxOccurs, null, occurs[code][1].ToString());
+                }
+                CreateAnnotation(element, elements[code]);
+                sequence.AppendChild(element);
+            }
+        }
+    }
+    private async Task MakeCompositesAsync(CancellationToken stoppingToken)
+    {
+        XmlDocument doc = InitXmlDocument(s_composites);
+        SaveXmlDocument(doc, Path.Combine(_tmpDir, string.Format(s_fileNameFormat, s_compositesXsd, s_src)));
+
+        using TextReader edcd = new StreamReader(
+                File.OpenRead(
+                    Path.Combine(
+                        _tmpDir,
+                        string.Format(s_fileNameFormat, _edcd, _ext)
+                    )
+                ),
+                Encoding.Latin1
+            );
+        await MakeCompositesOfUsageMeanAsync(doc, edcd, 'C', stoppingToken);
+        using TextReader idcd = new StreamReader(
+                File.OpenRead(
+                    Path.Combine(
+                        _tmpDir,
+                        string.Format(s_fileNameFormat, _idcd, _ext)
+                    )
+                ),
+                Encoding.Latin1
+            );
+        await MakeCompositesOfUsageMeanAsync(doc, idcd, 'E', stoppingToken);
+        string targetFile = Path.Combine(_tmpDir, s_compositesXsd);
+        SaveXmlDocument(doc, targetFile);
+        if (new FileInfo(targetFile).Length == new FileInfo(string.Format(s_fileNameFormat, targetFile, s_src)).Length)
+        {
+            throw new Exception(string.Format(s_rmLabels.GetString(s_noTypesFound)!, _directory));
+        }
+        _generatedFiles.Add(targetFile);
+    }
+    private void SchemaSet_ValidationEventHandler(object? sender, ValidationEventArgs e)
+    {
+        switch (e.Severity)
+        {
+            case XmlSeverityType.Warning:
+                _logger?.LogWarning(s_logMessage, e.Message);
+                break;
+            case XmlSeverityType.Error:
+                _logger?.LogWarning(s_logMessage, e.Message);
+                break;
+        }
+    }
+    private async Task MakeCompositesOfUsageMeanAsync(XmlDocument doc, TextReader reader, char nameFirstChar, CancellationToken stoppingToken)
+    {
+        Dictionary<string, int[]> occurs = [];
+        Dictionary<string, Element> elements = [];
+        List<string> codes = [];
+
+        CompositeParser parser = new(_hrChars, nameFirstChar);
+        await foreach (Composite composite in parser.ParseAsync(reader, stoppingToken))
+        {
+            XmlElement complexType = doc.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns);
+            complexType.SetAttribute(s_name, null, composite.Code);
+            CreateAnnotation(complexType, composite);
+            XmlElement sequence = doc.CreateElement(s_xsPrefix, s_sequence, Properties.Resources.schema_ns);
+
+            elements.Clear();
+            occurs.Clear();
+            codes.Clear();
+
+            foreach(Element element in composite.Elements)
+            {
+                if(occurs.TryGetValue(element.Code!, out int[]? occur))
+                {
+                    ++occur[1];
+                    if(element.MinOccurs == s_m)
+                    {
+                        ++occur[0];
+                    }
+                }
+                else
+                {
+                    codes.Add(element.Code!);
+                    occurs.Add(element.Code!, [element.MinOccurs == s_m ? 1 : 0, 1]);
+                    elements.Add(element.Code!, element);
+                }
+            }
+            if (composite.Note is { })
+            {
+                int pos = 0;
+                Match m;
+                while((m = s_reOccursNote.Match(composite.Note[pos..])).Success)
+                {
+                    if (occurs.TryGetValue(m.Groups[s_code].Value, out int[]? occur))
+                    {
+                        occur[1] = int.Parse(m.Groups[s_maxOccurs].Value);
+                    }
+                    pos += m.Groups[0].Index + m.Groups[0].Length;
+                }
+                if(pos == 0)
+                {
+                    _logger?.LogWarning(s_logMessage, string.Format(s_noteAtComposite, composite.Code, composite.Note));
+                }
+            }
+            foreach (string code in codes)
+            {
+                XmlElement element = doc.CreateElement(s_xsPrefix, s_element, Properties.Resources.schema_ns);
+                element.SetAttribute(s_name, null, string.Format(s_renameElementFormat, code));
+                element.SetAttribute(s_type, null, string.Format(s_renameElementFormat, code));
+                if (occurs[code][0] != 1)
+                {
+                    element.SetAttribute(s_minOccurs, null, occurs[code][0].ToString());
+                }
+                if (occurs[code][1] != 1)
+                {
+                    element.SetAttribute(s_maxOccurs, null, occurs[code][1].ToString());
+                }
+                CreateAnnotation(element, elements[code]);
+                sequence.AppendChild(element);
+            }
+            complexType.AppendChild(sequence);
+            doc.DocumentElement!.AppendChild(complexType);
+        }
+    }
+    private async Task MakeElementsAsync(CancellationToken stoppingToken)
+    {
+        using TextReader eded = new StreamReader(
+                File.OpenRead(
+                    Path.Combine(
+                        _tmpDir,
+                        string.Format(s_fileNameFormat, _eded, _ext)
+                    )
+                ),
+                Encoding.Latin1
+            );
+        using TextReader uncl = new StreamReader(
+                File.OpenRead(
+                    Path.Combine(
+                        _tmpDir,
+                        string.Format(s_fileNameFormat, _uncl, _ext)
+                    )
+                ),
+                Encoding.Latin1
+            );
+        XmlDocument doc = InitXmlDocument(s_elements);
+        SaveXmlDocument(doc, Path.Combine(_tmpDir, string.Format(s_fileNameFormat, s_elementsXsd, s_src)));
+        DataElementParser parser = new(_hrChars);
+        await foreach (DataElement dataElement in parser.ParseAsync(eded, stoppingToken))
+        {
+            XmlElement complexType = doc.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns);
+            complexType.SetAttribute(s_name, null, string.Format(s_renameElementFormat, dataElement.Code));
+            CreateAnnotation(complexType, dataElement);
+            XmlElement simpleContent = doc.CreateElement(s_xsPrefix, s_simpleContent, Properties.Resources.schema_ns);
+            if (!string.IsNullOrEmpty(dataElement.Representation))
+            {
+                XmlElement restriction = doc.CreateElement(s_xsPrefix, s_restriction, Properties.Resources.schema_ns);
+                restriction.SetAttribute(s_base, s_d);
+                ApplyRepresentation(restriction, dataElement.Representation);
+                simpleContent.AppendChild(restriction);
+            }
+            complexType.AppendChild(simpleContent);
+            doc.DocumentElement!.AppendChild(complexType);
+        }
+        EnumerationParser enumerationParser = new(_hrChars);
+        await foreach (Enumeration en in enumerationParser.ParseAsync(uncl, stoppingToken))
+        {
+            XmlElement restriction = (XmlElement)doc.CreateNavigator()!
+                .SelectSingleNode(
+                    string.Format(s_typeForEnumXPathFormat, en.TypeCode),
+                    _man
+                )?.UnderlyingObject! ?? throw new Exception(string.Format(s_rmLabels.GetString(s_dataElementNotFound)!, en.TypeCode));
+            XmlElement enumeration = doc.CreateElement(s_xsPrefix, s_enumeration, Properties.Resources.schema_ns);
+            enumeration.SetAttribute(s_value, en.Code);
+            CreateAnnotation(enumeration, en);
+            restriction.AppendChild(enumeration);
+        }
+        string targetFile = Path.Combine(_tmpDir, s_elementsXsd);
+        SaveXmlDocument(doc, targetFile);
+        if(new FileInfo(targetFile).Length == new FileInfo(string.Format(s_fileNameFormat, targetFile, s_src)).Length)
+        {
+            throw new Exception(string.Format(s_rmLabels.GetString(s_noSimpleTypesFound)!, _directory));
+        }
+        _generatedFiles.Add(targetFile);
+    }
+    private static void CreateAnnotation(XmlElement element, DataElement source)
+    {
+        if (
+            !string.IsNullOrEmpty(source.Name)
+            || !string.IsNullOrEmpty(source.Description)
+            || !string.IsNullOrEmpty(source.Change)
+            || !string.IsNullOrEmpty(source.Note)
+            || !string.IsNullOrEmpty(source.Function)
+            || !string.IsNullOrEmpty(source.Position)
+        )
+        {
+            XmlElement ann = element.OwnerDocument.CreateElement(s_xsPrefix, s_annotation, Properties.Resources.schema_ns);
+            if (!string.IsNullOrEmpty(source.Name))
+            {
+                XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
+                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_name);
+                documentation.AppendChild(element.OwnerDocument.CreateTextNode(source.Name));
+                ann.AppendChild(documentation);
+            }
+            if (!string.IsNullOrEmpty(source.Description))
+            {
+                XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
+                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_description);
+                documentation.AppendChild(element.OwnerDocument.CreateTextNode(source.Description));
+                ann.AppendChild(documentation);
+            }
+            if (!string.IsNullOrEmpty(source.Note))
+            {
+                XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
+                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_note);
+                documentation.AppendChild(element.OwnerDocument.CreateTextNode(source.Note));
+                ann.AppendChild(documentation);
+            }
+            if (!string.IsNullOrEmpty(source.Change))
+            {
+                XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
+                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_change);
+                documentation.AppendChild(element.OwnerDocument.CreateTextNode(source.Change));
+                ann.AppendChild(documentation);
+            }
+            if (!string.IsNullOrEmpty(source.Function))
+            {
+                XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
+                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_function);
+                documentation.AppendChild(element.OwnerDocument.CreateTextNode(source.Function));
+                ann.AppendChild(documentation);
+            }
+            if (!string.IsNullOrEmpty(source.Position))
+            {
+                XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
+                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_position);
+                documentation.AppendChild(element.OwnerDocument.CreateTextNode(source.Position));
+                ann.AppendChild(documentation);
+            }
+            element.AppendChild(ann);
+        }
+    }
+    private static void SaveXmlDocument(XmlDocument doc, string path)
+    {
+        XmlWriterSettings ws = new()
+        {
+            Indent = true,
+            Encoding = Encoding.UTF8,
+            OmitXmlDeclaration = true
+        };
+        XmlWriter wr = XmlWriter.Create(path, ws);
+        doc.WriteTo(wr);
+        wr.Close();
+    }
+    private static void ApplyRepresentation(XmlElement restr, string repr)
+    {
+        int min_occurs = 0;
+        int max_occurs = 1;
+        bool number = false;
+        Match m = s_reRepr.Match(repr);
+        if (m.Success)
+        {
+            if (s_n.Equals(m.Groups[1].Captures[0].Value))
+            {
+                number = true;
+                min_occurs = 1;
+            }
+            max_occurs = int.Parse(m.Groups[3].Captures[0].Value);
+            if (string.IsNullOrEmpty(m.Groups[2].Captures[0].Value))
+            {
+                min_occurs = max_occurs;
+            }
+        }
+        if (number)
+        {
+            (
+                (XmlElement)restr.AppendChild(
+                    restr.OwnerDocument.CreateElement(s_xsPrefix, s_pattern, Properties.Resources.schema_ns)
+                )!
+            )
+            .SetAttribute(
+                s_value, 
+                string.Format(
+                    s_numberTypePatternFormat, 
+                    min_occurs == max_occurs 
+                        ? string.Empty 
+                        : string.Format(s_minOccursPatternFormat, min_occurs),
+                    max_occurs
                 )
             );
-        }
-        if(_num_sys_elements == 0)
-        {
-            if (_unsl_message != null)
-            {
-                _logger?.LogInformation(s_logMessage, _unsl_message);
-            }
-            foreach (string uns in _unsls)
-            {
-                MakeCodelist(
-                    File.ReadAllLines(
-                        Path.Combine(_preparedDir, Path.GetFileName(uns))
-                    )
-                );
-            }
-        }
-        if (_num_sys_elements == 0)
-        {
-            _logger?.LogWarning(s_logMessage, "todo: _num_sys_elements == 0");
-        }
-        AjustSysElementsList();
-        if (_num_elements == 0)
-        {
-            _logger?.LogWarning(s_logMessage, "todo: _num_elements == 0");
-        }
-        xmlSchemaSet.Add(
-            ReplaceNs(Properties.Resources.edifact_ns),
-            Path.Combine(targetDirectory, s_simpleTypesFileName)
-        );
-
-        MakeTypes(
-            File.ReadAllLines(
-                Path.Combine(
-                    _preparedDir,
-                    string.Format(s_fileNameFormat, _edcd, _ext)
-                )
-            )
-        );
-        //MakeTypes(
-        //    File.ReadAllLines(
-        //        Path.Combine(
-        //            _preparedDir,
-        //            string.Format(s_fileNameFormat, _idcd, _ext)
-        //        )
-        //    )
-        //);
-        xmlSchemaSet.Add(
-            ReplaceNs(Properties.Resources.edifact_ns),
-            Path.Combine(targetDirectory, s_typesFileName)
-        );
-
-        MakeSegments(
-            File.ReadAllLines(
-                Path.Combine(
-                    _preparedDir,
-                    string.Format(s_fileNameFormat, _edsd, _ext)
-                )
-            )
-        );
-        //MakeSegments(
-        //    File.ReadAllLines(
-        //        Path.Combine(
-        //            _preparedDir,
-        //            string.Format(s_fileNameFormat, _idsd, _ext)
-        //        )
-        //    )
-        //);
-        xmlSchemaSet.Add(
-            ReplaceNs(Properties.Resources.edifact_ns),
-            Path.Combine(targetDirectory, s_segmentsFileName)
-        );
-
-        string edmd = null!;
-        List<string> messages = [];
-        if (_options.Message is { })
-        {
-            if (!s_sharp.Equals(_options.Message))
-            {
-                messages.Add(_options.Message);
-            }
-        }
-        else if ("d96b".Equals(_dir))
-        {
-            ListMessages(messages, "HTM");
+            (
+                (XmlElement)restr.AppendChild(
+                    restr.OwnerDocument.CreateElement(s_xsPrefix, s_pattern, Properties.Resources.schema_ns)
+                )!
+            ).SetAttribute(s_value, s_numberTypePattern);
         }
         else
         {
-            ListMessages(messages, _ext);
-        }
-
-        foreach (string message in messages)
-        {
-            _logger?.LogInformation(s_logMessage, string.Format(s_rmLabels.GetString(s_downloadMessage)!, message, _directory));
-            if ("d96b".Equals(_dir))
+            if (min_occurs == max_occurs)
             {
-                new Compiler96B().Run(_tmpDir, _directory!, message);
+                (
+                    (XmlElement)restr.AppendChild(
+                        restr.OwnerDocument.CreateElement(s_xsPrefix, s_length, Properties.Resources.schema_ns)
+                    )!
+                ).SetAttribute(s_value, min_occurs.ToString());
             }
-
-            edmd = message + _mPostfix;
-            if (
-                !File.Exists(
-                    Path.Combine(
-                        _tmpDir, 
-                        string.Format(s_fileNameFormat, edmd, _ext)
-                    )
-                )
-            )
+            else
             {
-                _logger?.LogWarning(s_logMessage, string.Format(s_rmLabels.GetString(s_messageNotFound)!, edmd, _directory));
-                continue;
-            }
-
-            string src = Path.Combine(_tmpDir, string.Format(s_fileNameFormat, edmd, _ext));
-            string dst = Path.Combine(_preparedDir, Path.GetFileName(src));
-
-            if (File.Exists(dst))
-            {
-                File.Delete(dst);
-            }
-            CopyFile(src, dst);
-
-            MakeMessage(message, dst);
-
-            if (
-                File.Exists(
-                    Path.Combine(
-                        targetDirectory, 
-                        string.Format(s_xsdFileNameFormat, message)
-                    )
-                )
-            )
-            {
-                List<XmlSchema> schemas = [];
-                foreach(XmlSchema schema in xmlSchemaSet.Schemas().Cast<XmlSchema>())
+                if (min_occurs > 0)
                 {
-                    schemas.Add(schema);
+                    (
+                        (XmlElement)restr.AppendChild(
+                            restr.OwnerDocument.CreateElement(s_xsPrefix, s_minLength, Properties.Resources.schema_ns)
+                        )!
+                    ).SetAttribute(s_value, min_occurs.ToString());
                 }
-                foreach(XmlSchema schema in schemas)
-                {
-                    xmlSchemaSet.Remove(schema);
-                }
-
-                xmlSchemaSet.Add(
-                    ReplaceNs(Properties.Resources.edifact_ns),
-                    Path.Combine(targetDirectory, s_simpleTypesFileName)
-                );
-                xmlSchemaSet.Add(
-                    ReplaceNs(Properties.Resources.edifact_ns),
-                    Path.Combine(targetDirectory, s_typesFileName)
-                );
-                xmlSchemaSet.Add(
-                    ReplaceNs(Properties.Resources.edifact_ns),
-                    Path.Combine(targetDirectory, s_segmentsFileName)
-                );
-                xmlSchemaSet.Add(
-                    ReplaceNs(Properties.Resources.edifact_ns),
-                    Path.Combine(
-                        targetDirectory,
-                        string.Format(s_xsdFileNameFormat, message)
-                    )
-                );
-                xmlSchemaSet.Compile();
+                (
+                    (XmlElement)restr.AppendChild(
+                        restr.OwnerDocument.CreateElement(s_xsPrefix, s_maxLength, Properties.Resources.schema_ns)
+                    )!
+                ).SetAttribute(s_value, max_occurs.ToString());
             }
-        }
-        xmlSchemaSet = null;
-        MoveTmpFile(s_simpleTypes);
-        MoveTmpFile(s_types);
-        MoveTmpFile(s_segments);
-        Thread.CurrentThread.CurrentUICulture = ci;
-
-    }
-    private void MoveTmpFile(string selector)
-    {
-        string file1 = Path.Combine(_targetDirectory, s_un, _directory!, string.Format(s_tmpXsdFileNameFormat, selector));
-        string file2 = Path.Combine(_targetDirectory, s_un, _directory!, string.Format(s_xsdFileNameFormat, selector));
-        if (File.Exists(file1))
-        {
-            if (File.Exists(file2))
-            {
-                File.Delete(file2);
-            }
-            File.Move(file1, file2);
         }
     }
-    private void InitXmlDocument(string fname)
+
+    private string ReplaceNs(string str)
     {
-        _xsd.LoadXml(ReplaceNs(Properties.Resources.ResourceManager.GetString(fname, Properties.Resources.Culture)!));
-        XPathNavigator nav = _xsd.CreateNavigator()!;
+        if (_options.Namespace is { })
+        {
+            return s_reXmlNs.Replace(str, m => string.Format(s_replaceNsFormat, m.Groups[s_attr].Value, _options.Namespace));
+        }
+        else
+        {
+            return str;
+        }
+    }
+    private XmlDocument InitXmlDocument(string fname)
+    {
+        XmlDocument result = new(_nameTable);
+        result.LoadXml(ReplaceNs(Properties.Resources.ResourceManager.GetString(fname)!));
+        XPathNavigator nav = result.CreateNavigator()!;
         XPathNodeIterator ni1 = nav.Select(s_commentsXPath);
         if (ni1.MoveNext())
         {
@@ -539,781 +847,10 @@ public class EdifactDownloader: IDownloader
             ni1.Current.InsertBefore(nav1);
             ni1.Current.DeleteSelf();
         }
+
+        result.DocumentElement!.SetAttribute(s_annotationPrefixDeclaration, Properties.Resources.annotation_ns);
+        return result;
     }
-    private void MakeMessage(string message, string file)
-    {
-        string[] data = File.ReadAllLines(file);
-        InitXmlDocument(s_message);
-        XPathNavigator nav = _xsd.CreateNavigator()!.SelectSingleNode(s_sequenceIdStructureXPath, _man)!;
-        MParser mp = new();
-        XPathNodeIterator? ni = null;
-        mp.OnSegment += (string name, string info, string desc, int sg) =>
-        {
-            XmlElement el = _xsd.CreateElement(s_xsPrefix, s_element, Properties.Resources.schema_ns);
-            string ename = name;
-            for (int i = 1; ; i++)
-            {
-                if (nav.SelectSingleNode(string.Format(s_elementByNameXPathFormat, ename), _man) == null)
-                {
-                    break;
-                }
-                ename = string.Format(s_fileNameFormat, name, i);
-            }
-            el.SetAttribute(s_name, ename);
-            el.SetAttribute(s_type, name);
-            nav.AppendChild(el.CreateNavigator()!);
-        };
-        mp.OnBeginSG += delegate (int num, string desc)
-        {
-            XmlElement el = _xsd.CreateElement(s_xsPrefix, s_element, Properties.Resources.schema_ns);
-            el.SetAttribute(s_name, s_sg_ + num.ToString());
-            el.AppendChild(_xsd.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns))!
-                .AppendChild(_xsd.CreateElement(s_xsPrefix, s_sequence, Properties.Resources.schema_ns));
-            nav.AppendChild(el.CreateNavigator()!);
-            nav = nav.SelectSingleNode(s_lastElementComplexTypeSequenceXPath, _man)!;
-        };
-        mp.OnEndSG += delegate (int num)
-        {
-            nav = nav.SelectSingleNode(s_ancestorSequenceXPath, _man)!;
-        };
-        mp.OnEndMessage += delegate ()
-        {
-            nav = _xsd.CreateNavigator()!.SelectSingleNode(s_sequenceIdStructureXPath, _man)!;
-        };
-        mp.OnOccurs += delegate (int sgnum, string segment, int min_occurs, int max_occurs)
-        {
-            ni ??= _xsd.CreateNavigator()!.Select(s_sequenceIdStructureElementXPath, _man);
-            bool move = ni.MoveNext();
-            if (
-                !move
-                || (
-                    sgnum == 0
-                    && (
-                        segment is null
-                        || !ni.Current!.GetAttribute(s_name, string.Empty).StartsWith(segment)
-                    )
-                )
-                || (
-                    sgnum > 0
-                    && (
-                        (
-                            segment is null
-                            && !ni.Current!.GetAttribute(s_name, string.Empty).Equals(string.Format(s_sgNameFormat, sgnum))
-                        )
-                        || (
-                            segment is not null
-                            && (
-                                !ni.Current!.GetAttribute(s_name, string.Empty).StartsWith(segment)
-                                || !ni.Current.SelectSingleNode(s_ancestorElement, _man)!.GetAttribute(s_name, "").Equals(string.Format(s_sgNameFormat, sgnum))
-                            )
-                        )
-                    )
-                )
-            )
-            {
-                throw new Exception(s_rmLabels.GetString(s_invalidStructure));
-            }
-            if (min_occurs != 1 || max_occurs != 1)
-            {
-                if (min_occurs != 1)
-                {
-                    ni.Current!.CreateAttribute(string.Empty, s_minOccurs, string.Empty, min_occurs.ToString());
-                }
-                if (max_occurs != 1)
-                {
-                    ni.Current!.CreateAttribute(string.Empty, s_maxOccurs, string.Empty, max_occurs.ToString());
-                }
-            }
-        };
-        try
-        {
-            mp.Run(data);
-            SaveXmlDocument(message);
-        }
-        catch (Exception ex)
-        {
-            _logger?.LogError(ex, s_logMessage, string.Format(s_rmLabels.GetString(s_exceptionParsingMessage)!, message, _directory, Path.GetFileName(file), mp.LineNumber));
-        }
-    }
-    private void ListMessages(List<string> list, string ext)
-    {
-        string[] files = Directory.GetFiles(_tmpDir);
-        Regex re = new(string.Format(s_messagePattern, _mPostfix, ext));
-        foreach (string file in files)
-        {
-            Match m = re.Match(Path.GetFileName(file).ToUpper());
-            if (m.Success)
-            {
-                list.Add(m.Groups[1].Captures[0].Value);
-            }
-        }
-    }
-    private void MakeSegments(string[] data)
-    {
-        InitXmlDocument(s_segments);
-        XPathNavigator nav = _xsd.CreateNavigator()!;
-        nav.MoveToChild(s_schema, Properties.Resources.schema_ns);
-        SCParser scp = new();
-        XmlElement seq = null!;
-        string elName = string.Empty;
-        int num_items = 0;
-        _num_elements = 0;
-        scp.OnSegmentOrType += delegate (string name, string change_indicator, string info, string description, string note)
-        {
-            if (!string.IsNullOrEmpty(elName))
-            {
-                if (num_items == 0)
-                {
-                    _logger?.LogWarning(s_logMessage, string.Format(s_rmLabels.GetString(s_noItemsForElement)!, _directory, elName));
-                }
-            }
-            elName = name;
-            num_items = 0;
-            XmlElement ann = (XmlElement)((XmlElement)nav.UnderlyingObject!)
-                .AppendChild(_xsd.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns))!
-                .AppendChild(_xsd.CreateElement(s_xsPrefix, s_annotation, Properties.Resources.schema_ns))!
-            ;
-
-            ann.CreateNavigator()!.SelectSingleNode(s_parentXPath, _man)!
-                .CreateAttribute(string.Empty, s_name, string.Empty, name)
-            ;
-
-            ann.AppendChild(_xsd.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns))!
-                .AppendChild(_xsd.CreateTextNode(info))
-            ;
-            ann.AppendChild(_xsd.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns))!
-                .AppendChild(_xsd.CreateTextNode(description))
-            ;
-            if (!string.IsNullOrEmpty(note))
-            {
-                ann.AppendChild(_xsd.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns))!
-                    .AppendChild(_xsd.CreateTextNode(note))
-                ;
-            }
-            if (!string.IsNullOrEmpty(change_indicator))
-            {
-                ann.AppendChild(_xsd.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns))!
-                    .AppendChild(_xsd.CreateTextNode(string.Format(s_changeIndicatorFormat, change_indicator)))
-                ;
-            }
-            seq = (XmlElement)ann.ParentNode!
-                .AppendChild(_xsd.CreateElement(s_xsPrefix, s_complexContent, Properties.Resources.schema_ns))!
-                .AppendChild(_xsd.CreateElement(s_xsPrefix, s_extension, Properties.Resources.schema_ns))!
-                .AppendChild(_xsd.CreateElement(s_xsPrefix, s_sequence, Properties.Resources.schema_ns))!
-            ;
-            ann.CreateNavigator()!
-                .SelectSingleNode(s_upComplexContentExtension, _man)!
-                .CreateAttribute(string.Empty, s_base, string.Empty, s_genericSegment)
-            ;
-            ++_num_elements;
-        };
-        string prev_name = string.Empty;
-        int prev_max_occurs = 0;
-        int prev_min_occurs = 0;
-        scp.OnItem += delegate (string name, string info, int min_occurs, int max_occurs, string repr)
-        {
-            if (!name.StartsWith('C'))
-            {
-                name = string.Format(s_renameElementFormat, name);
-            }
-            string ename = name;
-            OnItem(seq, name, ename, info, min_occurs, max_occurs, ref prev_name, ref prev_min_occurs, ref prev_max_occurs);
-            ++num_items;
-        };
-        scp.Run(data);
-        if (!string.IsNullOrEmpty(elName))
-        {
-            if (num_items == 0)
-            {
-                _logger?.LogWarning(s_logMessage, string.Format(s_rmLabels.GetString(s_noItemsForElement)!, _directory, elName));
-            }
-        }
-        SaveXmlDocument(s_segments);
-    }
-    private void OnItem(
-        XmlElement seq,
-        string name, string ename, string info, int min_occurs, int max_occurs,
-        ref string prev_name, ref int prev_min_occurs, ref int prev_max_occurs
-    )
-    {
-        XmlElement el;
-        if (prev_name.Equals(ename))
-        {
-            prev_max_occurs += max_occurs;
-            prev_min_occurs += min_occurs;
-            XPathNavigator n1 = seq.CreateNavigator()!;
-            XPathNavigator n2 = n1.SelectSingleNode(s_lastElement, _man)!;
-            el = (XmlElement)n2.UnderlyingObject!;
-            //el = (XmlElement)seq.CreateNavigator()!
-            //    .SelectSingleNode(s_lastElement, _man)!
-            //    .UnderlyingObject!
-            //;
-        }
-        else
-        {
-            for (int i = 1; ; i++)
-            {
-                if (
-                    seq.CreateNavigator()!
-                        .SelectSingleNode(string.Format(s_elementByNameXPathFormat, ename), _man) is null
-                )
-                {
-                    break;
-                }
-                ename = string.Format(s_fileNameFormat, name, i);
-            }
-            prev_name = ename;
-            prev_max_occurs = max_occurs;
-            prev_min_occurs = min_occurs;
-            el = (XmlElement)seq.AppendChild(_xsd.CreateElement(s_xsPrefix, s_element, Properties.Resources.schema_ns))!;
-            el.SetAttribute(s_name, ename);
-            el.SetAttribute(s_type, name);
-            el.AppendChild(_xsd.CreateElement(s_xsPrefix, s_annotation, Properties.Resources.schema_ns))!
-                .AppendChild(_xsd.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns))!
-                .AppendChild(_xsd.CreateTextNode(info));
-        }
-        if (prev_min_occurs != 1)
-        {
-            el.SetAttribute(s_minOccurs, prev_min_occurs.ToString());
-        }
-        else
-        {
-            el.RemoveAttribute(s_minOccurs);
-        }
-        if (prev_max_occurs != 1)
-        {
-            el.SetAttribute(s_maxOccurs, prev_max_occurs.ToString());
-        }
-        else
-        {
-            el.RemoveAttribute(s_maxOccurs);
-        }
-    }
-    private void MakeTypes(string[] data)
-    {
-        InitXmlDocument(s_types);
-        XPathNavigator nav = _xsd.CreateNavigator()!;
-        nav.MoveToChild(s_schema, Properties.Resources.schema_ns);
-        SCParser scp = new()
-        {
-            WaitEmptyStringForNextItem = false
-        };
-        XmlElement seq = null!;
-        _num_elements = 0;
-        int num_items = 0;
-        string elName = string.Empty;
-        scp.OnSegmentOrType += delegate (string name, string change_indicator, string info, string description, string note)
-        {
-            if (!string.IsNullOrEmpty(elName))
-            {
-                if (num_items == 0)
-                {
-                    _logger?.LogWarning(s_logMessage, string.Format(s_rmLabels.GetString(s_noItemsForComplexType)!, _directory, elName));
-                }
-            }
-            elName = name;
-            num_items = 0;
-            XmlElement ann = (XmlElement)((XmlElement)nav.UnderlyingObject!)
-                .AppendChild(_xsd.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns))!
-                .AppendChild(_xsd.CreateElement(s_xsPrefix, s_annotation, Properties.Resources.schema_ns))!
-            ;
-            ann.CreateNavigator()!
-                .SelectSingleNode(s_parentXPath, _man)!
-                .CreateAttribute(string.Empty, s_name, string.Empty, name)
-            ;
-            ann.AppendChild(_xsd.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns))!
-                .AppendChild(_xsd.CreateTextNode(info))
-            ;
-            ann.AppendChild(_xsd.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns))!
-                .AppendChild(_xsd.CreateTextNode(description))
-            ;
-            if (!string.IsNullOrEmpty(change_indicator))
-            {
-                ann.AppendChild(_xsd.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns))!
-                    .AppendChild(_xsd.CreateTextNode(string.Format(s_changeIndicatorFormat, change_indicator)))
-                ;
-            }
-            seq = (XmlElement)ann.ParentNode!.AppendChild(_xsd.CreateElement(s_xsPrefix, s_sequence, Properties.Resources.schema_ns))!;
-            ++_num_elements;
-        };
-        string prev_name = string.Empty;
-        int prev_max_occurs = 0;
-        int prev_min_occurs = 0;
-        scp.OnItem += (string name, string info, int min_occurs, int max_occurs, string repr) =>
-        {
-            name = string.Format(s_renameElementFormat, name);
-            string ename = name;
-            OnItem(seq, name, ename, info, min_occurs, max_occurs, ref prev_name, ref prev_min_occurs, ref prev_max_occurs);
-            ++num_items;
-        };
-        scp.Run(data);
-        if (!string.IsNullOrEmpty(elName))
-        {
-            if (num_items == 0)
-            {
-                _logger?.LogWarning(s_logMessage, string.Format(s_rmLabels.GetString(s_noItemsForComplexType)!, _directory, elName));
-            }
-        }
-        SaveXmlDocument(s_types);
-    }
-    private void AjustSysElementsList()
-    {
-        _xsd.Load(Path.Combine(_targetDirectory, s_un, _directory!, s_simpleTypesFileName));
-        XPathNavigator nav = _xsd.CreateNavigator()!;
-        nav.MoveToChild(s_schema, Properties.Resources.schema_ns);
-        foreach (int num in new int[] { 51, 52, 54, 65 })
-        {
-            string value = null!;
-            switch (num)
-            {
-                case 51:
-                    value = s_un;
-                    break;
-                case 52:
-                    value = _directory![..1];
-                    break;
-                case 54:
-                    value = _directory![1..];
-                    break;
-            }
-            XPathNavigator navRestr = nav.SelectSingleNode(string.Format(s_complexTypeByNameRestrictionFormat, num), _man)!;
-            if (num != 65)
-            {
-                AddEnumeration(navRestr, value);
-            }
-            else
-            {
-                List<string> list = [];
-                ListMessages(list, _ext);
-                foreach (string file in list)
-                {
-                    AddEnumeration(navRestr, file);
-                }
-            }
-        }
-        SaveXmlDocument(s_simpleTypes);
-    }
-    private void AddEnumeration(XPathNavigator nav, string value)
-    {
-        XmlElement enumeration = (XmlElement)((XmlElement)nav.UnderlyingObject!)
-            .AppendChild(_xsd.CreateElement(s_xsPrefix, s_enumeration, Properties.Resources.schema_ns))!
-        ;
-        enumeration.SetAttribute(s_value, value);
-    }
-    private void MakeCodelist(string[] data)
-    {
-        _xsd.Load(Path.Combine(_targetDirectory, s_un, _directory!, s_simpleTypesFileName));
-        XPathNavigator nav = _xsd.CreateNavigator()!;
-        nav.MoveToChild(s_schema, Properties.Resources.schema_ns);
-        CLParser clp = new();
-        XPathNavigator navRestr = null!;
-        int num_items = 0;
-        bool skip = false;
-        clp.OnSimpleType += (string name) =>
-        {
-            skip = false;
-            navRestr = nav.SelectSingleNode(string.Format(s_complexTypeByNameRestrictionFormat, name), _man)!;
-            if (int.Parse(name) < 1000)
-            {
-                if (
-                    s_0051.Equals(name)
-                    || s_0052.Equals(name)
-                    || s_0054.Equals(name)
-                    || s_0065.Equals(name)
-                )
-                {
-                    skip = true;
-                }
-                if (!skip)
-                {
-                    ++_num_sys_elements;
-                }
-            }
-            else
-            {
-                ++_num_elements;
-            }
-        };
-        clp.OnItem += (string value, string change_indicator, string info, string description) =>
-        {
-            if (skip)
-            {
-                return;
-            }
-            if (navRestr != null)
-            {
-                XmlElement enumeration = (XmlElement)((XmlElement)navRestr.UnderlyingObject!)
-                    .AppendChild(_xsd.CreateElement(s_xsPrefix, s_enumeration, Properties.Resources.schema_ns))!
-                ;
-                enumeration.SetAttribute(s_value, value);
-                XmlElement ann = (XmlElement)enumeration
-                    .AppendChild(_xsd.CreateElement(s_xsPrefix, s_annotation, Properties.Resources.schema_ns))!
-                ;
-                ann.AppendChild(_xsd.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns))!
-                    .AppendChild(_xsd.CreateTextNode(info))
-                ;
-                ann.AppendChild(_xsd.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns))!
-                    .AppendChild(_xsd.CreateTextNode(description))
-                ;
-                if (!string.IsNullOrEmpty(change_indicator))
-                {
-                    ann.AppendChild(_xsd.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns))!
-                        .AppendChild(_xsd.CreateTextNode(string.Format(s_changeIndicatorFormat, change_indicator)))
-                    ;
-                }
-                ++num_items;
-            }
-        };
-        clp.Run(data);
-        SaveXmlDocument(s_simpleTypes);
-    }
-    private void MakeSimpleTypes(string[] data)
-    {
-        InitXmlDocument(s_simpleTypes);
-        XPathNavigator nav = _xsd.CreateNavigator()!;
-        nav.MoveToChild(s_schema, Properties.Resources.schema_ns);
-        EParser ep = new();
-        _num_elements = 0;
-        ep.OnSimpleType += (string name, string change_indicator, string info, string description, string repr, string note) =>
-        {
-            XmlElement ct = (XmlElement)((XmlElement)nav.UnderlyingObject!)
-                .AppendChild(_xsd.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns))!
-            ;
-            XmlElement ann = (XmlElement)ct
-                .AppendChild(_xsd.CreateElement(s_xsPrefix, s_annotation, Properties.Resources.schema_ns))!
-            ;
-            XmlElement restr = (XmlElement)ct
-                .AppendChild(_xsd.CreateElement(s_xsPrefix, "simpleContent", Properties.Resources.schema_ns))!
-                .AppendChild(_xsd.CreateElement(s_xsPrefix, "restriction", Properties.Resources.schema_ns))!
-            ;
-            ct.SetAttribute(s_name, string.Format(s_renameElementFormat, name));
-            restr.SetAttribute(s_base, s_e);
-            ann.AppendChild(_xsd.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns))!
-                .AppendChild(_xsd.CreateTextNode(info))
-            ;
-            ann.AppendChild(_xsd.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns))!
-                .AppendChild(_xsd.CreateTextNode(description))
-            ;
-            if (!string.IsNullOrEmpty(note))
-            {
-                ann.AppendChild(_xsd.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns))!
-                    .AppendChild(_xsd.CreateTextNode(note))
-                ;
-            }
-            if (!string.IsNullOrEmpty(change_indicator))
-            {
-                ann.AppendChild(_xsd.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns))!
-                    .AppendChild(_xsd.CreateTextNode(string.Format(s_changeIndicatorFormat, change_indicator)))
-                ;
-            }
-            int min_oocurs = 0;
-            int max_oocurs = 1;
-            bool number = false;
-            Match m = _reRepr.Match(repr);
-            if (m.Success)
-            {
-                if (s_n.Equals(m.Groups[1].Captures[0].Value))
-                {
-                    number = true;
-                    min_oocurs = 1;
-                }
-                max_oocurs = int.Parse(m.Groups[3].Captures[0].Value);
-                if (string.IsNullOrEmpty(m.Groups[2].Captures[0].Value))
-                {
-                    min_oocurs = max_oocurs;
-                }
-            }
-            if (number)
-            {
-                ((XmlElement)restr.AppendChild(_xsd.CreateElement(s_xsPrefix, s_pattern, Properties.Resources.schema_ns))!)
-                    .SetAttribute(s_value, string.Format(s_numberTypePatternFormat, (min_oocurs == max_oocurs ? string.Empty : string.Format(s_minOccursPatternFormat, min_oocurs)), max_oocurs))
-                ;
-                ((XmlElement)restr.AppendChild(_xsd.CreateElement(s_xsPrefix, s_pattern, Properties.Resources.schema_ns))!)
-                    .SetAttribute(s_value, s_numberTypePattern1Format)
-                ;
-            }
-            else
-            {
-                if (min_oocurs == max_oocurs)
-                {
-                    ((XmlElement)restr.AppendChild(_xsd.CreateElement(s_xsPrefix, s_length, Properties.Resources.schema_ns))!)
-                        .SetAttribute(s_value, min_oocurs.ToString())
-                    ;
-                }
-                else
-                {
-                    if (min_oocurs > 0)
-                    {
-                        ((XmlElement)restr.AppendChild(_xsd.CreateElement(s_xsPrefix, s_minLength, Properties.Resources.schema_ns))!)
-                            .SetAttribute(s_value, min_oocurs.ToString())
-                        ;
-                    }
-                    ((XmlElement)restr.AppendChild(_xsd.CreateElement(s_xsPrefix, s_maxLength, Properties.Resources.schema_ns))!)
-                        .SetAttribute(s_value, max_oocurs.ToString())
-                    ;
-                }
-            }
-            _num_elements++;
-        };
-        ep.Run(data);
-        if (_num_elements == 0)
-        {
-            _logger?.LogWarning(s_logMessage, string.Format(s_rmLabels.GetString(s_noSimpleTypes)!, _directory));
-        }
-        SaveXmlDocument(s_simpleTypes);
-    }
-    private void DeleteTmpFile(string selector)
-    {
-        string file1 = Path.Combine(_targetDirectory, s_un, _directory!, string.Format(s_tmpXsdFileNameFormat, selector));
-        if (File.Exists(file1))
-        {
-            File.Delete(file1);
-        }
-    }
-    private void ValidationEventHandler (object? obj, ValidationEventArgs args)
-    {
-        Match m = _reTypeAlreadyDeclared.Match(args.Message);
-        if (m.Success)
-        {
-            string type_name = m.Groups[1].Captures[0].Value;
-            if (type_name.StartsWith(s_e))
-            {
-                RemoveDuplicatedType(s_simpleTypes, type_name);
-            }
-            else if (type_name.StartsWith('S') || type_name.StartsWith('C'))
-            {
-                RemoveDuplicatedType(s_types, type_name);
-            }
-            else
-            {
-                RemoveDuplicatedType(s_segments, type_name);
-            }
-        }
-        else
-        {
-            switch (args.Severity)
-            {
-                case XmlSeverityType.Warning:
-                    _logger?.LogWarning(s_logMessage, args.Message);
-                    break;
-                case XmlSeverityType.Error:
-                    _logger?.LogError(s_logMessage, args.Message);
-                    throw args.Exception;
-                    break;
-            }
-        }
-    }
-    private void RemoveDuplicatedType(string selector, string type_name)
-    {
-        string file = string.Format(s_tmpXsdFileNameFormat, selector);
-        string file1 = Path.Combine(_targetDirectory, s_un, _directory!, file);
-        if (File.Exists(file1))
-        {
-            _xsd.Load(file1);
-        }
-        else
-        {
-            _xsd.Load(Path.Combine(_targetDirectory, s_un, _directory!, string.Format(s_xsdFileNameFormat, selector)));
-        }
-        XPathNavigator nav = _xsd.CreateNavigator()!.SelectSingleNode(string.Format(s_duplicatedTypeXPathFormat, type_name), _man)!;
-        if (nav != null)
-        {
-            nav.DeleteSelf();
-            SaveXmlDocument(file);
-        }
-    }
-    private void SaveXmlDocument(string fname)
-    {
-        XmlWriterSettings ws = new()
-        {
-            Indent = true,
-            Encoding = Encoding.UTF8,
-            OmitXmlDeclaration = true
-        };
-        XmlWriter wr = XmlWriter.Create(Path.Combine(_targetDirectory, s_un, _directory!, string.Format(s_xsdFileNameFormat, fname)), ws);
-        _xsd.WriteTo(wr);
-        wr.Close();
-    }
-
-    private string ReplaceNs(string str)
-    {
-        if (_options.Namespace is { })
-        {
-            return str.Replace(Properties.Resources.edifact_ns, _options.Namespace);
-        }
-        else
-        {
-            return str;
-        }
-    }
-    private void CopyNeededFilesToPreparedDirectory()
-    {
-
-        if (!Directory.Exists(_preparedDir))
-        {
-            Directory.CreateDirectory(_preparedDir);
-        }
-
-        string targetFile = Path.Combine(_preparedDir, string.Format(s_fileNameFormat, _edsd, _ext));
-        if (File.Exists(targetFile))
-        {
-            File.Delete(targetFile);
-        }
-        CopyFile(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _edsd, _ext)), targetFile);
-
-        targetFile = Path.Combine(_preparedDir, string.Format(s_fileNameFormat, _idsd, _ext));
-        if (File.Exists(targetFile))
-        {
-            File.Delete(targetFile);
-        }
-        CopyFile(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _idsd, _ext)), targetFile);
-
-        targetFile = Path.Combine(_preparedDir, string.Format(s_fileNameFormat, _edcd, _ext));
-        if (File.Exists(targetFile))
-        {
-            File.Delete(targetFile);
-        }
-        CopyFile(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _edcd, _ext)), targetFile);
-
-        targetFile = Path.Combine(_preparedDir, string.Format(s_fileNameFormat, _idcd, _ext));
-        if (File.Exists(targetFile))
-        {
-            File.Delete(targetFile);
-        }
-        CopyFile(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _idcd, _ext)), targetFile);
-
-        targetFile = Path.Combine(_preparedDir, string.Format(s_fileNameFormat, _eded, _ext));
-        if (File.Exists(targetFile))
-        {
-            File.Delete(targetFile);
-        }
-        CopyFile(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _eded, _ext)), targetFile);
-        foreach (string unc in _uncls)
-        {
-            CopyFile(
-                unc,
-                Path.Combine(_preparedDir, Path.GetFileName(unc))
-            );
-        }
-        foreach (string uns in _unsls)
-        {
-            CopyFile(
-                uns,
-                Path.Combine(_preparedDir, Path.GetFileName(uns))
-            );
-        }
-    }
-
-    private void PrepareFilesLists()
-    {
-        _edcd = s_edcd;
-        if (!File.Exists(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _edcd, _ext))))
-        {
-            _edcd = s_trcd;
-            if (!File.Exists(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _edcd, _ext))))
-            {
-                _logger?.LogCritical(
-                    s_logMessage,
-                    string.Format(s_rmLabels.GetString(s_fileNotFoundFormat)!, 'C', _directory)
-                );
-                return;
-            }
-        }
-
-        _idcd = s_idcd;
-
-        _edsd = s_edsd;
-        if (!File.Exists(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _edsd, _ext))))
-        {
-            _edsd = s_trsd;
-            if (!File.Exists(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _edsd, _ext))))
-            {
-                _logger?.LogCritical(
-                    s_logMessage,
-                    string.Format(s_rmLabels.GetString(s_fileNotFoundFormat)!, 'S', _directory)
-                );
-                return;
-            }
-        }
-
-        _eded = s_eded;
-        if (!File.Exists(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _eded, _ext))))
-        {
-            _eded = s_tred;
-            if (!File.Exists(Path.Combine(_tmpDir, string.Format(s_fileNameFormat, _eded, _ext))))
-            {
-                _logger?.LogCritical(
-                    s_logMessage,
-                    string.Format(s_rmLabels.GetString(s_fileNotFoundFormat)!, 'E', _directory)
-                );
-                return;
-            }
-        }
-
-        _idcd = s_idcd;
-        _idsd = s_idsd;
-
-        _uncls = Directory.GetFiles(_tmpDir, string.Format(s_filePatternFormat, _uncl, _ext));
-        List<string> unl = new(Directory.GetFiles(_tmpDir, string.Format(s_filePatternFormat, _unsl, _ext)));
-        if (unl.Count == 0)
-        {
-            int di = 0;
-            for (; di < _directories.Count; di++)
-            {
-                if (_directory!.Equals(_directories[di]))
-                {
-                    break;
-                }
-            }
-            if (di < _directories.Count)
-            {
-                for (; di >= 0; di--)
-                {
-                    ResourceSet? resources = s_rmUnsl.GetResourceSet(CultureInfo.InvariantCulture, true, true);
-                    string prefix = Path.Combine(s_un, _directories[di].ToUpper());
-                    int n = 0;
-                    foreach (object? res in resources!)
-                    {
-                        if (
-                            res is DictionaryEntry de
-                            && de.Key is string key
-                            && key.StartsWith(prefix)
-                            && de.Value is byte[] bytes
-                        )
-                        {
-                            ++n;
-                            File.WriteAllBytes(
-                                Path.Combine(
-                                    _tmpDir,
-                                    string.Format(s_unslFileNameFormat, s_unsl_, n, _ext)
-                                ),
-                                bytes
-                            );
-                        }
-                    }
-                    unl.AddRange(
-                        Directory.GetFiles(
-                            _tmpDir,
-                            string.Format(s_filePatternFormat, s_unsl, _ext)
-                        )
-                    );
-                    if (unl.Count > 0)
-                    {
-                        _unsl_message = string.Format(s_rmLabels.GetString(s_unslMessageFormat)!, _directory, _directories[di]);
-                        _unsl = s_unsl_;
-                        break;
-                    }
-
-
-                }
-            }
-        }
-        _unsls = new string[unl.Count];
-        unl.CopyTo(_unsls);
-
-
-    }
-
     private void LoadFixedFilesFromResources()
     {
         ResourceSet? resources = s_rmFixed.GetResourceSet(CultureInfo.InvariantCulture, true, true);
@@ -1334,7 +871,6 @@ public class EdifactDownloader: IDownloader
         }
 
     }
-
     private void InitContext()
     {
         if (!Directory.Exists(_tmpDir))
@@ -1352,54 +888,32 @@ public class EdifactDownloader: IDownloader
                 Directory.Delete(d, true);
             }
         }
-
-        _dir = _directory!.ToLower();
-        _fname = _dir;
-        _ext = _directory[1..];
+        _eded = s_eded;
+        _edcd = s_edcd;
+        _idcd = s_idcd;
+        _edsd = s_edsd;
+        _idsd = s_idsd;
         _uncl = s_uncl;
-        _unsl = s_unsl;
-
-        _mPostfix = s_postfix_D;
+        _ext = _directory![1..];
     }
-
-    private Uri GetRequestUri()
+    private bool ExtractAll(Stream stream)
     {
-        Uri requestUri;
-        if (
-            string.Compare(_dir, s_d20b, StringComparison.OrdinalIgnoreCase) < 0
-            || string.Compare(_dir, s_d9, StringComparison.OrdinalIgnoreCase) > 0
-        )
-        {
-            requestUri = new Uri(string.Format(s_uriFormat, s_webSite, string.Format(s_pathDam, _dir, _fname)));
-        }
-        else
-        {
-            requestUri = new Uri(string.Format(s_uriFormat, s_webSite1, string.Format(s_pathNoDam, _dir, _fname)));
-        }
-        _logger?.LogInformation(s_logMessage, requestUri);
-        return requestUri;
-    }
-
-    private void ExtractAll(Stream stream)
-    {
-        ZipArchive zip;
-        try
-        {
-            zip = new(stream);
-        }
-        catch (Exception)
-        {
-            DirectoryNotFound?.Invoke(this, new DirectoryNotFoundEventArgs { Directory = _directory! });
-            throw;
-        }
         string sourceArchve = Path.Combine(_tmpDir, s_sourceArchiveDir);
         if (Directory.Exists(sourceArchve))
         {
             Directory.Delete(sourceArchve, true);
         }
         Directory.CreateDirectory(sourceArchve);
-        zip.ExtractToDirectory(sourceArchve);
-        zip.ExtractToDirectory(_tmpDir);
+        string srcFile = string.Format(s_fileNameFormat, _directory, s_zip);
+        string src = Path.Combine(sourceArchve, srcFile);
+        using FileStream fileStream = File.OpenWrite(src);
+        stream.CopyTo(fileStream);
+        fileStream.Close();
+        File.Copy(src, Path.Combine(_tmpDir, srcFile));
+        if(File.ReadLines(src).First().Contains(s_doctype))
+        {
+            return false;
+        }
 
         List<string> list = [];
         List<string> list1 = [];
@@ -1416,21 +930,10 @@ public class EdifactDownloader: IDownloader
                 try
                 {
                     fs = new(file, FileMode.Open, FileAccess.Read);
-                    zip = new ZipArchive(fs);
+                    ZipArchive zip = new(fs);
                     zip.ExtractToDirectory(_tmpDir, true);
                 }
-                catch (Exception) 
-                {
-                    if (_options.ExternalUnzipCommandLineFormat is string cmd)
-                    {
-                        UseExternalUnzip(_tmpDir, file, cmd);
-                    }
-                    else
-                    {
-                        _logger?.LogError(s_logMessage, string.Format(s_rmLabels.GetString(s_failedUnzip)!, file));
-                        throw;
-                    }
-                }
+                catch (Exception) { }
                 finally
                 {
                     fs?.Close();
@@ -1441,7 +944,7 @@ public class EdifactDownloader: IDownloader
             list.AddRange(Directory.GetDirectories(_tmpDir).Where(v => v != sourceArchve));
             foreach (string folder in list)
             {
-                if(_directory == s_d16a && Path.GetFileName(folder) == s_macosx)
+                if (_directory == s_d16a && Path.GetFileName(folder) == s_macosx)
                 {
                     continue;
                 }
@@ -1466,70 +969,44 @@ public class EdifactDownloader: IDownloader
                 Directory.Delete(folder, true);
             }
         }
-        foreach(string file in Directory.GetFiles(_tmpDir))
+        found = false;
+        foreach (string file in Directory.GetFiles(_tmpDir))
         {
+            found = true;   
             File.SetAttributes(file, FileAttributes.Normal);
         }
+        return found;
     }
 
-    private void UseExternalUnzip(string tmpDir, string file, string cmd)
+    private Uri GetRequestUri()
     {
-        string commandLine = string.Format(cmd, tmpDir, file);
-        Match match = _reExternalUnzip.Match(commandLine);
-        if (match.Success)
+        string dir = _directory!.ToLower();
+        Uri requestUri;
+        if (
+            string.Compare(_directory, s_d20b, StringComparison.OrdinalIgnoreCase) < 0
+            || string.Compare(_directory, s_d8, StringComparison.OrdinalIgnoreCase) > 0
+        )
         {
-            _logger?.LogInformation(
-                s_logMessage,
-                string.Format(s_rmLabels.GetString(s_usingExternalUnzip)!, commandLine)
+            requestUri = new Uri(
+                string.Format(
+                    s_uriFormat, 
+                    s_webSite, 
+                    string.Format(s_path1, dir, dir)
+                )
             );
-            Process unzip = new()
-            {
-                StartInfo = new()
-                {
-                    FileName = match.Groups[s_cmd].Value,
-                    Arguments = match.Groups[s_args].Value,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    WorkingDirectory = tmpDir,
-                }
-            };
-            unzip.ErrorDataReceived += (s, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                {
-                    _logger?.LogError(s_logMessage, e.Data);
-                }
-            };
-            unzip.OutputDataReceived += (s, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                {
-                    _logger?.LogInformation(s_logMessage, e.Data);
-                }
-            };
-            unzip.Start();
-            unzip.BeginErrorReadLine();
-            unzip.BeginOutputReadLine();
-
-            unzip.WaitForExit();
-            unzip.CancelErrorRead();
-            unzip.CancelOutputRead();
         }
-    }
-
-    private static void CopyFile(string src, string dst)
-    {
-        byte[] bb = File.ReadAllBytes(src);
-        List<byte> l = new(bb);
-        for (int i = 0; i < l.Count; i++)
+        else
         {
-            if (l[i] == 0x1A)
-            {
-                l.RemoveRange(i, l.Count - i);
-            }
+            requestUri = new Uri(
+                string.Format(
+                    s_uriFormat, 
+                    s_webSite1, 
+                    string.Format(s_path2, dir, dir)
+                )
+            );
         }
-        byte[] b = new byte[l.Count];
-        l.CopyTo(b);
-        File.WriteAllBytes(dst, b);
+        _logger?.LogInformation(s_logMessage, requestUri);
+        return requestUri;
     }
+
 }

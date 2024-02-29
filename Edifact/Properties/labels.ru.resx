@@ -176,10 +176,7 @@
   /t, --target-folder  PATH                                - каталог для размещения сгенерированных схем
   --tmp-folder PATH                                        - временный каталог
   /p, --proxy  http[s]://[USER[:PASSWORD]@]ADDRESS:PORT    - использовать прокси сервер для скачивания
-  --connection-timeout  SECONDS                            - таймаут соединения веб-клиента    
-  --external-unzip FORMAT                                  - командная строка для внешнего распаковщика - 
-                                                             строка формата в стиле C#, где {{0}} означает выходной 
-                                                             каталог, а {{1}} путь к архивному файлу</value>
+  --connection-timeout  SECONDS                            - таймаут соединения веб-клиента</value>
   </data>
   <data name="KEY_ALREADY_USED" xml:space="preserve">
     <value>Ключ '{0}' уже был применён.</value>
@@ -210,5 +207,27 @@
   </data>
   <data name="INVALID_DIRECTORY_NAME_OR_INTERVAL" xml:space="preserve">
     <value>Неверное имя директории или интервал: {0}.</value>
+  </data>
+  <data name="INVALID_SEQUENCE" xml:space="preserve">
+    <value>'{0}' на позиции '{1}' ожидался '{2}', обнаружен '{3}'.</value>
+  </data>
+  <data name="MISSED_MANDATORY_KEY" xml:space="preserve">
+    <value>Пропущен обязательный параметр: '{0}'.</value>
+  </data>
+  <data name="NOT_XML_SCHEMA" xml:space="preserve">
+    <value>Файл '{0}' не содержит XML схему.</value>
+  </data>
+  <data name="SCHEMA2TREE_USAGE" xml:space="preserve">
+    <value>Использование: {0} АРГУМЕНТЫ
+АРГУМЕНТЫ:
+/s, --schema URI                   - URI файла XMLсхемы. 
+/o URI                             - URI выходного файла.
+/w, --width SIZE                   - ширина выходного файла.</value>
+  </data>
+  <data name="URI_SCHEME_NOT_SUPPORTED" xml:space="preserve">
+    <value>Схема URI не поддерживается: '{0}'.</value>
+  </data>
+  <data name="NOT_EDIFACT_SCHEMA" xml:space="preserve">
+    <value>Файл '{0}' не содержит XML схему для EDIFACT.</value>
   </data>
 </root>

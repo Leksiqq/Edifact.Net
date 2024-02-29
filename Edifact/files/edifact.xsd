@@ -9,16 +9,7 @@
   elementFormDefault="qualified" attributeFormDefault="unqualified"
 >
   <xs:complexType name="BASE-MESSAGE" abstract="true">
-    <xs:sequence>
-      <xs:element name="interchange">
-        <xs:complexType>
-          <xs:sequence>
-            
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:sequence id="structure"/>
-    </xs:sequence>
+    <xs:sequence id="structure"/>
   </xs:complexType>
   <xs:complexType name="BASE-SEGMENT" abstract="true">
     <xs:anyAttribute namespace="##any"/>

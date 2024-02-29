@@ -2,7 +2,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using static Net.Leksi.Edifact.Constants;
-using static Net.Leksi.Edifact.PartsParser;
 
 namespace Net.Leksi.Edifact;
 

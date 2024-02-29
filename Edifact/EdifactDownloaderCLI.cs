@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Globalization;
+using Net.Leksi.Streams;
+using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
 using static Net.Leksi.Edifact.Constants;
@@ -14,29 +15,51 @@ public class EdifactDownloaderCLI : BackgroundService
 
     private readonly IServiceProvider _services;
     private readonly IDownloader _downloader;
+    private readonly EdifactDownloaderOptions _options;
+    private readonly IStreamFactory? _outputStreamFactory;
 
     private readonly ILogger<EdifactDownloaderCLI>? _logger;
     public EdifactDownloaderCLI(IServiceProvider services)
     {
         _services = services;
+        _options = services.GetRequiredService<EdifactDownloaderOptions>();
         _logger = services.GetService<ILogger<EdifactDownloaderCLI>>();
         _downloader = _services.GetRequiredService<IDownloader>();
         _downloader.DirectoryNotFound += Downloader_DirectoryNotFound;
         _downloader.DirectoryDownloaded += _downloader_DirectoryDownloaded;
+        _outputStreamFactory = _services.GetKeyedService<IStreamFactory>(_options.TargetUri!.Scheme);
+        if (_outputStreamFactory is null)
+        {
+            throw new IOException(
+                string.Format(
+                    s_rmLabels.GetString(s_uriSchemeNotSupported)!, _options.TargetUri!.Scheme)
+            );
+        }
     }
 
     private void _downloader_DirectoryDownloaded(object sender, DirectoryDownloadedEventArgs e)
     {
-        if(e.Files is { })
+        if(e.Files is { } && e.Files.Length > 0)
         {
             foreach (string file in e.Files)
             {
-                //Console.WriteLine(file);
+                using Stream stream = _outputStreamFactory!.GetOutputStream(
+                    new Uri(
+                        _options.TargetUri!, 
+                        Path.Combine(
+                            Path.GetFileName(_options.TargetUri!.AbsolutePath), 
+                            e.Directory!, 
+                            Path.GetFileName(file)
+                        )
+                    )
+                );
+                using Stream fs = File.OpenRead(file);
+                fs.CopyTo( stream );
             }
         }
     }
 
-    public static async Task RunAsync(string[] args)
+    public static async Task RunAsync(string[] args, Action<IHostApplicationBuilder>? config = null)
     {
         EdifactDownloaderOptions? options = Create(args);
 
@@ -46,10 +69,11 @@ public class EdifactDownloaderCLI : BackgroundService
         }
 
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-
-        builder.Services.AddSingleton<IDownloader, EdifactDownloader1>();
+        builder.Services.AddSingleton<IDownloader, EdifactDownloader>();
         builder.Services.AddSingleton(options);
         builder.Services.AddHostedService<EdifactDownloaderCLI>();
+        builder.Services.AddKeyedSingleton<IStreamFactory, LocalFileStreamFactory>(s_file);
+        config?.Invoke(builder);
 
         IHost host = builder.Build();
         await host.RunAsync();
@@ -71,7 +95,13 @@ public class EdifactDownloaderCLI : BackgroundService
 
     private void Downloader_DirectoryNotFound(object sender, DirectoryNotFoundEventArgs e)
     {
-        _logger?.LogError(s_logMessage, string.Format(CommonCLI.LabelsResourceManager.GetString(s_directoryNotFound)!, e.Directory, e.Url));
+        _logger?.LogError(
+            s_logMessage, 
+            string.Format(
+                s_rmLabels.GetString(s_directoryNotFound)!,
+                e.Directory, e.Url
+            )
+        );
     }
 
 
@@ -80,7 +110,7 @@ public class EdifactDownloaderCLI : BackgroundService
         EdifactDownloaderOptions options = new();
 
         string? prevArg = null;
-        string? unkownArg = null;
+        string? unknownArg = null;
 
         foreach (string arg in args)
         {
@@ -133,11 +163,6 @@ public class EdifactDownloaderCLI : BackgroundService
             else if (waiting is Waiting.TmpFolder)
             {
                 options.TmpFolder = arg;
-                prevArg = null;
-            }
-            else if (waiting is Waiting.ExternalUnzipCommandLineFormat)
-            {
-                options.ExternalUnzipCommandLineFormat = arg;
                 prevArg = null;
             }
             else if(waiting is Waiting.ConnectionTimeout)
@@ -207,16 +232,6 @@ public class EdifactDownloaderCLI : BackgroundService
                     }
                     prevArg = arg;
                 }
-                else if (waiting is Waiting.ExternalUnzipCommandLineFormat)
-                {
-                    if (options.ExternalUnzipCommandLineFormat is { })
-                    {
-                        CommonCLI.AlreadyUsed(arg);
-                        Usage();
-                        return null;
-                    }
-                    prevArg = arg;
-                }
                 else if (waiting is Waiting.Proxy)
                 {
                     if (options.Proxy is { })
@@ -242,27 +257,26 @@ public class EdifactDownloaderCLI : BackgroundService
                     Usage();
                     return null;
                 }
-                else if(waiting is Waiting.None)
-                {
-
-                }
                 else
                 {
-                    if (unkownArg is null)
-                    {
-                        unkownArg = arg;
-                    }
+                    unknownArg ??= arg;
                 }
             }
         }
-        if(unkownArg is { })
+        if(unknownArg is { })
         {
-            CommonCLI.UnknownArgumentError(unkownArg);
+            CommonCLI.UnknownArgumentError(unknownArg);
             Usage();
         }
         if (GetWaiting(prevArg) is not Waiting.None)
         {
             CommonCLI.MissedArgumentError(prevArg!);
+            Usage();
+            return null;
+        }
+        if(options.TargetUri is null)
+        {
+            CommonCLI.MissedMandatoryKeyError("--target-folder");
             Usage();
             return null;
         }
@@ -278,7 +292,6 @@ public class EdifactDownloaderCLI : BackgroundService
             "/n" or "--ns" => Waiting.Namespace,
             "--tmp-folder" => Waiting.TmpFolder,
             "--connection-timeout" => Waiting.ConnectionTimeout,
-            "--external-unzip" => Waiting.ExternalUnzipCommandLineFormat,
             "/p" or "--proxy" => Waiting.Proxy,
             "/?" or "--help" => Waiting.Help,
             null => Waiting.None,
@@ -289,7 +302,7 @@ public class EdifactDownloaderCLI : BackgroundService
     {
         Console.WriteLine(
             string.Format(
-                CommonCLI.LabelsResourceManager.GetString(s_edifactDownloaderUsage)!, 
+                s_rmLabels.GetString(s_edifactDownloaderUsage)!, 
                 Path.GetFileName(Environment.ProcessPath)
             )
         );

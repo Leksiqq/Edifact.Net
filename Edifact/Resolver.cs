@@ -1,17 +1,14 @@
-﻿using System.Web;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Net.Leksi.Streams;
 using System.Xml;
 
 namespace Net.Leksi.Edifact;
 
-public class Resolver : XmlResolver
+public class Resolver(IServiceProvider services) : XmlResolver
 {
-    public override object? GetEntity(Uri absoluteUri, string? role, Type? ofObjectToReturn)
+    public override object? GetEntity(Uri uri, string? role, Type? ofObjectToReturn)
     {
-        //Console.WriteLine($"Resolver: {absoluteUri}, {absoluteUri.Scheme}, {role}, {ofObjectToReturn}");
-        if (absoluteUri.Scheme == "file")
-        {
-            return File.OpenRead(HttpUtility.UrlDecode(absoluteUri.AbsolutePath));
-        }
-        return null;
+        IStreamFactory? streamFactory = services.GetKeyedService<IStreamFactory>(uri.Scheme);
+        return streamFactory?.GetInputStream(uri);
     }
 }

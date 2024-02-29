@@ -1,6 +1,6 @@
 ﻿namespace Net.Leksi.Edifact;
 
-internal class Enumeration: DataElement
+public class Enumeration: DataElement
 {
-    internal string? TypeCode {  get; set; }
+    public string? TypeCode {  get; set; }
 }

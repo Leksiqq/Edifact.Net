@@ -40,6 +40,16 @@ internal class MessageParser(string hrChars) : Parser(hrChars)
                 type!.Note = sb.ToString();
                 sb.Clear();
             }
+            else if(state is State.SegmentGroup)
+            {
+                type!.Children = sb.ToString()
+                    .Split(
+                        separator,
+                        StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries
+                    )
+                ;
+                sb.Clear();
+            }
             state = State.None;
         }
         _lineNumber = 0;
@@ -155,21 +165,6 @@ internal class MessageParser(string hrChars) : Parser(hrChars)
                             ThrowUnexpectedLine(_lineNumber, line);
                         }
                         complete();
-                        if (state is State.Desc)
-                        {
-                            type!.Description = sb.ToString();
-                            sb.Clear();
-                        }
-                        else
-                        {
-                            type!.Children = sb.ToString()
-                                .Split(
-                                    separator,
-                                    StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries
-                                )
-                            ;
-                            sb.Clear();
-                        }
                         sb.Append(m.Groups[s_note].Value.Trim());
                         state = State.Note;
                     }

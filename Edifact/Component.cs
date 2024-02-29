@@ -1,6 +1,6 @@
 ﻿namespace Net.Leksi.Edifact;
 
-internal class Component: Element
+public class Component: Element
 {
-    internal string? MaxOccurs { get; set; }
+    public string? MaxOccurs { get; set; }
 }

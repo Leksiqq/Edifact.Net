@@ -1,6 +1,6 @@
 ﻿namespace Net.Leksi.Edifact;
 
-internal class Composite: DataElement
+public class Composite: DataElement
 {
-    internal List<Element> Elements { get; private init; } = [];
+    public List<Element> Elements { get; private init; } = [];
 }

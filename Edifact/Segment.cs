@@ -1,7 +1,7 @@
 ﻿namespace Net.Leksi.Edifact;
 
-internal class Segment: Component
+public class Segment: Component
 {
-    internal List<Component>? Components { get; set; }
-    internal string[]? Children { get; set; }
+    public List<Component>? Components { get; set; }
+    public string[]? Children { get; set; }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Resources;
+using System.Text.RegularExpressions;
 
 namespace Net.Leksi.Edifact;
 
@@ -41,7 +42,6 @@ internal static class Constants
     internal const string s_edcd = "EDCD";
     internal const string s_eded = "EDED";
     internal const string s_edifactDownloaderUsage = "EDIFACT_DOWNLOADER_USAGE";
-    internal const string s_uncl = "UNCL";
     internal const string s_edifact = "edifact";
     internal const string s_edifactXsd = "edifact.xsd";
     internal const string s_edsd = "EDSD";
@@ -51,6 +51,7 @@ internal static class Constants
     internal const string s_enumeration = "enumeration";
     internal const string s_extension = "extension";
     internal const string s_failedUnzip = "FAILED_UNZIP";
+    internal const string s_file = "file";
     internal const string s_fileNameFormat = "{0}.{1}";
     internal const string s_finish = "finish";
     internal const string s_function = "function";
@@ -58,24 +59,31 @@ internal static class Constants
     internal const string s_idsd = "IDSD";
     internal const string s_interval = "interval";
     internal const string s_invalidDirectoryNameOrInterval = "INVALID_DIRECTORY_NAME_OR_INTERVAL";
+    internal const string s_keyAlreadyUsed = "KEY_ALREADY_USED";
     internal const string s_length = "length";
+    internal const string s_loadFixedFile = "LOAD_FIXED_FILE";
     internal const string s_logMessage = "{message}";
     internal const string s_m = "M";
     internal const string s_macosx = "__MACOSX";
     internal const string s_maxLength = "maxLength";
     internal const string s_maxOccurs = "maxOccurs";
     internal const string s_message = "message";
+    internal const string s_message1 = "MESSAGE";
     internal const string s_messagesPatternFormat = "{0}_D.{1}";
     internal const string s_minLength = "minLength";
     internal const string s_minOccurs = "minOccurs";
     internal const string s_minOccursPatternFormat = "{0},";
     internal const string s_minus = "-";
+    internal const string s_missedKeyValue = "MISSED_KEY_VALUE";
+    internal const string s_missedMandatryKey = "MISSED_MANDATORY_KEY";
     internal const string s_n = "n";
     internal const string s_name = "name";
     internal const string s_noSimpleTypesFound = "NO_SIMPLE_TYPES_FOUND";
     internal const string s_note = "note";
     internal const string s_noteAtComposite = "Note: {0}: {1}";
     internal const string s_noSegmentsFound = "NO_SEGMENTS_FOUND";
+    internal const string s_notEdifactSchema = "NOT_EDIFACT_SCHEMA";
+    internal const string s_notSchema = "NOT_XML_SCHEMA";
     internal const string s_noTypesFound = "NO_TYPES_FOUND";
     internal const string s_numberTypePatternFormat = "^-?([0-9]\\.?){{{0}{1}}}[0-9]$";
     internal const string s_numberTypePattern = "^-?[^.]*\\.?[^.]+$";
@@ -90,8 +98,10 @@ internal static class Constants
     internal const string s_repr = "representation";
     internal const string s_rest = "rest";
     internal const string s_restriction = "restriction";
-    internal const string s_rmLabelsName = "Net.Leksi.Edifact.Properties.labels";
+    internal const string s_rmLabelsName = "labels";
+    internal const string s_rmFixedName = "fixed";
     internal const string s_schema = "schema";
+    internal const string s_schemaXPathFormat = "/{0}:schema";
     internal const string s_segmentGroupNameFormat = "SG{0}";
     internal const string s_segments = "segments";
     internal const string s_segmentsXsd = "segments.xsd";
@@ -102,16 +112,20 @@ internal static class Constants
     internal const string s_sourceArchiveDir = "--source";
     internal const string s_src = "src";
     internal const string s_start = "start";
+    internal const string s_targetNamespaceXPath = "@targetNamespace";
     internal const string s_type = "type";
     internal const string s_typeForEnumXPathFormat = "/xs:schema/xs:complexType[@name='D{0}']/xs:simpleContent/xs:restriction";
     internal const string s_uih = "UIH";
     internal const string s_uit = "UIT";
+    internal const string s_un = "UN";
+    internal const string s_uncl = "UNCL";
     internal const string s_unexpectedLine = "UNEXPECTED_LINE";
     internal const string s_unh = "UNH";
+    internal const string s_unknownKey = "UNKNOWN_KEY";
     internal const string s_unMessageFormat = " UN/{0} ";
     internal const string s_unt = "UNT";
     internal const string s_uriFormat = "{0}{1}";
-    internal const string s_usingExternalUnzip = "USING_EXTERNAL_UNZIP";
+    internal const string s_uriSchemeNotSupported = "URI_SCHEME_NOT_SUPPORTED";
     internal const string s_value = "value";
     internal const string s_webSite = "https://unece.org";
     internal const string s_webSite1 = "https://www.unece.org";
@@ -120,10 +134,12 @@ internal static class Constants
     internal const string s_zip = "zip";
     internal const string s_zipPattern = "*.zip";
 
+    internal static readonly Regex s_reSegmentGroup = new("^SG(?<code>\\d+)$");
+
     internal static readonly ResourceManager s_rmLabels;
 
     static Constants()
     {
-        s_rmLabels = new ResourceManager(s_rmLabelsName, Assembly.GetExecutingAssembly());
+        s_rmLabels = new ResourceManager($"{typeof(Properties.Resources).Namespace}.{s_rmLabelsName}", Assembly.GetExecutingAssembly());
     }
 }

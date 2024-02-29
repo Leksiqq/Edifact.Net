@@ -12,8 +12,8 @@ internal enum Waiting
     TmpFolder,
     ExternalUnzipCommandLineFormat,
     SchemaDocument,
-    Output,
-    PaddingLength,
+    OutputUri,
+    Width,
     Help,
     ConnectionTimeout
 }

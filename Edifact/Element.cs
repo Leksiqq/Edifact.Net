@@ -1,6 +1,6 @@
 ﻿namespace Net.Leksi.Edifact;
 
-internal class Element: DataElement
+public class Element: DataElement
 {
-    internal string? MinOccurs { get; set; }
+    public string? MinOccurs { get; set; }
 }

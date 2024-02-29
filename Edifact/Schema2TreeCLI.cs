@@ -1,14 +1,17 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Net.Leksi.Streams;
 using System.Xml;
+using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
 
 public class Schema2TreeCLI(IServiceProvider services) : BackgroundService
 {
+    private const string s_schema2treeUsage = "SCHEMA2TREE_USAGE";
     private readonly Schema2Tree _schema2Tree = new();
     private readonly Schema2TreeOptions _optoins = services.GetRequiredService<Schema2TreeOptions>();
-    public static async Task RunAsync(string[] args)
+    public static async Task RunAsync(string[] args, Action<IHostApplicationBuilder>? config = null)
     {
         Schema2TreeOptions? options = Create(args);
 
@@ -22,18 +25,20 @@ public class Schema2TreeCLI(IServiceProvider services) : BackgroundService
         builder.Services.AddSingleton<XmlResolver, Resolver>();
         builder.Services.AddSingleton(options);
         builder.Services.AddHostedService<Schema2TreeCLI>();
-
+        builder.Services.AddKeyedSingleton<IStreamFactory, LocalFileStreamFactory>(s_file);
+        config?.Invoke(builder);
         IHost host = builder.Build();
         await host.RunAsync();
 
     }
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await _schema2Tree.TranslateAsync(
+        await _schema2Tree.RenderAsync(
             _optoins.SchemaDocument!,
-            _optoins.Output!,
-            xmlResolver: services.GetService<XmlResolver>(),
-            padLen: _optoins.PaddingLength is int p ? p : Schema2Tree.s_deafultPadLen
+            output: services.GetKeyedService<IStreamFactory>(_optoins.OutputUri!.Scheme)!
+                .GetOutputStream(_optoins.OutputUri!),
+            xmlResolver: services.GetRequiredService<XmlResolver>(),
+            width: _optoins.PaddingLength is int p ? p : Schema2Tree.s_deafultWidth
         );
         await services.GetRequiredService<IHost>().StopAsync(stoppingToken);
     }
@@ -57,11 +62,11 @@ public class Schema2TreeCLI(IServiceProvider services) : BackgroundService
                     return null;
                 }
             }
-            else if (waiting is Waiting.Output)
+            else if (waiting is Waiting.OutputUri)
             {
                 try
                 {
-                    result.Output = new StreamWriter(File.OpenWrite(arg));
+                    result.OutputUri = new Uri(arg);
                     prevArg = null;
                 }
                 catch (Exception)
@@ -70,7 +75,7 @@ public class Schema2TreeCLI(IServiceProvider services) : BackgroundService
                     return null;
                 }
             }
-            else if (waiting is Waiting.PaddingLength)
+            else if (waiting is Waiting.Width)
             {
                 if (int.TryParse(arg, out int paddingLength))
                 {
@@ -102,7 +107,7 @@ public class Schema2TreeCLI(IServiceProvider services) : BackgroundService
                     }
                     prevArg = arg;
                 }
-                else if (waiting is Waiting.Output)
+                else if (waiting is Waiting.OutputUri)
                 {
                     if (result.Output is { })
                     {
@@ -112,7 +117,7 @@ public class Schema2TreeCLI(IServiceProvider services) : BackgroundService
                     }
                     prevArg = arg;
                 }
-                else if (waiting is Waiting.PaddingLength)
+                else if (waiting is Waiting.Width)
                 {
                     if (result.PaddingLength is { })
                     {
@@ -142,7 +147,7 @@ public class Schema2TreeCLI(IServiceProvider services) : BackgroundService
             Usage();
             return null;
         }
-        if (result.Output is null)
+        if (result.OutputUri is null)
         {
             OutputMissedError();
             Usage();
@@ -170,7 +175,7 @@ public class Schema2TreeCLI(IServiceProvider services) : BackgroundService
     {
         Console.WriteLine(
             string.Format(
-                CommonCLI.LabelsResourceManager.GetString("SCHEMA2TREE_USAGE")!,
+                s_rmLabels.GetString(s_schema2treeUsage)!,
                 Path.GetFileName(Environment.ProcessPath)
             )
         );
@@ -188,8 +193,8 @@ public class Schema2TreeCLI(IServiceProvider services) : BackgroundService
         return arg switch
         {
             "/s" or "--schema" => Waiting.SchemaDocument,
-            "/o" => Waiting.Output,
-            "/p" or "--padding" => Waiting.PaddingLength,
+            "/o" => Waiting.OutputUri,
+            "/w" or "--width" => Waiting.Width,
             null => Waiting.None,
             _ => Waiting.Unknown
         };

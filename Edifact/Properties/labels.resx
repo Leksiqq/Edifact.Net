@@ -223,10 +223,7 @@ ARGS:
   /t, --target-folder  PATH                                - target folder where schemas will be placed
   --tmp-folder PATH                                        - temporary folder
   /p, --proxy  http[s]://[USER[:PASSWORD]@]ADDRESS:PORT    - use proxy for download
-  --connection-timeout  SECONDS                            - connection timeout of web client    
-  --external-unzip FORMAT                                  - command line for external unzip program - 
-                                                             C#-style format string, where {{0}} means output directory
-                                                             and {{1}} means input file path</value>
+  --connection-timeout  SECONDS                            - connection timeout of web client</value>
   </data>
   <data name="KEY_ALREADY_USED" xml:space="preserve">
     <value>The key '{0}' is already used.</value>
@@ -240,9 +237,9 @@ ARGS:
   <data name="SCHEMA2TREE_USAGE" xml:space="preserve">
     <value>Usage: {0} ARGS
 ARGS:
-/s, --schema PATH                  - path to XML Schema file. 
-/o PATH                            - path to output file.
-/p, --padding SIZE                 - size of padding.</value>
+/s, --schema URI                   - URI of XML Schema file. 
+/o URI                             - URI of output file.
+/w, --width SIZE                   - width of output file.</value>
   </data>
   <data name="DOWNLOAD_MESSAGE" xml:space="preserve">
     <value>Downloading message '{0}:{1}'.</value>
@@ -264,5 +261,23 @@ ARGS:
   </data>
   <data name="INVALID_DIRECTORY_NAME_OR_INTERVAL" xml:space="preserve">
     <value>Invalid directory name or interval: '{0}'.</value>
+  </data>
+  <data name="DATA_TYPE_ERROR" xml:space="preserve">
+    <value>^The '.*:(E\d{4})' element is invalid - The value '(.*)' is invalid according to its datatype '.*:E\d{4}'.*$</value>
+  </data>
+  <data name="INVALID_SEQUENCE" xml:space="preserve">
+    <value>'{0}' at position '{1}' expected '{2}' but got '{3}'.</value>
+  </data>
+  <data name="MISSED_MANDATORY_KEY" xml:space="preserve">
+    <value>Mandatory key '{0}' is missed.</value>
+  </data>
+  <data name="NOT_EDIFACT_SCHEMA" xml:space="preserve">
+    <value>File '{0}' does not contains XML Schema for EDIFACT.</value>
+  </data>
+  <data name="NOT_XML_SCHEMA" xml:space="preserve">
+    <value>File '{0}' does not contains XML Schema.</value>
+  </data>
+  <data name="URI_SCHEME_NOT_SUPPORTED" xml:space="preserve">
+    <value>Uri scheme is not supported: '{0}'.</value>
   </data>
 </root>

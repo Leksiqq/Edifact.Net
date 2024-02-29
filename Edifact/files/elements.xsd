@@ -255,6 +255,16 @@
       </xs:restriction>
     </xs:simpleContent>
   </xs:complexType>
+  <xs:complexType name="D0087">
+    <xs:annotation>
+      <xs:documentation an:name="name">Anti-collision segment group identification</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="4"/>
+      </xs:restriction>
+    </xs:simpleContent>
+    </xs:complexType>
   <xs:complexType name="D0113">
     <xs:annotation>
       <xs:documentation an:name="name">Message type sub-function identification</xs:documentation>

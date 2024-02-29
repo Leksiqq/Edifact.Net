@@ -121,24 +121,6 @@
   <data name="UN\D09A\GOVCBR_D.09a" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\fixed\UN\D09A\GOVCBR_D.09a;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="UN\D94A\HANMOV_D.94a" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\fixed\UN\D94A\HANMOV_D.94a;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="UN\D94A\PRICAT_D.94a" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\fixed\UN\D94A\PRICAT_D.94a;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="UN\D94A\SLSRPT_D.94a" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\fixed\UN\D94A\SLSRPT_D.94a;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="UN\D94B\CUSEXP_D.94b" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\fixed\UN\D94B\CUSEXP_D.94b;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="UN\D94B\DOCINF_D.94b" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\fixed\UN\D94B\DOCINF_D.94b;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="UN\D94B\IFTSTA_D.94b" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\fixed\UN\D94B\IFTSTA_D.94b;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="UN\D99B\BOPBNK_D.99b" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\fixed\UN\D99B\BOPBNK_D.99b;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

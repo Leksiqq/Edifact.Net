@@ -1,16 +1,16 @@
 ﻿using Net.Leksi.Streams;
+using System.Web;
+using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
 
-internal class LocalFileOutputStreamFactory : IStreamFactory
+internal class LocalFileStreamFactory : IStreamFactory
 {
-    private const string s_file = "file";
-
     public Stream GetInputStream(Uri uri)
     {
         if(uri.Scheme == s_file)
         {
-            return File.OpenRead(uri.AbsolutePath);
+            return File.OpenRead(HttpUtility.UrlDecode(uri.AbsolutePath));
         }
         throw new NotSupportedException(uri.Scheme);
     }
@@ -19,7 +19,12 @@ internal class LocalFileOutputStreamFactory : IStreamFactory
     {
         if (uri.Scheme == s_file)
         {
-            return File.OpenWrite(uri.AbsolutePath);
+            string path = HttpUtility.UrlDecode(uri.AbsolutePath);
+            if(!Directory.Exists(Path.GetDirectoryName(path)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            }
+            return new FileStream(path, FileMode.Create);
         }
         throw new NotSupportedException(uri.Scheme);
     }
