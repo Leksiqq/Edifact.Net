@@ -18,23 +18,23 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Update="files\interactive_interchange.xsd">
+    <EmbeddedResource Update="files\interactive_interchange.xsd">
       <SubType>Designer</SubType>
-    </None>
-    <None Update="files\batch_interchange.xsd">
+    </EmbeddedResource>
+    <EmbeddedResource Update="files\batch_interchange.xsd">
       <SubType>Designer</SubType>
-    </None>
-    <None Update="files\UN\D\composites.xsd">
+    </EmbeddedResource>
+    <EmbeddedResource Update="files\UN\D\composites.xsd">
       <SubType>Designer</SubType>
-    </None>
-    <None Update="files\UN\D\elements.xsd">
+    </EmbeddedResource>
+    <EmbeddedResource Update="files\UN\D\elements.xsd">
       <SubType>Designer</SubType>
-    </None>
-    <None Update="files\UN\D\message.xsd">
+    </EmbeddedResource>
+    <EmbeddedResource Update="files\UN\D\message.xsd">
       <SubType>Designer</SubType>
-    </None>
-    <None Update="files\UN\D\segments.xsd">
+    </EmbeddedResource>
+    <EmbeddedResource Update="files\UN\D\segments.xsd">
       <SubType>Designer</SubType>
-    </None>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

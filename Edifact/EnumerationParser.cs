@@ -7,14 +7,14 @@ namespace Net.Leksi.Edifact;
 
 internal class EnumerationParser : Parser
 {
-    private enum State { None, TypeName, Name, Desc, Note }
+    private enum State { None, TypeName, Name, Desc, Note, DescRepr }
     private enum Selector { None, TypeNameBegin, TypeNameEnd, Name, Desc, Note, Hr, DescRepr }
 
     private static readonly Regex s_reTypeNameBegin = new("^(?:\\s*(?<change>[+*|#X-]+))?\\s+(?<code>\\d{4})\\s+(?<name>[^[]+)");
     private static readonly Regex s_reName = new("^(\\s*(?<change>[+*|#X-]+))?\\s+(?<code>[^\\s]+)\\s+(?<name>.+)$");
-    private static readonly Regex s_reNote = new("^\\s+(?<rest>Note\\s*\\:(?<note>.*))$");
+    private static readonly Regex s_reNote = new("^(\\s*(?<change>[+*|#X-]+))?\\s+(?<rest>Note\\s*\\:(?<note>.*))$");
     private static readonly Regex s_reRest = new("^\\s*(?<rest>.+)$");
-    private static readonly Regex s_reDescRepr = new("\\s+(?:Desc|Repr)\\s*\\:");
+    private static readonly Regex s_reDescRepr = new("\\s+(?:Desc|Repr|Note)\\s*\\:");
     internal async IAsyncEnumerable<Enumeration> ParseAsync(
         TextReader reader, [EnumeratorCancellation] CancellationToken stoppingToken
     )
@@ -26,6 +26,7 @@ internal class EnumerationParser : Parser
         int hrs = 0;
         string lastLine = string.Empty;
         string? typeCode = null;
+        int numTypes = 0;
         _lineNumber = 0;
         State state = State.None;
         await foreach (IEnumerable<string> lines in SplitByNewLineAsync(reader, stoppingToken))
@@ -38,12 +39,15 @@ internal class EnumerationParser : Parser
                 selector = Selector.None;
                 lastLine = line;
                 ++_lineNumber;
-                if (pos == 0)
-                {
+                //if (pos == 0)
+                //{
                     if (hrs > 0)
                     {
+                        if(pos == 0)
+                        {
                         if (
                             selector is Selector.None
+                            && state is not State.DescRepr
                             && (m = s_reTypeNameBegin.Match(line)).Success
                             && (selector = Selector.TypeNameBegin) == selector
                         )
@@ -53,10 +57,12 @@ internal class EnumerationParser : Parser
                                 ThrowUnexpectedLine(_lineNumber, line);
                             }
                             typeCode = m.Groups[s_code].Value;
+                            numTypes = 0;
                             state = State.TypeName;
                         }
                         if (
                             (selector is Selector.None || selector is Selector.TypeNameBegin)
+                            && state is not State.DescRepr
                             && (m = s_reTypeNameBegin.Match(line)).Success
                             && (selector = Selector.TypeNameEnd) == selector
                         )
@@ -68,17 +74,28 @@ internal class EnumerationParser : Parser
                         }
                         if (
                             selector is Selector.None
-                            && s_reDescRepr.Match(line).Success 
+                            && state is not State.DescRepr
+                            && numTypes == 0
+                            && s_reDescRepr.Match(line).Success
                             && (selector = Selector.DescRepr) == selector
                         )
                         {
-                            if (type is { } || state is not State.TypeName || typeCode is null || sb.Length > 0)
+                            if (
+                                type is { } 
+                                || (state is not State.TypeName && state is not State.None)
+                                || typeCode is null 
+                                || sb.Length > 0
+                            )
                             {
                                 ThrowUnexpectedLine(_lineNumber, line);
                             }
+                            state = State.DescRepr;
                         }
-                        if(
+                    }
+                    if (
                             selector is Selector.None
+                            && state is not State.DescRepr
+                            && state is not State.Note
                             && (m = s_reName.Match(line)).Success
                             && (selector = Selector.Name) == selector
                         )
@@ -99,6 +116,12 @@ internal class EnumerationParser : Parser
                                 }
                                 if(type is { })
                                 {
+                                    if (state is State.Desc)
+                                    {
+                                        type.Description = sb.ToString();
+                                        sb.Clear();
+                                        state = State.None; 
+                                    }
                                     yield return type;
                                 }
                                 if (state is not State.None || typeCode is null || sb.Length > 0)
@@ -111,12 +134,14 @@ internal class EnumerationParser : Parser
                                     TypeCode = typeCode,
                                     Code = m.Groups[s_code].Value,
                                 };
+                                ++numTypes;
                                 sb.Append(m.Groups[s_name].Value.Trim());
                                 state = State.Name;
                             }
                         }
                         if(
-                            selector is Selector.None 
+                            selector is Selector.None
+                            && state is not State.DescRepr
                             && (m = s_reNote.Match(line)).Success 
                             && (selector = Selector.Note) == selector
                         )
@@ -143,8 +168,9 @@ internal class EnumerationParser : Parser
                         }
                         ++hrs;
                     }
-                }
-                else if(hrs > 0)
+                //}
+                //else
+                if(hrs > 0 && state is not State.DescRepr)
                 {
                     if((m = s_reRest.Match(line)).Success)
                     {
@@ -170,15 +196,20 @@ internal class EnumerationParser : Parser
                                 }
                                 type!.Name = sb.ToString();
                                 sb.Clear();
+                                sb.Append(m.Groups[s_rest].Value);
                                 selector = Selector.Desc;
                                 state = State.Desc;
                             }
+                        }
+                        else if(state is State.Desc)
+                        {
+                            sb.AppendLine().Append(m.Groups[s_rest].Value.Trim());
                         }
                     }
                 }
                 ++pos;
             }
-            if (hrs > 0 && selector is not Selector.Hr && state is not State.TypeName)
+            if (hrs > 0 && selector is not Selector.Hr && state is not State.TypeName && state is not State.DescRepr)
             {
                 if (type is null)
                 {
@@ -196,6 +227,10 @@ internal class EnumerationParser : Parser
                     sb.Clear();
                     state = State.None;
                 }
+            }
+            if(state is State.DescRepr)
+            {
+                state = State.None;
             }
         }
         if (type is { })

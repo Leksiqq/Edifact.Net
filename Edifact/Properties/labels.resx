@@ -257,7 +257,7 @@ ARGS:
     <value>Unexpected line ({0}): {1}</value>
   </data>
   <data name="DATA_ELEMENT_NOT_FOUND" xml:space="preserve">
-    <value>Data element '{1}' not found.</value>
+    <value>Data element '{0}' not found.</value>
   </data>
   <data name="INVALID_DIRECTORY_NAME_OR_INTERVAL" xml:space="preserve">
     <value>Invalid directory name or interval: '{0}'.</value>

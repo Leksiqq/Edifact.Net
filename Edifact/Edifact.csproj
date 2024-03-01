@@ -10,15 +10,29 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="files\batch_interchange.xsd" />
     <None Remove="files\composites.xsd" />
     <None Remove="files\edifact.xsd" />
     <None Remove="files\elements.xsd" />
+    <None Remove="files\interactive_interchange.xsd" />
     <None Remove="files\message.xsd" />
     <None Remove="files\segments.xsd" />
+    <None Remove="files\UN\D\composites.xsd" />
+    <None Remove="files\UN\D\elements.xsd" />
+    <None Remove="files\UN\D\message.xsd" />
+    <None Remove="files\UN\D\segments.xsd" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="files\batch_interchange.xsd" />
     <EmbeddedResource Include="files\edifact.xsd" />
+    <EmbeddedResource Include="files\interactive_interchange.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="files\UN\D\composites.xsd" />
+    <EmbeddedResource Include="files\UN\D\elements.xsd" />
+    <EmbeddedResource Include="files\UN\D\message.xsd" />
+    <EmbeddedResource Include="files\UN\D\segments.xsd" />
   </ItemGroup>
 
   <ItemGroup>
@@ -61,12 +75,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="files\interactive_interchange.xsd">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

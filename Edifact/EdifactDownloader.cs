@@ -6,6 +6,8 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Resources;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Schema;
@@ -692,6 +694,7 @@ public class EdifactDownloader : IDownloader
         EnumerationParser enumerationParser = new();
         await foreach (Enumeration en in enumerationParser.ParseAsync(uncl, stoppingToken))
         {
+            //Console.WriteLine(JsonSerializer.Serialize(en));
             XmlElement restriction = (XmlElement)doc.CreateNavigator()!
                 .SelectSingleNode(
                     string.Format(s_typeForEnumXPathFormat, en.TypeCode),

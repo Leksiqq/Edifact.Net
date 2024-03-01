@@ -203,7 +203,7 @@
     <value>Неожиданная строка ({0}): {1}</value>
   </data>
   <data name="DATA_ELEMENT_NOT_FOUND" xml:space="preserve">
-    <value>Элемент данных '{1}' не обнаружен.</value>
+    <value>Элемент данных '{0}' не обнаружен.</value>
   </data>
   <data name="INVALID_DIRECTORY_NAME_OR_INTERVAL" xml:space="preserve">
     <value>Неверное имя директории или интервал: {0}.</value>
