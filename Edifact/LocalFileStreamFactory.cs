@@ -15,18 +15,20 @@ internal class LocalFileStreamFactory : IStreamFactory
         throw new NotSupportedException(uri.Scheme);
     }
 
-    public Stream GetOutputStream(Uri uri)
+    public Stream GetOutputStream(Uri uri, FileMode mode = FileMode.Create)
     {
         if (uri.Scheme == s_file)
         {
             string path = HttpUtility.UrlDecode(uri.AbsolutePath);
-            if(!Directory.Exists(Path.GetDirectoryName(path)))
+            if(
+                (mode is FileMode.CreateNew || mode is FileMode.Create) 
+                && !Directory.Exists(Path.GetDirectoryName(path))
+            )
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             }
-            return new FileStream(path, FileMode.Create);
+            return new FileStream(path, mode);
         }
         throw new NotSupportedException(uri.Scheme);
     }
-
 }

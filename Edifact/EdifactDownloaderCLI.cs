@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Net.Leksi.Streams;
-using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
 using static Net.Leksi.Edifact.Constants;
@@ -48,12 +47,11 @@ public class EdifactDownloaderCLI : BackgroundService
                         _options.TargetUri!, 
                         Path.Combine(
                             Path.GetFileName(_options.TargetUri!.AbsolutePath), 
-                            e.Directory!, 
-                            Path.GetFileName(file)
+                            file
                         )
                     )
                 );
-                using Stream fs = File.OpenRead(file);
+                using Stream fs = File.OpenRead(Path.Combine(e.BaseFolder!, file));
                 fs.CopyTo( stream );
             }
         }

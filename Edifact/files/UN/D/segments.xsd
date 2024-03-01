@@ -126,6 +126,81 @@
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
+  <xs:complexType name="UIB">
+    <xs:annotation>
+      <xs:documentation an:name="name">Interactive interchange header</xs:documentation>
+      <xs:documentation an:name="function">
+        To head and identify an interchange.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BASE-SEGMENT">
+        <xs:sequence>
+          <xs:element name="S001" type="S001">
+            <xs:annotation>
+              <xs:documentation an:name="name">SYNTAX IDENTIFIER</xs:documentation>
+              <xs:documentation an:name="position">010</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S302" type="S302" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">DIALOGUE REFERENCE</xs:documentation>
+              <xs:documentation an:name="position">020</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S303" type="S303" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">TRANSACTION REFERENCE</xs:documentation>
+              <xs:documentation an:name="position">030</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S018" type="S018" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">SCENARIO IDENTIFICATION</xs:documentation>
+              <xs:documentation an:name="position">040</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S305" type="S305" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">DIALOGUE IDENTIFICATION</xs:documentation>
+              <xs:documentation an:name="position">050</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S002" type="S002" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">INTERCHANGE SENDER</xs:documentation>
+              <xs:documentation an:name="position">060</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S003" type="S003" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">INTERCHANGE RECIPIENT</xs:documentation>
+              <xs:documentation an:name="position">070</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S300" type="S300" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">DATE AND/OR TIME OF INITIATION</xs:documentation>
+              <xs:documentation an:name="position">080</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="D0325" type="D0325" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">Duplicate Indicator</xs:documentation>
+              <xs:documentation an:name="position">090</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="D0035" type="D0035" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">TEST INDICATOR</xs:documentation>
+              <xs:documentation an:name="description">Set = 1 if the interchange is a test. Otherwise not used</xs:documentation>
+              <xs:documentation an:name="position">100</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
   <xs:complexType name="UIZ">
     <xs:annotation>
       <xs:documentation an:name="name">Interactive interchange trailer</xs:documentation>

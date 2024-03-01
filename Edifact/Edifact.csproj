@@ -18,11 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="files\composites.xsd" />
     <EmbeddedResource Include="files\edifact.xsd" />
-    <EmbeddedResource Include="files\elements.xsd" />
-    <EmbeddedResource Include="files\message.xsd" />
-    <EmbeddedResource Include="files\segments.xsd" />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,6 +61,12 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="files\interactive_interchange.xsd">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
 
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">

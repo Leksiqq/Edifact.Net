@@ -39,14 +39,15 @@ public class EdifactDownloader : IDownloader
     private readonly List<string> _requestedDirectories = [];
 
     private string? _directory;
+    private string? _directoryFolder;
     private string? _eded;
     private string? _edcd;
     private string? _idcd;
     private string? _edsd;
     private string? _idsd;
     private string? _uncl;
+    private string? _unsl;
     private string? _ext;
-    private string _hrChars = s_minus;
     internal string Ns => !string.IsNullOrEmpty(_options.Namespace)
         ? _options.Namespace
         : Properties.Resources.edifact_ns;
@@ -167,15 +168,6 @@ public class EdifactDownloader : IDownloader
             }
             return;
         }
-        _generatedFiles.Clear();
-        if(s_directoryComparer.Compare(_directory, s_d01c) < 0)
-        {
-            _hrChars = "\\xC4";
-        }
-        else
-        {
-            _hrChars = s_minus;
-        }
         _logger?.LogInformation(s_logMessage, string.Format(s_rmLabels.GetString(s_receivingDirectory)!, _directory));
         try
         {
@@ -206,7 +198,8 @@ public class EdifactDownloader : IDownloader
                     DirectoryDownloaded?.Invoke(this, new DirectoryDownloadedEventArgs
                     {
                         Directory = _directory,
-                        Files = [.. _generatedFiles],
+                        BaseFolder = _tmpDir,
+                        Files = [.. _generatedFiles.Select(f => Path.GetRelativePath(_tmpDir, f))],
                     });
                 }
             }
@@ -234,7 +227,19 @@ public class EdifactDownloader : IDownloader
 
     private async Task BuildSchemasAsync(CancellationToken stoppingToken)
     {
+        if (Directory.Exists(_directoryFolder))
+        {
+            Directory.Delete(_directoryFolder, true);
+        }
+        Directory.CreateDirectory(_directoryFolder!);
+
         string targetFile = Path.Combine(_tmpDir, s_edifactXsd);
+        SaveXmlDocument(InitXmlDocument(s_edifact), targetFile);
+        _generatedFiles.Add(targetFile);
+        targetFile = Path.Combine(_tmpDir, s_batchInterchangeXsd);
+        SaveXmlDocument(InitXmlDocument(s_edifact), targetFile);
+        _generatedFiles.Add(targetFile);
+        targetFile = Path.Combine(_tmpDir, s_interactiveInterchangeXsd);
         SaveXmlDocument(InitXmlDocument(s_edifact), targetFile);
         _generatedFiles.Add(targetFile);
 
@@ -248,7 +253,7 @@ public class EdifactDownloader : IDownloader
             XmlResolver = _xmlResolver
         };
         schemaSet.ValidationEventHandler += SchemaSet_ValidationEventHandler;
-        schemaSet.Add(Ns, Path.Combine(_tmpDir, s_segmentsXsd));
+        schemaSet.Add(Ns, Path.Combine(_directoryFolder!, s_segmentsXsd));
         schemaSet.Compile();
 
         await MakeMessagesAsync(schemaSet, stoppingToken);
@@ -273,7 +278,7 @@ public class EdifactDownloader : IDownloader
             ;
             if (_options.Message is { } && messages.Length == 0)
             {
-                throw new Exception(string.Format(s_rmLabels.GetString("MESSAGE_NOT_FOUND")!, _directory, _options.Message));
+                throw new Exception(string.Format(s_rmLabels.GetString(s_messageNotFound)!, _directory, _options.Message));
             }
             foreach (string mess in messages)
             {
@@ -285,7 +290,7 @@ public class EdifactDownloader : IDownloader
     private async Task MakeMessageAsync(XmlSchemaSet schemaSet, string mess, CancellationToken stoppingToken)
     {
         XmlDocument doc = InitXmlDocument(s_message);
-        string targetFile = Path.Combine(_tmpDir, string.Format(s_fileNameFormat, mess, s_xsd));
+        string targetFile = Path.Combine(_directoryFolder!, string.Format(s_fileNameFormat, mess, s_xsd));
         SaveXmlDocument(
             doc,
             string.Format(
@@ -303,7 +308,7 @@ public class EdifactDownloader : IDownloader
                 ),
                 Encoding.Latin1
             );
-        MessageParser parser = new(_hrChars);
+        MessageParser parser = new();
         Stack<Segment> segmentGroupsStack = [];
         Stack<int> positionStack = [];
         Stack<XmlElement> sequenceStack = [];
@@ -407,7 +412,7 @@ public class EdifactDownloader : IDownloader
     private async Task MakeSegmentsAsync(CancellationToken stoppingToken)
     {
         XmlDocument doc = InitXmlDocument(s_segments);
-        SaveXmlDocument(doc, Path.Combine(_tmpDir, string.Format(s_fileNameFormat, s_segmentsXsd, s_src)));
+        SaveXmlDocument(doc, Path.Combine(_directoryFolder!, string.Format(s_fileNameFormat, s_segmentsXsd, s_src)));
 
         using TextReader edsd = new StreamReader(
                 File.OpenRead(
@@ -429,7 +434,7 @@ public class EdifactDownloader : IDownloader
                 Encoding.Latin1
             );
         await MakeSegmentsOfUsageMeanAsync(doc, idsd, 'E', stoppingToken);
-        string targetFile = Path.Combine(_tmpDir, s_segmentsXsd);
+        string targetFile = Path.Combine(_directoryFolder!, s_segmentsXsd);
         SaveXmlDocument(doc, targetFile);
         if (new FileInfo(targetFile).Length == new FileInfo(string.Format(s_fileNameFormat, targetFile, s_src)).Length)
         {
@@ -444,7 +449,7 @@ public class EdifactDownloader : IDownloader
         Dictionary<string, Element> elements = [];
         List<string> codes = [];
 
-        SegmentParser parser = new(_hrChars, nameFirstChar);
+        SegmentParser parser = new(nameFirstChar);
         await foreach (Segment segment in parser.ParseAsync(reader, stoppingToken))
         {
             XmlElement complexType = doc.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns);
@@ -509,7 +514,7 @@ public class EdifactDownloader : IDownloader
     private async Task MakeCompositesAsync(CancellationToken stoppingToken)
     {
         XmlDocument doc = InitXmlDocument(s_composites);
-        SaveXmlDocument(doc, Path.Combine(_tmpDir, string.Format(s_fileNameFormat, s_compositesXsd, s_src)));
+        SaveXmlDocument(doc, Path.Combine(_directoryFolder!, string.Format(s_fileNameFormat, s_compositesXsd, s_src)));
 
         using TextReader edcd = new StreamReader(
                 File.OpenRead(
@@ -531,7 +536,7 @@ public class EdifactDownloader : IDownloader
                 Encoding.Latin1
             );
         await MakeCompositesOfUsageMeanAsync(doc, idcd, 'E', stoppingToken);
-        string targetFile = Path.Combine(_tmpDir, s_compositesXsd);
+        string targetFile = Path.Combine(_directoryFolder!, s_compositesXsd);
         SaveXmlDocument(doc, targetFile);
         if (new FileInfo(targetFile).Length == new FileInfo(string.Format(s_fileNameFormat, targetFile, s_src)).Length)
         {
@@ -557,7 +562,7 @@ public class EdifactDownloader : IDownloader
         Dictionary<string, Element> elements = [];
         List<string> codes = [];
 
-        CompositeParser parser = new(_hrChars, nameFirstChar);
+        CompositeParser parser = new(nameFirstChar);
         await foreach (Composite composite in parser.ParseAsync(reader, stoppingToken))
         {
             XmlElement complexType = doc.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns);
@@ -634,18 +639,9 @@ public class EdifactDownloader : IDownloader
                 ),
                 Encoding.Latin1
             );
-        using TextReader uncl = new StreamReader(
-                File.OpenRead(
-                    Path.Combine(
-                        _tmpDir,
-                        string.Format(s_fileNameFormat, _uncl, _ext)
-                    )
-                ),
-                Encoding.Latin1
-            );
         XmlDocument doc = InitXmlDocument(s_elements);
-        SaveXmlDocument(doc, Path.Combine(_tmpDir, string.Format(s_fileNameFormat, s_elementsXsd, s_src)));
-        DataElementParser parser = new(_hrChars);
+        SaveXmlDocument(doc, Path.Combine(_directoryFolder!, string.Format(s_fileNameFormat, s_elementsXsd, s_src)));
+        DataElementParser parser = new();
         await foreach (DataElement dataElement in parser.ParseAsync(eded, stoppingToken))
         {
             XmlElement complexType = doc.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns);
@@ -662,7 +658,38 @@ public class EdifactDownloader : IDownloader
             complexType.AppendChild(simpleContent);
             doc.DocumentElement!.AppendChild(complexType);
         }
-        EnumerationParser enumerationParser = new(_hrChars);
+        using TextReader uncl = new StreamReader(
+                File.OpenRead(
+                    Path.Combine(
+                        _tmpDir,
+                        string.Format(s_fileNameFormat, _uncl, _ext)
+                    )
+                ),
+                Encoding.Latin1
+            );
+        await MakeEnumerationsAsync(uncl, doc, stoppingToken);
+        using TextReader unsl = new StreamReader(
+                File.OpenRead(
+                    Path.Combine(
+                        _tmpDir,
+                        string.Format(s_fileNameFormat, _unsl, _ext)
+                    )
+                ),
+                Encoding.Latin1
+            );
+        await MakeEnumerationsAsync(unsl, doc, stoppingToken);
+        string targetFile = Path.Combine(_directoryFolder!, s_elementsXsd);
+        SaveXmlDocument(doc, targetFile);
+        if (new FileInfo(targetFile).Length == new FileInfo(string.Format(s_fileNameFormat, targetFile, s_src)).Length)
+        {
+            throw new Exception(string.Format(s_rmLabels.GetString(s_noSimpleTypesFound)!, _directory));
+        }
+        _generatedFiles.Add(targetFile);
+    }
+
+    private async Task MakeEnumerationsAsync(TextReader uncl, XmlDocument doc, CancellationToken stoppingToken)
+    {
+        EnumerationParser enumerationParser = new();
         await foreach (Enumeration en in enumerationParser.ParseAsync(uncl, stoppingToken))
         {
             XmlElement restriction = (XmlElement)doc.CreateNavigator()!
@@ -675,14 +702,8 @@ public class EdifactDownloader : IDownloader
             CreateAnnotation(enumeration, en);
             restriction.AppendChild(enumeration);
         }
-        string targetFile = Path.Combine(_tmpDir, s_elementsXsd);
-        SaveXmlDocument(doc, targetFile);
-        if(new FileInfo(targetFile).Length == new FileInfo(string.Format(s_fileNameFormat, targetFile, s_src)).Length)
-        {
-            throw new Exception(string.Format(s_rmLabels.GetString(s_noSimpleTypesFound)!, _directory));
-        }
-        _generatedFiles.Add(targetFile);
     }
+
     private static void CreateAnnotation(XmlElement element, DataElement source)
     {
         if (
@@ -869,7 +890,12 @@ public class EdifactDownloader : IDownloader
                 File.WriteAllBytes(target, bytes);
             }
         }
-
+        string unsl = Path.Combine(_tmpDir, string.Format(s_fileNameFormat, s_unsl, _ext));
+        if (!File.Exists(unsl))
+        {
+            _logger?.LogInformation(s_logMessage, string.Format(s_rmLabels.GetString(s_loadFixedFile)!, unsl));
+            File.WriteAllBytes(unsl, (s_rmFixed.GetObject(s_unsl99a)! as byte[])!);
+        }
     }
     private void InitContext()
     {
@@ -894,7 +920,10 @@ public class EdifactDownloader : IDownloader
         _edsd = s_edsd;
         _idsd = s_idsd;
         _uncl = s_uncl;
+        _unsl = s_unsl;
         _ext = _directory![1..];
+        _directoryFolder = Path.Combine(_tmpDir, s_un, _directory!);
+        _generatedFiles.Clear();
     }
     private bool ExtractAll(Stream stream)
     {

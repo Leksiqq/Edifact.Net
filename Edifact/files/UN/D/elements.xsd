@@ -9,7 +9,7 @@
   elementFormDefault="qualified" attributeFormDefault="unqualified"
   xmlns:an="http://leksi.net/annotation"
 >
-  <xs:include schemaLocation="edifact.xsd" />
+  <xs:include schemaLocation="../../edifact.xsd" />
   <xs:complexType name="D0001">
     <xs:simpleContent>
       <xs:restriction base="D">
@@ -275,6 +275,36 @@
       </xs:restriction>
     </xs:simpleContent>
   </xs:complexType>
+  <xs:complexType name="D0127">
+    <xs:annotation>
+      <xs:documentation an:name="name">Scenario identification</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="14"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0128">
+    <xs:annotation>
+      <xs:documentation an:name="name">Scenario version number</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="3"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0130">
+    <xs:annotation>
+      <xs:documentation an:name="name">Scenario release number</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="3"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
   <xs:complexType name="D0300">
     <xs:annotation>
       <xs:documentation an:name="name">Initiator control reference</xs:documentation>
@@ -302,6 +332,26 @@
     <xs:simpleContent>
       <xs:restriction base="D">
         <xs:maxLength value="35"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0306">
+    <xs:annotation>
+      <xs:documentation an:name="name">Transaction control reference</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="35"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0311">
+    <xs:annotation>
+      <xs:documentation an:name="name">Dialogue identification</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="14"/>
       </xs:restriction>
     </xs:simpleContent>
   </xs:complexType>
@@ -369,6 +419,26 @@
     <xs:simpleContent>
       <xs:restriction base="D">
         <xs:maxLength value="35"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0342">
+    <xs:annotation>
+      <xs:documentation an:name="name">Dialogue version number</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="3"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0344">
+    <xs:annotation>
+      <xs:documentation an:name="name">Dialogue release number</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="3"/>
       </xs:restriction>
     </xs:simpleContent>
   </xs:complexType>

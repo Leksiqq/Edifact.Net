@@ -8,8 +8,8 @@ internal class EdifactTokenizer
     private static Dictionary<byte, object> s_bomTree = new()
     {
         {
-            0xEF, 
-            new Dictionary<byte, object>() 
+            0xEF,
+            new Dictionary<byte, object>()
             {
                 {
                     0xBB,
@@ -19,9 +19,9 @@ internal class EdifactTokenizer
                             0xBF,
                             BOM.Utf8
                         }
-                    } 
+                    }
                 }
-            } 
+            }
         },
         {
             0xFE,
@@ -261,31 +261,60 @@ internal class EdifactTokenizer
                 {
                     node = s_begin;
                 }
-                else if (b == ' ' || b == '\t' || b == '\n' || b == '\n')
+                if (node is null)
                 {
-                    spaces = true;
+                    do
+                    {
+                        b = stream.ReadByte();
+                    }
+                    while (IsWhitespace(b));
+                    if (s_begin.TryGetValue((byte)b, out _))
+                    {
+                        node = s_begin;
+                    }
+                    else
+                    {
+                        throw new Exception("todo");
+                    }
                 }
             }
-            if (node is { } && node.TryGetValue((byte)b, out obj))
+            if (node!.TryGetValue((byte)b, out obj))
             {
-                if(obj is BOM bom)
+                if (obj is BOM bom)
                 {
-
+                    do
+                    {
+                        b = stream.ReadByte();
+                    }
+                    while (IsWhitespace(b));
+                    if (s_begin.TryGetValue((byte)b, out _))
+                    {
+                        node = s_begin;
+                    }
+                    else
+                    {
+                        throw new Exception("todo");
+                    }
                 }
                 else if (obj == _beginEdifact)
                 {
-
+                    _componentPartsSeparator = (char)stream.ReadByte();
+                    _segmentPartsSeparator = (char)stream.ReadByte();
+                    _decimalMark = (char)stream.ReadByte();
+                    _ = (char)stream.ReadByte();
                 }
-                else if(obj is Dictionary<byte, object> nextNode){
+                else if (obj is Dictionary<byte, object> nextNode) {
                     node = nextNode;
                 }
             }
+            else
+            {
+                throw new Exception("todo");
+            }
         }
-        byte[] buffer = new byte[9];
-        int n = await stream.ReadAsync(buffer, 0, 9);
-        if (n == 9)
-        {
-
-        }
+    }
+    private bool IsWhitespace(int b)
+    {
+        return b == (byte)' ' || b == (byte)'\t' || b == (byte)'\r' || b == (byte)'\n';
     }
 }

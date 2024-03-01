@@ -11,6 +11,7 @@
   <xs:complexType name="BASE-MESSAGE" abstract="true">
     <xs:sequence id="structure"/>
   </xs:complexType>
+  
   <xs:complexType name="BASE-SEGMENT" abstract="true">
     <xs:anyAttribute namespace="##any"/>
   </xs:complexType>
@@ -28,5 +29,4 @@
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
-
 </xs:schema>

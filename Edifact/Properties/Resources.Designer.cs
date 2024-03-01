@@ -70,7 +70,7 @@ namespace Net.Leksi.Edifact.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        ///   Ищет локализованную строку, похожую на &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
         ///&lt;!-- UN --&gt;
         ///&lt;!-- The file was automatically generated --&gt;
         ///&lt;!-- Don&apos;t edit! --&gt;
@@ -80,13 +80,36 @@ namespace Net.Leksi.Edifact.Properties {
         ///  xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
         ///  elementFormDefault=&quot;qualified&quot; attributeFormDefault=&quot;unqualified&quot;
         ///&gt;
-        ///  &lt;xs:include schemaLocation=&quot;simpletypes.xsd&quot;/&gt;
+        ///  &lt;xs:include schemaLocation=&quot;segments.xsd&quot;/&gt;
+        ///  &lt;xs:complexType name=&quot;BATCH_INTERCHANGE&quot;&gt;
+        ///    &lt;xs:sequence&gt;
+        ///      &lt;xs:element name=&quot;UNB&quot; type=&quot;UNB&quot;/&gt;
+        ///      &lt;xs:choice&gt;
+        ///        &lt;xs:sequence maxOccurs=&quot;unbou [остаток строки не уместился]&quot;;.
+        /// </summary>
+        internal static string batch_interchange {
+            get {
+                return ResourceManager.GetString("batch_interchange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        ///&lt;!-- UN --&gt;
+        ///&lt;!-- The file was automatically generated --&gt;
+        ///&lt;!-- Don&apos;t edit! --&gt;
+        ///&lt;xs:schema
+        ///  targetNamespace=&quot;EDIFACT&quot;
+        ///  xmlns=&quot;EDIFACT&quot;
+        ///  xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
+        ///  elementFormDefault=&quot;qualified&quot; attributeFormDefault=&quot;unqualified&quot;
+        ///  xmlns:an=&quot;http://leksi.net/annotation&quot;
+        ///&gt;
+        ///  &lt;xs:include schemaLocation=&quot;elements.xsd&quot;/&gt;
         ///  &lt;xs:complexType name=&quot;S001&quot;&gt;
         ///    &lt;xs:annotation&gt;
         ///      &lt;xs:documentation&gt;SYNTAX IDENTIFIER&lt;/xs:documentation&gt;
-        ///    &lt;/xs:annotation&gt;
-        ///    &lt;xs:sequence&gt;
-        ///      [остаток строки не уместился]&quot;;.
+        ///    &lt;/x [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string composites {
             get {
@@ -105,14 +128,12 @@ namespace Net.Leksi.Edifact.Properties {
         ///  xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
         ///  elementFormDefault=&quot;qualified&quot; attributeFormDefault=&quot;unqualified&quot;
         ///&gt;
-        ///  &lt;xs:complexType name=&quot;GENERIC-MESSAGE&quot; abstract=&quot;true&quot;&gt;
-        ///    &lt;xs:sequence&gt;
-        ///      &lt;xs:element name=&quot;interchange&quot;&gt;
-        ///        &lt;xs:complexType&gt;
-        ///          &lt;xs:sequence&gt;
-        ///            
-        ///          &lt;/xs:sequence&gt;
-        ///   [остаток строки не уместился]&quot;;.
+        ///  &lt;xs:complexType name=&quot;BASE-MESSAGE&quot; abstract=&quot;true&quot;&gt;
+        ///    &lt;xs:sequence id=&quot;structure&quot;/&gt;
+        ///  &lt;/xs:complexType&gt;
+        ///  
+        ///  &lt;xs:complexType name=&quot;BASE-SEGMENT&quot; abstract=&quot;true&quot;&gt;
+        ///    &lt;xs:anyAttribute namespace=&quot;##any&quot; [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string edifact {
             get {
@@ -139,18 +160,41 @@ namespace Net.Leksi.Edifact.Properties {
         ///  xmlns=&quot;EDIFACT&quot;
         ///  xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
         ///  elementFormDefault=&quot;qualified&quot; attributeFormDefault=&quot;unqualified&quot;
+        ///  xmlns:an=&quot;http://leksi.net/annotation&quot;
         ///&gt;
-        ///  &lt;xs:include schemaLocation=&quot;edifact.xsd&quot; /&gt;
+        ///  &lt;xs:include schemaLocation=&quot;../../edifact.xsd&quot; /&gt;
         ///  &lt;xs:complexType name=&quot;D0001&quot;&gt;
         ///    &lt;xs:simpleContent&gt;
         ///      &lt;xs:restriction base=&quot;D&quot;&gt;
-        ///        &lt;xs:pattern value=&quot;^\w{4}$&quot;/&gt;
-        ///      &lt;/xs:restriction&gt;
-        ///    &lt;/xs:s [остаток строки не уместился]&quot;;.
+        ///        &lt;xs:pattern value= [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string elements {
             get {
                 return ResourceManager.GetString("elements", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot; ?&gt;
+        ///&lt;!-- UN --&gt;
+        ///&lt;!-- The file was automatically generated --&gt;
+        ///&lt;!-- Don&apos;t edit! --&gt;
+        ///&lt;xs:schema
+        ///  targetNamespace=&quot;EDIFACT&quot;
+        ///  xmlns=&quot;EDIFACT&quot;
+        ///  xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
+        ///  elementFormDefault=&quot;qualified&quot; attributeFormDefault=&quot;unqualified&quot;
+        ///&gt;
+        ///  &lt;xs:include schemaLocation=&quot;segments.xsd&quot;/&gt;
+        ///  &lt;xs:complexType name=&quot;INTERACTIVE_INTERCHANGE&quot;&gt;
+        ///    &lt;xs:sequence&gt;
+        ///      &lt;xs:element name=&quot;UIB&quot; type=&quot;UIB&quot;/&gt;
+        ///      &lt;xs:choice&gt;
+        ///        &lt;xs:sequence maxOccurs= [остаток строки не уместился]&quot;;.
+        /// </summary>
+        internal static string interactive_interchange {
+            get {
+                return ResourceManager.GetString("interactive_interchange", resourceCulture);
             }
         }
         
@@ -168,9 +212,10 @@ namespace Net.Leksi.Edifact.Properties {
         ///  &lt;xs:include schemaLocation=&quot;segments.xsd&quot;/&gt;
         ///  &lt;xs:complexType name=&quot;MESSAGE&quot;&gt;
         ///    &lt;xs:complexContent&gt;
-        ///      &lt;xs:extension base=&quot;GENERIC-MESSAGE&quot;&gt;
+        ///      &lt;xs:extension base=&quot;BASE-MESSAGE&quot;&gt;
         ///        &lt;xs:sequence id=&quot;structure&quot;&gt;
-        ///        &lt;/xs:sequence [остаток строки не уместился]&quot;;.
+        ///        &lt;/xs:sequence&gt;
+        /// [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string message {
             get {
@@ -206,13 +251,12 @@ namespace Net.Leksi.Edifact.Properties {
         ///  xmlns=&quot;EDIFACT&quot;
         ///  xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
         ///  elementFormDefault=&quot;qualified&quot; attributeFormDefault=&quot;unqualified&quot;
+        ///  xmlns:an=&quot;http://leksi.net/annotation&quot;
         ///&gt;
-        ///  &lt;xs:include schemaLocation=&quot;types.xsd&quot;/&gt;
+        ///  &lt;xs:include schemaLocation=&quot;composites.xsd&quot;/&gt;
         ///  &lt;xs:complexType name=&quot;UNB&quot;&gt;
         ///    &lt;xs:annotation&gt;
-        ///      &lt;xs:documentation&gt;Interchange Header&lt;/xs:documentation&gt;
-        ///      &lt;xs:documentation&gt;
-        ///        Function: To start [остаток строки не уместился]&quot;;.
+        ///      &lt;xs:documentation an:name=&quot;name&quot;&gt;Interchange Header&lt;/xs:docume [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string segments {
             get {

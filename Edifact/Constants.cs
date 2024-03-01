@@ -16,6 +16,7 @@ internal static class Constants
     internal const string s_attr = "attr";
     internal const string s_base = "base";
     internal const string s_baseSegment = "BASE-SEGMENT";
+    internal const string s_batchInterchangeXsd = "batch_interchange.xsd";
     internal const string s_change = "change";
     internal const string s_children = "children";
     internal const string s_cmd = "cmd";
@@ -57,6 +58,7 @@ internal static class Constants
     internal const string s_function = "function";
     internal const string s_idcd = "IDCD";
     internal const string s_idsd = "IDSD";
+    internal const string s_interactiveInterchangeXsd = "interactive_interchange.xsd";
     internal const string s_interval = "interval";
     internal const string s_invalidDirectoryNameOrInterval = "INVALID_DIRECTORY_NAME_OR_INTERVAL";
     internal const string s_keyAlreadyUsed = "KEY_ALREADY_USED";
@@ -69,11 +71,11 @@ internal static class Constants
     internal const string s_maxOccurs = "maxOccurs";
     internal const string s_message = "message";
     internal const string s_message1 = "MESSAGE";
+    internal const string s_messageNotFound = "MESSAGE_NOT_FOUND";
     internal const string s_messagesPatternFormat = "{0}_D.{1}";
     internal const string s_minLength = "minLength";
     internal const string s_minOccurs = "minOccurs";
     internal const string s_minOccursPatternFormat = "{0},";
-    internal const string s_minus = "-";
     internal const string s_missedKeyValue = "MISSED_KEY_VALUE";
     internal const string s_missedMandatryKey = "MISSED_MANDATORY_KEY";
     internal const string s_n = "n";
@@ -123,6 +125,8 @@ internal static class Constants
     internal const string s_unh = "UNH";
     internal const string s_unknownKey = "UNKNOWN_KEY";
     internal const string s_unMessageFormat = " UN/{0} ";
+    internal const string s_unsl = "UNSL";
+    internal const string s_unsl99a = "UN\\D99A\\UNSL.99A";
     internal const string s_unt = "UNT";
     internal const string s_uriFormat = "{0}{1}";
     internal const string s_uriSchemeNotSupported = "URI_SCHEME_NOT_SUPPORTED";

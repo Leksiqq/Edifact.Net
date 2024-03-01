@@ -16,17 +16,25 @@
     <EmbeddedResource Update="files\edifact.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Update="files\message.xsd">
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="files\interactive_interchange.xsd">
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="files\segments.xsd">
+    </None>
+    <None Update="files\batch_interchange.xsd">
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="files\elements.xsd">
+    </None>
+    <None Update="files\UN\D\composites.xsd">
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="files\composites.xsd">
+    </None>
+    <None Update="files\UN\D\elements.xsd">
       <SubType>Designer</SubType>
-    </EmbeddedResource>
+    </None>
+    <None Update="files\UN\D\message.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Update="files\UN\D\segments.xsd">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
 </Project>

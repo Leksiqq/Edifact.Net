@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- UN -->
+<!-- The file was automatically generated -->
+<!-- Don't edit! -->
+<xs:schema
+  targetNamespace="EDIFACT"
+  xmlns="EDIFACT"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified" attributeFormDefault="unqualified"
+>
+  <xs:include schemaLocation="segments.xsd"/>
+  <xs:complexType name="BATCH_INTERCHANGE">
+    <xs:sequence>
+      <xs:element name="UNB" type="UNB"/>
+      <xs:choice>
+        <xs:sequence maxOccurs="unbounded">
+          <xs:element name="UNG" type="UNG"/>
+          <xs:sequence maxOccurs="unbounded">
+            <xs:element name="UNH" type="UNH"/>
+            <xs:element name="MESSAGE" type="BASE-MESSAGE" maxOccurs="unbounded"/>
+            <xs:element name="UNT" type="UNT"/>
+          </xs:sequence>
+          <xs:element name="UNE" type="UNE"/>
+        </xs:sequence>
+        <xs:sequence maxOccurs="unbounded">
+          <xs:element name="UNH" type="UNH"/>
+          <xs:element name="MESSAGE" type="BASE-MESSAGE" maxOccurs="unbounded"/>
+          <xs:element name="UNT" type="UNT"/>
+        </xs:sequence>
+      </xs:choice>
+      <xs:element name="UNZ" type="UNZ"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

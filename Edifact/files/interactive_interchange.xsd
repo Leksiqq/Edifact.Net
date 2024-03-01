@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!-- UN -->
+<!-- The file was automatically generated -->
+<!-- Don't edit! -->
+<xs:schema
+  targetNamespace="EDIFACT"
+  xmlns="EDIFACT"
+  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified" attributeFormDefault="unqualified"
+>
+  <xs:include schemaLocation="segments.xsd"/>
+  <xs:complexType name="INTERACTIVE_INTERCHANGE">
+    <xs:sequence>
+      <xs:element name="UIB" type="UIB"/>
+      <xs:choice>
+        <xs:sequence maxOccurs="unbounded">
+          <xs:element name="UNG" type="UNG"/>
+          <xs:sequence maxOccurs="unbounded">
+            <xs:element name="UIH" type="UIH"/>
+            <xs:element name="MESSAGE" type="BASE-MESSAGE" maxOccurs="unbounded"/>
+            <xs:element name="UIT" type="UIT"/>
+          </xs:sequence>
+          <xs:element name="UNE" type="UNE"/>
+        </xs:sequence>
+        <xs:sequence maxOccurs="unbounded">
+          <xs:element name="UIH" type="UIH"/>
+          <xs:element name="MESSAGE" type="BASE-MESSAGE" maxOccurs="unbounded"/>
+          <xs:element name="UIT" type="UIT"/>
+        </xs:sequence>
+      </xs:choice>
+      <xs:element name="UIZ" type="UIZ"/>
+    </xs:sequence>
+  </xs:complexType>
+
+</xs:schema>

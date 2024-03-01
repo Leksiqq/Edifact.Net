@@ -5,7 +5,7 @@ using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
 
-internal class EnumerationParser(string hrChars) : Parser(hrChars)
+internal class EnumerationParser : Parser
 {
     private enum State { None, TypeName, Name, Desc, Note }
     private enum Selector { None, TypeNameBegin, TypeNameEnd, Name, Desc, Note, Hr, DescRepr }
