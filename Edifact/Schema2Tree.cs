@@ -119,11 +119,11 @@ public class Schema2Tree: IDisposable
                         }
                         if (positions[^1] < seq.Items.Count || positions.Count == 1)
                         {
-                            if (s_unh.Equals(cur.Name) || s_uih.Equals(cur.Name))
+                            if (positions.Count == 1 && positions[^1] == 1)
                             {
                                 await WriteAsync(s_x250Cx2500);
                             }
-                            else if (s_unt.Equals(cur.Name) || s_uit.Equals(cur.Name))
+                            else if (positions.Count == 1 && positions[^1] == seq.Items.Count)
                             {
                                 await WriteAsync(s_x2514x2500);
                             }
@@ -141,7 +141,8 @@ public class Schema2Tree: IDisposable
                         if (m.Success)
                         {
                             await WriteAsync(string.Format(s_segmentGroupFormat, m.Groups[s_code].Value));
-                            vlines[positions.Count - 1] = (positions[^1] < seq.Items.Count || positions.Count == 1);
+                            vlines[positions.Count - 1] = (positions[^1] < seq.Items.Count || positions.Count == 1) 
+                                && !(positions.Count == 1 && positions[^1] == seq.Items.Count);
                             positions.Add(0);
                             elementsStack.Add(cur);
                             if (vlines.Count < positions.Count)

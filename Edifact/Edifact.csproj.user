@@ -2,6 +2,12 @@
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup />
   <ItemGroup>
+    <EmbeddedResource Update="files\system_elements.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Update="files\system_composites.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Update="Properties\labels.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -36,5 +42,10 @@
     <EmbeddedResource Update="files\UN\D\segments.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="files\system_segments.xsd">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
 </Project>

@@ -83,12 +83,10 @@ public class EdifactDownloaderCLI : BackgroundService
         {
             await _downloader.DownloadAsync(stoppingToken);
         }
-        catch (Exception)
+        finally
         {
-
+            await _services.GetRequiredService<IHost>().StopAsync(stoppingToken);
         }
-        await _services.GetRequiredService<IHost>().StopAsync(stoppingToken);
-
     }
 
     private void Downloader_DirectoryNotFound(object sender, DirectoryNotFoundEventArgs e)

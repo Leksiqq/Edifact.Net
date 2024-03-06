@@ -106,10 +106,8 @@ namespace Net.Leksi.Edifact.Properties {
         ///  xmlns:an=&quot;http://leksi.net/annotation&quot;
         ///&gt;
         ///  &lt;xs:include schemaLocation=&quot;elements.xsd&quot;/&gt;
-        ///  &lt;xs:complexType name=&quot;S001&quot;&gt;
-        ///    &lt;xs:annotation&gt;
-        ///      &lt;xs:documentation&gt;SYNTAX IDENTIFIER&lt;/xs:documentation&gt;
-        ///    &lt;/x [остаток строки не уместился]&quot;;.
+        ///
+        ///&lt;/xs:schema&gt;.
         /// </summary>
         internal static string composites {
             get {
@@ -163,10 +161,8 @@ namespace Net.Leksi.Edifact.Properties {
         ///  xmlns:an=&quot;http://leksi.net/annotation&quot;
         ///&gt;
         ///  &lt;xs:include schemaLocation=&quot;../../edifact.xsd&quot; /&gt;
-        ///  &lt;xs:complexType name=&quot;D0001&quot;&gt;
-        ///    &lt;xs:simpleContent&gt;
-        ///      &lt;xs:restriction base=&quot;D&quot;&gt;
-        ///        &lt;xs:pattern value= [остаток строки не уместился]&quot;;.
+        ///
+        ///&lt;/xs:schema&gt;.
         /// </summary>
         internal static string elements {
             get {
@@ -254,13 +250,83 @@ namespace Net.Leksi.Edifact.Properties {
         ///  xmlns:an=&quot;http://leksi.net/annotation&quot;
         ///&gt;
         ///  &lt;xs:include schemaLocation=&quot;composites.xsd&quot;/&gt;
-        ///  &lt;xs:complexType name=&quot;UNB&quot;&gt;
-        ///    &lt;xs:annotation&gt;
-        ///      &lt;xs:documentation an:name=&quot;name&quot;&gt;Interchange Header&lt;/xs:docume [остаток строки не уместился]&quot;;.
+        ///
+        ///&lt;/xs:schema&gt;.
         /// </summary>
         internal static string segments {
             get {
                 return ResourceManager.GetString("segments", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        ///&lt;!-- UN --&gt;
+        ///&lt;!-- The file was automatically generated --&gt;
+        ///&lt;!-- Don&apos;t edit! --&gt;
+        ///&lt;xs:schema
+        ///  targetNamespace=&quot;EDIFACT&quot;
+        ///  xmlns=&quot;EDIFACT&quot;
+        ///  xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
+        ///  elementFormDefault=&quot;qualified&quot; attributeFormDefault=&quot;unqualified&quot;
+        ///  xmlns:an=&quot;http://leksi.net/annotation&quot;
+        ///&gt;
+        ///  &lt;xs:include schemaLocation=&quot;system_elements.xsd&quot;/&gt;
+        ///  &lt;xs:complexType name=&quot;S001&quot;&gt;
+        ///    &lt;xs:annotation&gt;
+        ///      &lt;xs:documentation&gt;SYNTAX IDENTIFIER&lt;/xs:documentation&gt;
+        /// [остаток строки не уместился]&quot;;.
+        /// </summary>
+        internal static string system_composites {
+            get {
+                return ResourceManager.GetString("system_composites", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        ///&lt;!-- UN --&gt;
+        ///&lt;!-- The file was automatically generated --&gt;
+        ///&lt;!-- Don&apos;t edit! --&gt;
+        ///&lt;xs:schema
+        ///  targetNamespace=&quot;EDIFACT&quot;
+        ///  xmlns=&quot;EDIFACT&quot;
+        ///  xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
+        ///  elementFormDefault=&quot;qualified&quot; attributeFormDefault=&quot;unqualified&quot;
+        ///  xmlns:an=&quot;http://leksi.net/annotation&quot;
+        ///&gt;
+        ///  &lt;xs:include schemaLocation=&quot;edifact.xsd&quot; /&gt;
+        ///  &lt;xs:complexType name=&quot;D0001&quot;&gt;
+        ///    &lt;xs:simpleContent&gt;
+        ///      &lt;xs:restriction base=&quot;D&quot;&gt;
+        ///        &lt;xs:pattern value=&quot;^\w{4 [остаток строки не уместился]&quot;;.
+        /// </summary>
+        internal static string system_elements {
+            get {
+                return ResourceManager.GetString("system_elements", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+        ///&lt;!-- UN --&gt;
+        ///&lt;!-- The file was automatically generated --&gt;
+        ///&lt;!-- Don&apos;t edit! --&gt;
+        ///&lt;xs:schema
+        ///  targetNamespace=&quot;EDIFACT&quot;
+        ///  xmlns=&quot;EDIFACT&quot;
+        ///  xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
+        ///  elementFormDefault=&quot;qualified&quot; attributeFormDefault=&quot;unqualified&quot;
+        ///  xmlns:an=&quot;http://leksi.net/annotation&quot;
+        ///&gt;
+        ///  &lt;xs:include schemaLocation=&quot;system_composites.xsd&quot;/&gt;
+        ///  &lt;xs:complexType name=&quot;UNB&quot;&gt;
+        ///    &lt;xs:annotation&gt;
+        ///      &lt;xs:documentation an:name=&quot;name&quot;&gt;Interchange Header&lt;/xs [остаток строки не уместился]&quot;;.
+        /// </summary>
+        internal static string system_segments {
+            get {
+                return ResourceManager.GetString("system_segments", resourceCulture);
             }
         }
     }

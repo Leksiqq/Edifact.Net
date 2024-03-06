@@ -6,8 +6,6 @@ using System.IO.Compression;
 using System.Reflection;
 using System.Resources;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Schema;
@@ -48,7 +46,6 @@ public class EdifactDownloader : IDownloader
     private string? _edsd;
     private string? _idsd;
     private string? _uncl;
-    private string? _unsl;
     private string? _ext;
     internal string Ns => !string.IsNullOrEmpty(_options.Namespace)
         ? _options.Namespace
@@ -239,10 +236,19 @@ public class EdifactDownloader : IDownloader
         SaveXmlDocument(InitXmlDocument(s_edifact), targetFile);
         _generatedFiles.Add(targetFile);
         targetFile = Path.Combine(_tmpDir, s_batchInterchangeXsd);
-        SaveXmlDocument(InitXmlDocument(s_edifact), targetFile);
+        SaveXmlDocument(InitXmlDocument(s_batchInterchange), targetFile);
         _generatedFiles.Add(targetFile);
         targetFile = Path.Combine(_tmpDir, s_interactiveInterchangeXsd);
-        SaveXmlDocument(InitXmlDocument(s_edifact), targetFile);
+        SaveXmlDocument(InitXmlDocument(s_interactiveInterchange), targetFile);
+        _generatedFiles.Add(targetFile);
+        targetFile = Path.Combine(_tmpDir, s_systemCompositesXsd);
+        SaveXmlDocument(InitXmlDocument(s_systemComposites), targetFile);
+        _generatedFiles.Add(targetFile);
+        targetFile = Path.Combine(_tmpDir, s_systemElementsXsd);
+        SaveXmlDocument(InitXmlDocument(s_systemElements), targetFile);
+        _generatedFiles.Add(targetFile);
+        targetFile = Path.Combine(_tmpDir, s_systemSegmentsXsd);
+        SaveXmlDocument(InitXmlDocument(s_systemSegments), targetFile);
         _generatedFiles.Add(targetFile);
 
         await MakeElementsAsync(stoppingToken);
@@ -326,11 +332,11 @@ public class EdifactDownloader : IDownloader
             {
                 if (elementsByPosition.TryGetValue(segment.Position!, out XmlElement? el))
                 {
-                    if(segment.MinOccurs != s_m)
+                    if (segment.MinOccurs != s_m)
                     {
                         el.SetAttribute(s_minOccurs, s_0);
                     }
-                    if(segment.MaxOccurs != s_1)
+                    if (segment.MaxOccurs != s_1)
                     {
                         el.SetAttribute(s_maxOccurs, segment.MaxOccurs);
                     }
@@ -350,35 +356,38 @@ public class EdifactDownloader : IDownloader
                     {
                         XmlElement element = doc.CreateElement(s_xsPrefix, s_element, Properties.Resources.schema_ns);
                         elementsByPosition.Add(segment.Position!, element);
-                        sequenceStack.Peek().AppendChild(element);
-                        element.SetAttribute(s_name, segment.Code);
-                        CreateAnnotation(element, segment);
-                        if (segmentGroupsStack.Count > 0)
+                        if (segment.Code != s_unh && segment.Code != s_unt && segment.Code != s_uih && segment.Code != s_uit)
                         {
-                            positionStack.Push(positionStack.Pop() + 1);
-                        }
-                        if (s_reSegmentGroup.IsMatch(segment.Code!))
-                        {
-                            segmentGroupsStack.Push(segment);
-                            positionStack.Push(0);
-                            XmlElement ct = doc.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns);
-                            element.AppendChild(ct);
-                            XmlElement seq = doc.CreateElement(s_xsPrefix, s_sequence, Properties.Resources.schema_ns);
-                            ct.AppendChild(seq);
-                            sequenceStack.Push(seq);
-                        }
-                        else
-                        {
-                            element.SetAttribute(s_type, segment.Code);
+                            sequenceStack.Peek().AppendChild(element);
+                            element.SetAttribute(s_name, segment.Code);
+                            CreateAnnotation(element, segment);
+                            if (segmentGroupsStack.Count > 0)
+                            {
+                                positionStack.Push(positionStack.Pop() + 1);
+                            }
+                            if (s_reSegmentGroup.IsMatch(segment.Code!))
+                            {
+                                segmentGroupsStack.Push(segment);
+                                positionStack.Push(0);
+                                XmlElement ct = doc.CreateElement(s_xsPrefix, s_complexType, Properties.Resources.schema_ns);
+                                element.AppendChild(ct);
+                                XmlElement seq = doc.CreateElement(s_xsPrefix, s_sequence, Properties.Resources.schema_ns);
+                                ct.AppendChild(seq);
+                                sequenceStack.Push(seq);
+                            }
+                            else
+                            {
+                                element.SetAttribute(s_type, segment.Code);
+                            }
                         }
                     }
-                    else if(segmentGroupsStack.Count > 0)
+                    else if (segmentGroupsStack.Count > 0)
                     {
                         throw new Exception(
-                            string.Format(s_rmLabels.GetString("INVALID_SEQUENCE")!, 
+                            string.Format(s_rmLabels.GetString("INVALID_SEQUENCE")!,
                                 mess,
-                                segment.Position, 
-                                segmentGroupsStack.Peek().Children![positionStack.Peek()], 
+                                segment.Position,
+                                segmentGroupsStack.Peek().Children![positionStack.Peek()],
                                 segment.Code
                             )
                         );
@@ -670,16 +679,6 @@ public class EdifactDownloader : IDownloader
                 Encoding.Latin1
             );
         await MakeEnumerationsAsync(uncl, doc, stoppingToken);
-        using TextReader unsl = new StreamReader(
-                File.OpenRead(
-                    Path.Combine(
-                        _tmpDir,
-                        string.Format(s_fileNameFormat, _unsl, _ext)
-                    )
-                ),
-                Encoding.Latin1
-            );
-        await MakeEnumerationsAsync(unsl, doc, stoppingToken);
         string targetFile = Path.Combine(_directoryFolder!, s_elementsXsd);
         SaveXmlDocument(doc, targetFile);
         if (new FileInfo(targetFile).Length == new FileInfo(string.Format(s_fileNameFormat, targetFile, s_src)).Length)
@@ -893,12 +892,6 @@ public class EdifactDownloader : IDownloader
                 File.WriteAllBytes(target, bytes);
             }
         }
-        string unsl = Path.Combine(_tmpDir, string.Format(s_fileNameFormat, s_unsl, _ext));
-        if (!File.Exists(unsl))
-        {
-            _logger?.LogInformation(s_logMessage, string.Format(s_rmLabels.GetString(s_loadFixedFile)!, unsl));
-            File.WriteAllBytes(unsl, (s_rmFixed.GetObject(s_unsl99a)! as byte[])!);
-        }
     }
     private void InitContext()
     {
@@ -923,7 +916,6 @@ public class EdifactDownloader : IDownloader
         _edsd = s_edsd;
         _idsd = s_idsd;
         _uncl = s_uncl;
-        _unsl = s_unsl;
         _ext = _directory![1..];
         _directoryFolder = Path.Combine(_tmpDir, s_un, _directory!);
         _generatedFiles.Clear();

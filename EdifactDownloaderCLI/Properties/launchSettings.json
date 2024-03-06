@@ -2,7 +2,7 @@
   "profiles": {
     "EdifactDownloaderCLI": {
       "commandName": "Project",
-      "commandLineArgs": "--tmp-folder W:\\C#\\Edifact\\var\\tmp /-d \"d09b\" /-m #\r\n/t W:\\C#\\Edifact\\var\\xsd\r\n--connection-timeout\" 300"
+      "commandLineArgs": "--tmp-folder W:\\C#\\Edifact\\var\\tmp /-d \"d11b\" /-m IFTMBF\r\n/t W:\\C#\\Edifact\\var\\xsd\r\n--connection-timeout\" 300"
     },
     "Профиль 1": {
       "commandName": "Project",

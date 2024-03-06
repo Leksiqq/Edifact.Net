@@ -11,12 +11,12 @@
 
   <ItemGroup>
     <None Remove="files\batch_interchange.xsd" />
-    <None Remove="files\composites.xsd" />
     <None Remove="files\edifact.xsd" />
-    <None Remove="files\elements.xsd" />
     <None Remove="files\interactive_interchange.xsd" />
     <None Remove="files\message.xsd" />
     <None Remove="files\segments.xsd" />
+    <None Remove="files\system_composites.xsd" />
+    <None Remove="files\system_elements.xsd" />
     <None Remove="files\UN\D\composites.xsd" />
     <None Remove="files\UN\D\elements.xsd" />
     <None Remove="files\UN\D\message.xsd" />
@@ -25,6 +25,12 @@
 
   <ItemGroup>
     <EmbeddedResource Include="files\batch_interchange.xsd" />
+    <EmbeddedResource Include="files\system_elements.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="files\system_composites.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="files\edifact.xsd" />
     <EmbeddedResource Include="files\interactive_interchange.xsd">
       <SubType>Designer</SubType>

@@ -151,4 +151,13 @@
   <data name="segments" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\files\UN\D\segments.xsd;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
+  <data name="system_composites" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\files\system_composites.xsd;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="system_elements" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\files\system_elements.xsd;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="system_segments" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\files\system_segments.xsd;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
 </root>

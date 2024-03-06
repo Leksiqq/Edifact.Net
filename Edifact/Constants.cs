@@ -16,6 +16,7 @@ internal static class Constants
     internal const string s_attr = "attr";
     internal const string s_base = "base";
     internal const string s_baseSegment = "BASE-SEGMENT";
+    internal const string s_batchInterchange = "batch_interchange";
     internal const string s_batchInterchangeXsd = "batch_interchange.xsd";
     internal const string s_change = "change";
     internal const string s_children = "children";
@@ -58,6 +59,7 @@ internal static class Constants
     internal const string s_function = "function";
     internal const string s_idcd = "IDCD";
     internal const string s_idsd = "IDSD";
+    internal const string s_interactiveInterchange = "interactive_interchange";
     internal const string s_interactiveInterchangeXsd = "interactive_interchange.xsd";
     internal const string s_interval = "interval";
     internal const string s_invalidDirectoryNameOrInterval = "INVALID_DIRECTORY_NAME_OR_INTERVAL";
@@ -114,6 +116,12 @@ internal static class Constants
     internal const string s_sourceArchiveDir = "--source";
     internal const string s_src = "src";
     internal const string s_start = "start";
+    internal const string s_systemComposites = "system_composites";
+    internal const string s_systemCompositesXsd = "system_composites.xsd";
+    internal const string s_systemElements = "system_elements";
+    internal const string s_systemElementsXsd = "system_elements.xsd";
+    internal const string s_systemSegments = "system_segments";
+    internal const string s_systemSegmentsXsd = "system_segments.xsd";
     internal const string s_targetNamespaceXPath = "@targetNamespace";
     internal const string s_type = "type";
     internal const string s_typeForEnumXPathFormat = "/xs:schema/xs:complexType[@name='D{0}']/xs:simpleContent/xs:restriction";
@@ -125,7 +133,6 @@ internal static class Constants
     internal const string s_unh = "UNH";
     internal const string s_unknownKey = "UNKNOWN_KEY";
     internal const string s_unMessageFormat = " UN/{0} ";
-    internal const string s_unsl = "UNSL";
     internal const string s_unsl99a = "UN\\D99A\\UNSL.99A";
     internal const string s_unt = "UNT";
     internal const string s_uriFormat = "{0}{1}";
