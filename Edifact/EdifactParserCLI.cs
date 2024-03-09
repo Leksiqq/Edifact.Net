@@ -24,7 +24,6 @@ public class EdifactParserCLI : BackgroundService
         {
             SchemasUri = args[0],
             InputUri = args[1],
-            OutputUri = args[2],
         };
         builder.Services.AddSingleton(options);
         builder.Services.AddSingleton<Resolver>();

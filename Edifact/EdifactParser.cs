@@ -11,6 +11,7 @@ namespace Net.Leksi.Edifact;
 
 public class EdifactParser
 {
+    public event MessageEventHandler? Message;
     private readonly IServiceProvider _services;
     private readonly ILogger<EdifactParser>? _logger;
     public EdifactParser(IServiceProvider services)
@@ -41,22 +42,21 @@ public class EdifactParser
         }
         Uri schemas = new($"{options.SchemasUri!}/_");
         Uri input = new(options.InputUri!);
-        Uri output = new(options.OutputUri!);
         IStreamFactory schemasStreamFactory = _services.GetKeyedService<IStreamFactory>(schemas.Scheme)!;
         IStreamFactory inputStreamFactory = _services.GetKeyedService<IStreamFactory>(input.Scheme)!;
-        IStreamFactory outputStreamFactory = _services.GetKeyedService<IStreamFactory>(output.Scheme)!;
         XmlWriter? writer = null;
         XmlResolver xmlResolver = _services.GetRequiredService<Resolver>();
-        XmlSchemaSet schemaSet = new()
-        {
-            XmlResolver = xmlResolver
-        };
-        schemaSet.ValidationEventHandler += SchemaSet_ValidationEventHandler;
         Uri edifactUri = new(schemas, s_edifactXsd);
         using Stream edifact = xmlResolver.GetEntity(edifactUri, null, typeof(Stream)) as Stream
             ?? throw new Exception("TODO: edifact.xsd not found.");
         XmlNameTable nameTable = new NameTable();
         XmlNamespaceManager man = new(nameTable);
+        XmlDocument interchange = new(nameTable);
+        XmlSchemaSet schemaSet = new(nameTable)
+        {
+            XmlResolver = xmlResolver
+        };
+        schemaSet.ValidationEventHandler += SchemaSet_ValidationEventHandler;
         man.AddNamespace(s_xsPrefix, Properties.Resources.schema_ns);
         XmlDocument doc = new(nameTable);
         doc.Load(edifact);
@@ -71,6 +71,8 @@ public class EdifactParser
 
         Stack<XmlSchemaElement> elementsStack = [];
 
+        XmlWriterSettings? xws = null;
+
         try
         {
             await foreach (SegmentToken token in tokenizer.Tokenize(inputStreamFactory.GetInputStream(input)))
@@ -81,31 +83,34 @@ public class EdifactParser
                 }
                 if (segmentPosition == 0)
                 {
-                    XmlWriterSettings xws = new()
+                    xws = new()
                     {
                         Async = true,
                         Encoding = tokenizer.Encoding!,
                         Indent = true,
                     };
-                    writer = XmlWriter.Create(outputStreamFactory.GetOutputStream(output), xws);
+                    StringBuilder sb = new();
+                    writer = XmlWriter.Create(sb, xws);
+
+                    //writer = XmlWriter.Create(outputStreamFactory.GetOutputStream(output), xws);
                     await writer.WriteStartDocumentAsync();
+                    XmlSchemaElement? el0 = null;
                     if (token.Tag == "UNB")
                     {
                         Uri batchUri = new(schemas, s_batchInterchangeXsd);
                         schemaSet.Add(targetNamespace, batchUri.ToString());
                         schemaSet.Compile();
-                        elementsStack.Push((XmlSchemaElement)schemaSet.GlobalElements[new XmlQualifiedName("BATCH_INTERCHANGE", targetNamespace)]!);
+                        el0 = (XmlSchemaElement)schemaSet.GlobalElements[new XmlQualifiedName("BATCH_INTERCHANGE", targetNamespace)]!;
                     }
                     else if (token.Tag == "UIB")
                     {
                         Uri interactiveUri = new(schemas, s_interactiveInterchangeXsd);
                         schemaSet.Add(targetNamespace, interactiveUri.ToString());
                         schemaSet.Compile();
-                        elementsStack.Push((XmlSchemaElement)schemaSet.GlobalElements[new XmlQualifiedName("INTERACTIVE_INTERCHANGE", targetNamespace)]!);
+                        el0 = (XmlSchemaElement)schemaSet.GlobalElements[new XmlQualifiedName("INTERACTIVE_INTERCHANGE", targetNamespace)]!;
                     }
                     if (
-                        elementsStack.Count == 1
-                        && elementsStack.Peek() is XmlSchemaElement el0
+                        el0 is { }
                         && el0.ElementSchemaType is XmlSchemaComplexType ct
                         && ct.Particle is XmlSchemaSequence seq
                         && seq.Items.Count > 0
@@ -114,28 +119,30 @@ public class EdifactParser
                     )
                     {
                         await writer.WriteStartElementAsync(null, el0.Name!, targetNamespace);
-                        elementsStack.Push(el);
+                        Action<string, string?>? action = (path, value) =>
+                        {
+                            Console.WriteLine($"{path}: {value}");
+                        };
+                        await ParseSegmentAsync(token, el, writer!, action);
+                        await writer!.WriteEndElementAsync();
+                        await writer!.WriteEndDocumentAsync();
+                        writer.Close();
+                        Console.WriteLine(sb);
+                        interchange.LoadXml(sb.ToString());
                     }
                     else
                     {
                         throw new Exception($"TODO: expected tag: 'UNB' or 'UIB', got: {token.Tag}");
                     }
                 }
-                Action<string, string?>? action = null;
-                if(segmentPosition == 0)
+                else
                 {
-                    action = (path, value) =>
-                    {
-                        Console.WriteLine($"{path}: {value}");
-                    };
+
                 }
-                await ParseSegmentAsync(token, elementsStack.Peek(), writer!, action);
 
                 ++segmentPosition;
                 break;
             }
-            await writer!.WriteEndElementAsync();
-            await writer!.WriteEndDocumentAsync();
         }
         finally
         {
