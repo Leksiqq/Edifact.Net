@@ -353,7 +353,6 @@ internal class EdifactTokenizer
             throw new Exception("TODO: unclosed last segment found.");
         }
 
-        Console.WriteLine($"{_syntaxLevel}, {_syntaxVersion}");
     }
     private void AddValue(SegmentToken token, StringBuilder sb)
     {

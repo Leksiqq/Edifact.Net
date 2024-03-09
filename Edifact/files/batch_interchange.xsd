@@ -8,7 +8,7 @@
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="qualified" attributeFormDefault="unqualified"
 >
-  <xs:include schemaLocation="segments.xsd"/>
+  <xs:include schemaLocation="system_segments.xsd"/>
   <xs:complexType name="BATCH_INTERCHANGE">
     <xs:sequence>
       <xs:element name="UNB" type="UNB"/>
@@ -31,5 +31,5 @@
       <xs:element name="UNZ" type="UNZ"/>
     </xs:sequence>
   </xs:complexType>
-
+  <xs:element name="BATCH_INTERCHANGE" type="BATCH_INTERCHANGE"/>
 </xs:schema>

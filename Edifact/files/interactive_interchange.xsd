@@ -31,5 +31,5 @@
       <xs:element name="UIZ" type="UIZ"/>
     </xs:sequence>
   </xs:complexType>
-
+  <xs:element name="INTERACTIVE_INTERCHANGE" type="INTERACTIVE_INTERCHANGE"/>
 </xs:schema>

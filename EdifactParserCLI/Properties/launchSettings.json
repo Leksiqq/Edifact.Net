@@ -2,7 +2,7 @@
   "profiles": {
     "EdifactParserCLI": {
       "commandName": "Project",
-      "commandLineArgs": "W:\\C#\\Edifact\\xsd \r\nW:\\C#\\Edifact\\var\\PDF73217 \r\nW:\\C#\\Edifact\\var\\1.txt"
+      "commandLineArgs": "W:\\C#\\Edifact\\var\\xsd \r\nW:\\C#\\Edifact\\var\\PDF73217 \r\nW:\\C#\\Edifact\\var\\1.xml"
     }
   }
 }
