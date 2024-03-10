@@ -329,11 +329,11 @@ internal class EdifactTokenizer
                             {
                                 AddValue(token, sb);
                             }
-                            if (token.Elements is null)
+                            if (token.Components is null)
                             {
-                                token.Elements = [];
+                                token.Components = [];
                             }
-                            token.Elements!.Add(new ElementToken());
+                            token.Components!.Add(new ComponentToken());
                         }
                         else if (ch == _componentPartsSeparator)
                         {
@@ -360,7 +360,7 @@ internal class EdifactTokenizer
         {
             token.Tag = sb.ToString();
         }
-        else if(token.Elements is null)
+        else if(token.Components is null)
         {
             int nesting = 0;
             if (sb.Length > 0 && !int.TryParse(sb.ToString(), out nesting))
@@ -372,12 +372,12 @@ internal class EdifactTokenizer
         }
         else
         {
-            if (token.Elements!.Count == 0)
+            if (token.Components!.Count == 0)
             {
-                token.Elements.Add(new ElementToken());
+                token.Components.Add(new ComponentToken());
             }
-            token.Elements.Last().Components ??= [];
-            token.Elements.Last().Components!.Add(sb.ToString());
+            token.Components.Last().Elements ??= [];
+            token.Components.Last().Elements!.Add(sb.ToString());
         }
         sb.Clear();
     }
@@ -489,10 +489,10 @@ internal class EdifactTokenizer
         SegmentToken token = new()
         {
             Tag = _isInteractive ? "UIB" : "UNB",
-            Elements = [
-                new ElementToken 
+            Components = [
+                new ComponentToken 
                 {
-                    Components = [Encoding.ASCII.GetString(buf), _syntaxVersion.ToString()]
+                    Elements = [Encoding.ASCII.GetString(buf), _syntaxVersion.ToString()]
                 }    
             ],
         };

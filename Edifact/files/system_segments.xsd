@@ -243,23 +243,23 @@
     <xs:complexContent>
       <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
-          <xs:element name="D0038" type="D0038">
+          <xs:element name="D0038" type="D0038" minOccurs="0">
             <xs:annotation>
               <xs:documentation an:name="name">FUNCTIONAL GROUP IDENTIFICATION</xs:documentation>
               <xs:documentation an:name="description">Identifies the one message type in the functional group</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="S006" type="S006">
+          <xs:element name="S006" type="S006" minOccurs="0">
             <xs:annotation>
               <xs:documentation an:name="name">APPLICATION SENDER'S IDENTIFICATION</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="S007" type="S007">
+          <xs:element name="S007" type="S007" minOccurs="0">
             <xs:annotation>
               <xs:documentation an:name="name">APPLICATION RECIPIENT'S IDENTIFICATION</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="S004" type="S004">
+          <xs:element name="S004" type="S004" minOccurs="0">
             <xs:annotation>
               <xs:documentation an:name="name">DATE/TIME OF PREPARATION</xs:documentation>
             </xs:annotation>
@@ -270,13 +270,13 @@
               <xs:documentation an:name="description">Unique reference number assigned by sender's division, department etc.</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="D0051" type="D0051">
+          <xs:element name="D0051" type="D0051" minOccurs="0">
             <xs:annotation>
               <xs:documentation an:name="name">CONTROLLING AGENCY</xs:documentation>
               <xs:documentation an:name="description">Code to identify the agency controlling the specification, maintenance and publication of the message type</xs:documentation>
             </xs:annotation>
           </xs:element>
-          <xs:element name="S008" type="S008">
+          <xs:element name="S008" type="S008" minOccurs="0">
             <xs:annotation>
               <xs:documentation an:name="name">MESSAGE VERSION</xs:documentation>
             </xs:annotation>
