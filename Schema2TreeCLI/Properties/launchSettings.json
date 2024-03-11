@@ -2,7 +2,7 @@
   "profiles": {
     "Schema2TreeCLI": {
       "commandName": "Project",
-      "commandLineArgs": "/s W:\\c#\\Edifact\\var\\xsd\\UN\\D01B\\IFTMBF.xsd\r\n/o W:\\c#\\Edifact\\var\\1.html"
+      "commandLineArgs": "/s W:\\c#\\Edifact\\var\\xsd\\UN\\D97B\\IFCSUM.xsd\r\n/o W:\\c#\\Edifact\\var\\1.html"
     }
   }
 }

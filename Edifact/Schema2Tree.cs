@@ -15,6 +15,7 @@ public class Schema2Tree: IDisposable
     <meta http-equiv=""Content-Type"" content=""text/html; charset=utf-8""/>
 </head>
 <body>
+<h1>{0}</h1>
 <pre>";
     private const string s_htmlEnd = @"</table>
 </pre>
@@ -83,7 +84,19 @@ public class Schema2Tree: IDisposable
         {
             throw new Exception(string.Format(s_rmLabels.GetString(s_notEdifactSchema)!, schemaDocument));
         }
-        await _output.WriteLineAsync(s_htmlBegin);
+        if(
+            root.ElementSchemaType!.Annotation?.Items is XmlSchemaObjectCollection items 
+            && items.Count > 0 
+            && items[0] is XmlSchemaAppInfo appInfo 
+            && appInfo.Markup is XmlNode[] mu && mu.Length > 0
+        )
+        {
+            await _output.WriteLineAsync(string.Format(s_htmlBegin, mu[0]!.Value));
+        }
+        else
+        {
+            await _output.WriteLineAsync(string.Format(s_htmlBegin, string.Empty));
+        }
         List<int> positions = [];
         List<bool> vlines = [];
         List<XmlSchemaElement> elementsStack = [];

@@ -8,5 +8,6 @@ public class EdifactParserOptions
     public string? SchemasUri { get; set; }
     public Encoding? Encoding { get; set; }
     public bool? IsStrict { get; set; }
+    public string? OutputUri { get; set; }
     public int? BufferLength { get; set; }
 }

@@ -17,14 +17,14 @@
           <xs:element name="UNG" type="UNG"/>
           <xs:sequence maxOccurs="unbounded">
             <xs:element name="UNH" type="UNH"/>
-            <xs:element name="MESSAGE" type="BASE-MESSAGE" maxOccurs="unbounded"/>
+            <xs:element name="MESSAGE" type="BASE-MESSAGE"/>
             <xs:element name="UNT" type="UNT"/>
           </xs:sequence>
           <xs:element name="UNE" type="UNE"/>
         </xs:sequence>
         <xs:sequence maxOccurs="unbounded">
           <xs:element name="UNH" type="UNH"/>
-          <xs:element name="MESSAGE" type="BASE-MESSAGE" maxOccurs="unbounded"/>
+          <xs:element name="MESSAGE" type="BASE-MESSAGE"/>
           <xs:element name="UNT" type="UNT"/>
         </xs:sequence>
       </xs:choice>

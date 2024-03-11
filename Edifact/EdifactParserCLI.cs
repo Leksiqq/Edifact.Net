@@ -24,6 +24,7 @@ public class EdifactParserCLI : BackgroundService
         {
             SchemasUri = args[0],
             InputUri = args[1],
+            OutputUri = args[2],
         };
         builder.Services.AddSingleton(options);
         builder.Services.AddSingleton<Resolver>();
@@ -41,11 +42,20 @@ public class EdifactParserCLI : BackgroundService
     {
         try
         {
+            _parser.Message += _parser_Message;
             await _parser.Parse(_options);
         }
         finally
         {
             await _services.GetRequiredService<IHost>().StopAsync(stoppingToken);
+        }
+    }
+
+    private void _parser_Message(object sender, MessageEventArgs e)
+    {
+        if(e.EventKind is MessageEventKind.Start){
+            Uri uri = new(new Uri($"{_options.OutputUri}/_"), $"{e.MessageReferenceNumber}.xml");
+            e.Stream = _services.GetRequiredKeyedService<IStreamFactory>(uri.Scheme).GetOutputStream(uri);
         }
     }
 }
