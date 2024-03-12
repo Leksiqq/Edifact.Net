@@ -4,7 +4,7 @@ using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
 
-internal class LocalFileStreamFactory : IStreamFactory
+public class LocalFileStreamFactory : IStreamFactory
 {
     public Stream GetInputStream(Uri uri)
     {

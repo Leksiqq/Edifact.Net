@@ -94,7 +94,6 @@ public class EdifactParser
         int messageControlCount = 0;
         bool inMessage = false;
         bool inGroup = false;
-        bool withGroups = false;
 
         string groupReference = string.Empty;
         int groupControlCount = 0;
@@ -202,7 +201,6 @@ public class EdifactParser
                     {
                         if (!inGroup)
                         {
-                            withGroups = true;
                             if (
                                 sequencesStack.Last().MoveIfNeed()
                                 && sequencesStack.Last().Item is XmlSchemaElement el
@@ -717,7 +715,7 @@ public class EdifactParser
         }
     }
 
-    private async Task ParseCompositeAsync(string tag, ComponentToken token, XmlSchemaElement el, XmlWriter writer, string? ns)
+    private static async Task ParseCompositeAsync(string tag, ComponentToken token, XmlSchemaElement el, XmlWriter writer, string? ns)
     {
         if (
             el.ElementSchemaType is XmlSchemaComplexType ct
