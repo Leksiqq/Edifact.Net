@@ -275,12 +275,13 @@ internal class EdifactTokenizer
         int n;
         while ((n = await reader.ReadAsync(buffer, 0, buffer.Length)) > 0)
         {
-            ++_col;
             for(int i = 0; i < n; ++i)
             {
                 char ch = buffer[i];
 
-                if (token is { } || !IsWhitespace(ch))
+                bool isWhiteSpace = IsWhitespace(ch);
+
+                if (token is { } || !isWhiteSpace)
                 {
                     if (
                         IsStrict
@@ -296,14 +297,18 @@ internal class EdifactTokenizer
                     if (escaped)
                     {
                         if(
-                            IsStrict
-                            && (
-                                ch != _componentPartsSeparator && ch != _decimalMark && ch != _segmentPartsSeparator 
-                                && ch != _segmentTerminator && ch != _releaseCharacter
-                            )
+                            ch != _componentPartsSeparator && ch != _decimalMark && ch != _segmentPartsSeparator 
+                            && ch != _segmentTerminator && ch != _releaseCharacter
                         )
                         {
-                            throw new Exception($"TODO: invalid escaping at {_line}:{_col - 1}");
+                            if (IsStrict)
+                            {
+                                throw new Exception($"TODO: invalid escaping at {_line}:{_col - 1}");
+                            }
+                            else
+                            {
+                                sb.Append(_releaseCharacter);
+                            }
                         }
                         sb.Append(ch);
                         escaped = false;
@@ -628,16 +633,6 @@ internal class EdifactTokenizer
         do
         {
             b = stream.ReadByte();
-        }
-        while (IsWhitespace(b));
-        return b;
-    }
-    private int SkipCharWhitespaces(TextReader reader)
-    {
-        int b;
-        do
-        {
-            b = reader.Read();
         }
         while (IsWhitespace(b));
         return b;

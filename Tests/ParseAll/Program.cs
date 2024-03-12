@@ -11,6 +11,7 @@ EdifactParserOptions options = new()
     InputUri = args[1],
     OutputUri = args[2],
     Encoding = Encoding.Latin1,
+    IsStrict = false,
 };
 builder.Services.AddSingleton(options);
 builder.Services.AddSingleton<Resolver>();

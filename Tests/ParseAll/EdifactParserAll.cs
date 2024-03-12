@@ -35,7 +35,14 @@ internal class EdifactParserAll : BackgroundService
                 {
                     Console.WriteLine($"Parsing {item}");
                     _options.InputUri = item;
-                    await _parser.Parse(_options);
+                    try
+                    {
+                        await _parser.Parse(_options);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Write(ex.ToString());
+                    }
                 }
             }
         }
