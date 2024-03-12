@@ -86,6 +86,7 @@ public class EdifactParser
 
         string messageHeader = string.Empty;
         string messageTrailer = string.Empty;
+        string interchangeTrailer = string.Empty;
         string messageXsd = string.Empty;
         MessageEventArgs? messageEventArgs = null;
         Dictionary<string, XmlSchema> messageSchemaCache = [];
@@ -93,6 +94,7 @@ public class EdifactParser
         int messageControlCount = 0;
         bool inMessage = false;
         bool inGroup = false;
+        bool withGroups = false;
 
         string groupReference = string.Empty;
         int groupControlCount = 0;
@@ -128,6 +130,7 @@ public class EdifactParser
                     el0 = (XmlSchemaElement)schemaSet.GlobalElements[new XmlQualifiedName("INTERACTIVE_INTERCHANGE", targetNamespace)]!;
                     messageHeader = "UIH";
                     messageTrailer = "UIT";
+                    interchangeTrailer = "UIZ";
                 }
                 else
                 {
@@ -137,6 +140,7 @@ public class EdifactParser
                     el0 = (XmlSchemaElement)schemaSet.GlobalElements[new XmlQualifiedName("BATCH_INTERCHANGE", targetNamespace)]!;
                     messageHeader = "UNH";
                     messageTrailer = "UNT";
+                    interchangeTrailer = "UNZ";
                 }
                 if (
                     el0 is { }
@@ -196,41 +200,49 @@ public class EdifactParser
                 {
                     if (segment.Tag == "UNG")
                     {
-                        if (
-                            sequencesStack.Last().MoveIfNeed()
-                            && sequencesStack.Last().Item is XmlSchemaElement el
-                        )
+                        if (!inGroup)
                         {
-                            if (el.QualifiedName == new XmlQualifiedName(segment.Tag, targetNamespace))
+                            withGroups = true;
+                            if (
+                                sequencesStack.Last().MoveIfNeed()
+                                && sequencesStack.Last().Item is XmlSchemaElement el
+                            )
                             {
-                                sb.Clear();
-                                writer = XmlWriter.Create(sb, xws);
-                                await writer.WriteStartDocumentAsync();
-                                await ParseSegmentAsync(segment, el, writer!, targetNamespace);
-                                await writer!.WriteEndDocumentAsync();
-                                writer.Close();
-                                groupHeaderXml.LoadXml(sb.ToString());
-                                groupReference = groupHeaderXml.CreateNavigator()!.SelectSingleNode("/e:UNG/e:D0048", man)!.Value;
-                                groupControlCount = 0;
-                                inGroup = true;
-                                ++interchangeControlCount;
-                                if (sequencesStack.Last().Move() && sequencesStack.Last().Item is XmlSchemaSequence seq)
+                                if (el.QualifiedName == new XmlQualifiedName(segment.Tag, targetNamespace))
                                 {
-                                    sequencesStack.Add(new Sequence(el.Name!, seq));
+                                    sb.Clear();
+                                    writer = XmlWriter.Create(sb, xws);
+                                    await writer.WriteStartDocumentAsync();
+                                    await ParseSegmentAsync(segment, el, writer!, targetNamespace);
+                                    await writer!.WriteEndDocumentAsync();
+                                    writer.Close();
+                                    groupHeaderXml.LoadXml(sb.ToString());
+                                    groupReference = groupHeaderXml.CreateNavigator()!.SelectSingleNode("/e:UNG/e:D0048", man)!.Value;
+                                    groupControlCount = 0;
+                                    inGroup = true;
+                                    ++interchangeControlCount;
+                                    if (sequencesStack.Last().Move() && sequencesStack.Last().Item is XmlSchemaSequence seq)
+                                    {
+                                        sequencesStack.Add(new Sequence(el.Name!, seq));
+                                    }
+                                    else
+                                    {
+                                        throw new Exception($"TODO: expected: {nameof(XmlSchemaSequence)}, got: {sequencesStack.Last().Item}");
+                                    }
                                 }
                                 else
                                 {
-                                    throw new Exception($"TODO: expected: {nameof(XmlSchemaSequence)}, got: {sequencesStack.Last().Item}");
+                                    throw new Exception($"TODO: expected tag: 'UNG', got: '{segment.Tag}'");
                                 }
                             }
                             else
                             {
-                                throw new Exception($"TODO: expected tag: 'UNG', got: '{segment.Tag}'");
+                                throw new Exception($"TODO: extra tag: {segment.Tag}");
                             }
                         }
                         else
                         {
-                            throw new Exception($"TODO: extra tag: {segment.Tag}");
+                            throw new Exception($"TODO: unexpected tag: '{segment.Tag}'.");
                         }
                     }
                     else if (segment.Tag == "UNE")
@@ -254,7 +266,20 @@ public class EdifactParser
                                     groupTrailerXml.LoadXml(sb.ToString());
                                     sequencesStack.Last().Reset();
                                     inGroup = false;
-                                    int expectedMessages = groupTrailerXml.CreateNavigator()
+                                    int expectedMessages = groupTrailerXml.CreateNavigator()!
+                                        .SelectSingleNode("/e:UNE/e:D0060", man)?.ValueAsInt ?? -1;
+                                    if (expectedMessages != -1 && expectedMessages != groupControlCount)
+                                    {
+                                        throw new Exception($"TODO: expected number of messages: {expectedMessages}, got: {groupControlCount}.");
+                                    }
+                                    string groupReference1 = groupHeaderXml.CreateNavigator()!
+                                        .SelectSingleNode("/e:UNG/e:D0048", man)?.Value ?? string.Empty;
+                                    string groupReference2 = groupTrailerXml.CreateNavigator()!
+                                        .SelectSingleNode("/e:UNE/e:D0048", man)?.Value ?? string.Empty;
+                                    if (groupReference1 != groupReference2)
+                                    {
+                                        throw new Exception($"TODO: group references differ; expected: {groupReference1}, got: {groupReference2}.");
+                                    }
                                 }
                                 else
                                 {
@@ -423,10 +448,41 @@ public class EdifactParser
                             throw new Exception($"TODO: extra tag: {segment.Tag}");
                         }
                     }
-                    else
+                    else if (segment.Tag == interchangeTrailer)
                     {
-                        throw new Exception($"TODO: unexpected tag: '{segment.Tag}'");
+                        if(!inGroup)
+                        {
+                            sequencesStack.RemoveAt(sequencesStack.Count - 1);
+                            if (
+                                sequencesStack.Last().Move()
+                                && sequencesStack.Last().Item is XmlSchemaElement el
+                            )
+                            {
+
+                                sb.Clear();
+                                writer = XmlWriter.Create(sb, xws);
+                                await writer.WriteStartDocumentAsync();
+                                await ParseSegmentAsync(segment, el, writer!, targetNamespace);
+                                await writer!.WriteEndDocumentAsync();
+                                writer.Close();
+                                interchangeTrailerXml.LoadXml(sb.ToString());
+                                int exepectedCount = interchangeTrailerXml.CreateNavigator()!
+                                        .SelectSingleNode(string.Format("/e:{0}/e:D0036", interchangeTrailer), man)?.ValueAsInt ?? -1;
+                                if (exepectedCount != -1 && exepectedCount != interchangeControlCount)
+                                {
+                                    throw new Exception($"TODO: expected number of groups/messages: {exepectedCount}, got: {interchangeControlCount}.");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            throw new Exception($"TODO: unexpected tag: '{segment.Tag}'.");
+                        }
                     }
+                    else
+                {
+                    throw new Exception($"TODO: unexpected tag: '{segment.Tag}'");
+                }
                 }
                 else
                 {
@@ -463,7 +519,6 @@ public class EdifactParser
                                 }
                                 messageEventArgs.EventKind = MessageEventKind.End;
                                 Message?.Invoke(this, messageEventArgs);
-                                Console.WriteLine(sb);
 
                                 sb.Clear();
                                 writer = XmlWriter.Create(sb, xws);
@@ -475,10 +530,19 @@ public class EdifactParser
                                 inMessage = false;
                                 messageTrailerXml.LoadXml(sb.ToString());
                                 int expectedSegments = messageTrailerXml.CreateNavigator()!
-                                        .SelectSingleNode(string.Format("/e:{0}/e:D0074", messageTrailer), man)!.ValueAsInt;
-                                if (expectedSegments != messageControlCount)
+                                        .SelectSingleNode(string.Format("/e:{0}/e:D0074", messageTrailer), man)?.ValueAsInt ?? -1;
+                                if (expectedSegments != -1 && expectedSegments != messageControlCount)
                                 {
                                     throw new Exception($"TODO: expected number of segments: {expectedSegments}, got: {messageControlCount}.");
+                                }
+                                string s = tokenizer.IsInteractive ? "D0340" : "D0062";
+                                string messageReference1 = messageHeaderXml.CreateNavigator()!
+                                    .SelectSingleNode(string.Format("/e:{0}/e:{1}", messageHeader, s), man)?.Value ?? string.Empty;
+                                string messageReference2 = messageTrailerXml.CreateNavigator()!
+                                    .SelectSingleNode(string.Format("/e:{0}/e:{1}", messageTrailer, s), man)?.Value ?? string.Empty;
+                                if (messageReference1 != messageReference2)
+                                {
+                                    throw new Exception($"TODO: message references differ; expected: {messageReference1}, got: {messageReference2}.");
                                 }
                             }
                             else
@@ -529,7 +593,6 @@ public class EdifactParser
                                         }
                                         sequencesStack[i].IncrementOccurs();
                                         await ParseSegmentAsync(segment, el, writer!, targetNamespace);
-                                        await writer!.FlushAsync();
                                         break;
                                     }
                                     else
