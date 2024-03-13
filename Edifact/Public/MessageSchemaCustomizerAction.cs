@@ -2,6 +2,9 @@
 
 public enum MessageSchemaCustomizerAction
 {
-    Remove,
-    Change
+    None,
+    ChangeType,
+    CopySchema,
+    RemoveSegment,
+    RemoveSegmentGroup,
 }

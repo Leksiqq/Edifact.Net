@@ -8,4 +8,5 @@ public class MessageSchemaCustomizerOptions
     public string? SegmentGroup { get; set; }
     public string? Segment { get; set; }
     public string? Type { get; set; }
+    public string? Suffix { get; set; }
 }

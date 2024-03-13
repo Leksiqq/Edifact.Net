@@ -125,6 +125,7 @@ internal static class Constants
     internal const string s_path2 = "/fileadmin/DAM/trade/untdid/{0}/{1}.zip";
     internal const string s_parentXPath = "..";
     internal const string s_pattern = "pattern";
+    internal const string s_placeholderElement = "<root/>";
     internal const string s_position = "position";
     internal const string s_receivingDirectory = "RECEIVING_DIRECTORY";
     internal const string s_renameElementFormat = "D{0}";
@@ -193,6 +194,7 @@ internal static class Constants
     internal const string s_zipPattern = "*.zip";
 
     internal static readonly Regex s_reSegmentGroup = new("^SG(?<code>\\d+)$");
+    internal static readonly Regex s_reOriginalMessageXsd = new("^(?<message>[A-Z]{6}\\.XSD)$");
 
     internal static readonly ResourceManager s_rmLabels;
 

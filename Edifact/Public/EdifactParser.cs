@@ -24,7 +24,7 @@ public class EdifactParser
     private readonly HashSet<string> _validationWarningsCache = [];
     private readonly List<Sequence> _sequencesStack = [];
     private readonly List<string> _path = [];
-    private EdifactParserOptions _options;
+    private EdifactParserOptions _options = null!;
     private XmlSchemaSet _schemaSet = null!;
     private XmlNameTable _nameTable = null!;
     private XmlDocument _interchangeHeaderXml = null!;
@@ -91,14 +91,14 @@ public class EdifactParser
             _messageHeaderXml = new XmlDocument(_nameTable);
             _messageTrailerXml = new XmlDocument(_nameTable);
             _elementXml = new XmlDocument(_nameTable);
-            _elementXml.LoadXml("<root/>");
+            _elementXml.LoadXml(s_placeholderElement);
             _schemaSet = new(_nameTable)
             {
                 XmlResolver = _xmlResolver
             };
             _elementXml.Schemas = _schemaSet;
             _schemaSet.ValidationEventHandler += SchemaSet_ValidationEventHandler;
-            _schemas = new($"{options.SchemasUri!}/_");
+            _schemas = new(string.Format(s_folderUriFormat, options.SchemasUri!));
             _messageSchemaCache.Clear();
             _sequencesStack.Clear();
             _path.Clear();
