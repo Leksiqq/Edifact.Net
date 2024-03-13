@@ -4,7 +4,7 @@ using System.Xml;
 
 namespace Net.Leksi.Edifact;
 
-public class Resolver(IServiceProvider services) : XmlResolver
+internal class Resolver(IServiceProvider services) : XmlResolver
 {
     public override object? GetEntity(Uri uri, string? role, Type? ofObjectToReturn)
     {

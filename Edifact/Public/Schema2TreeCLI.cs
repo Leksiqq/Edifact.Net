@@ -22,7 +22,6 @@ public class Schema2TreeCLI(IServiceProvider services) : BackgroundService
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
 
-        builder.Services.AddSingleton<XmlResolver, Resolver>();
         builder.Services.AddSingleton(options);
         builder.Services.AddHostedService<Schema2TreeCLI>();
         builder.Services.AddKeyedSingleton<IStreamFactory, LocalFileStreamFactory>(s_file);

@@ -301,14 +301,7 @@ internal class EdifactTokenizer
                             && ch != _segmentTerminator && ch != _releaseCharacter
                         )
                         {
-                            if (IsStrict)
-                            {
-                                throw new Exception($"TODO: invalid escaping at {_line}:{_col - 1}");
-                            }
-                            else
-                            {
-                                sb.Append(_releaseCharacter);
-                            }
+                            sb.Append(_releaseCharacter);
                         }
                         sb.Append(ch);
                         escaped = false;

@@ -27,7 +27,6 @@ public class EdifactParserCLI : BackgroundService
             OutputUri = args[2],
         };
         builder.Services.AddSingleton(options);
-        builder.Services.AddSingleton<Resolver>();
         builder.Services.AddSingleton<EdifactParser>();
         builder.Services.AddHostedService<EdifactParserCLI>();
         builder.Services.AddKeyedTransient<IStreamFactory, LocalFileStreamFactory>(s_file);

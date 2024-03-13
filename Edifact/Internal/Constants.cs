@@ -8,6 +8,8 @@ internal static class Constants
 {
     internal const string s_0 = "0";
     internal const string s_1 = "1";
+    internal const string s_allElementsCountXPath = "count(e:*)";
+    internal const string s_allElementsXPath = "//e:*";
     internal const string s_annotation = "annotation";
     internal const string s_annotationPrefixDeclaration = "xmlns:an";
     internal const string s_args = "args";
@@ -17,6 +19,7 @@ internal static class Constants
     internal const string s_base = "base";
     internal const string s_baseSegment = "BASE-SEGMENT";
     internal const string s_batchInterchange = "batch_interchange";
+    internal const string s_batchInterchange1 = "BATCH_INTERCHANGE";
     internal const string s_batchInterchangeXsd = "batch_interchange.xsd";
     internal const string s_change = "change";
     internal const string s_children = "children";
@@ -29,7 +32,15 @@ internal static class Constants
     internal const string s_compositesXsd = "composites.xsd";
     internal const string s_d = "D";
     internal const string s_d00 = "D00";
+    internal const string s_d0036 = "D0036";
+    internal const string s_d0051XPath = "e:D0051";
+    internal const string s_d0052XPath = "e:D0052";
+    internal const string s_d0054XPath = "e:D0054";
+    internal const string s_d0062 = "D0062";
+    internal const string s_d0065XPath = "e:D0065";
+    internal const string s_d0074XPathFormat = "/e:{0}/e:D0074";
     internal const string s_d01c = "D01C";
+    internal const string s_d0340 = "D0340";
     internal const string s_d16a = "D16A";
     internal const string s_d20b = "D20B";
     internal const string s_d79 = "D79";
@@ -60,9 +71,11 @@ internal static class Constants
     internal const string s_idcd = "IDCD";
     internal const string s_idsd = "IDSD";
     internal const string s_interactiveInterchange = "interactive_interchange";
+    internal const string s_interactiveInterchange1 = "INTERACTIVE_INTERCHANGE";
     internal const string s_interactiveInterchangeXsd = "interactive_interchange.xsd";
     internal const string s_interval = "interval";
     internal const string s_invalidDirectoryNameOrInterval = "INVALID_DIRECTORY_NAME_OR_INTERVAL";
+    internal const string s_invalidSequence = "INVALID_SEQUENCE";
     internal const string s_keyAlreadyUsed = "KEY_ALREADY_USED";
     internal const string s_length = "length";
     internal const string s_loadFixedFile = "LOAD_FIXED_FILE";
@@ -75,6 +88,12 @@ internal static class Constants
     internal const string s_message1 = "MESSAGE";
     internal const string s_messageNotFound = "MESSAGE_NOT_FOUND";
     internal const string s_messagesPatternFormat = "{0}_D.{1}";
+    internal const string s_messageTypeAndVersion = @"<xs:annotation>
+    <xs:appinfo>{0}.{1}</xs:appinfo>  
+</xs:annotation>
+";
+    internal const string s_messageXpath = "/xs:schema/xs:complexType[@name='MESSAGE']/xs:*[1]";
+    internal const string s_messageXsdFormat = "{0}/{1}{2}/{3}.xsd";
     internal const string s_minLength = "minLength";
     internal const string s_minOccurs = "minOccurs";
     internal const string s_minOccursPatternFormat = "{0},";
@@ -104,8 +123,11 @@ internal static class Constants
     internal const string s_restriction = "restriction";
     internal const string s_rmLabelsName = "labels";
     internal const string s_rmFixedName = "fixed";
+    internal const string s_s009 = "S009";
+    internal const string s_s306 = "S306";
     internal const string s_schema = "schema";
     internal const string s_schemaXPathFormat = "/{0}:schema";
+    internal const string s_secondLevelXPathFormat = "/e:{0}/e:{1}";
     internal const string s_segmentGroupNameFormat = "SG{0}";
     internal const string s_segments = "segments";
     internal const string s_segmentsXsd = "segments.xsd";
@@ -123,18 +145,26 @@ internal static class Constants
     internal const string s_systemSegments = "system_segments";
     internal const string s_systemSegmentsXsd = "system_segments.xsd";
     internal const string s_targetNamespaceXPath = "@targetNamespace";
+    internal const string s_targetNamespaceXPath1 = "/xs:schema/@targetNamespace";
     internal const string s_type = "type";
     internal const string s_typeForEnumXPathFormat = "/xs:schema/xs:complexType[@name='D{0}']/xs:simpleContent/xs:restriction";
     internal const string s_uih = "UIH";
     internal const string s_uit = "UIT";
+    internal const string s_uiz = "UIZ";
     internal const string s_un = "UN";
     internal const string s_uncl = "UNCL";
+    internal const string s_une = "UNE";
     internal const string s_unexpectedLine = "UNEXPECTED_LINE";
+    internal const string s_uneD0048XPath = "/e:UNE/e:D0048";
+    internal const string s_uneD0060XPath = "/e:UNE/e:D0060";
+    internal const string s_ung = "UNG";
+    internal const string s_ungD0048XPath = "/e:UNG/e:D0048";
     internal const string s_unh = "UNH";
     internal const string s_unknownKey = "UNKNOWN_KEY";
     internal const string s_unMessageFormat = " UN/{0} ";
     internal const string s_unsl99a = "UN\\D99A\\UNSL.99A";
     internal const string s_unt = "UNT";
+    internal const string s_unz = "UNZ";
     internal const string s_uriFormat = "{0}{1}";
     internal const string s_uriSchemeNotSupported = "URI_SCHEME_NOT_SUPPORTED";
     internal const string s_value = "value";

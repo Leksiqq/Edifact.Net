@@ -13,7 +13,7 @@ public class EdifactDownloaderCLI : BackgroundService
     private static readonly Regex s_reProxy = new("^(https?\\://)(?:([^\\s:]+)(?::(.+))?@)?(.*)$");
 
     private readonly IServiceProvider _services;
-    private readonly IDownloader _downloader;
+    private readonly EdifactDownloader _downloader;
     private readonly EdifactDownloaderOptions _options;
     private readonly IStreamFactory? _outputStreamFactory;
 
@@ -23,7 +23,7 @@ public class EdifactDownloaderCLI : BackgroundService
         _services = services;
         _options = services.GetRequiredService<EdifactDownloaderOptions>();
         _logger = services.GetService<ILogger<EdifactDownloaderCLI>>();
-        _downloader = _services.GetRequiredService<IDownloader>();
+        _downloader = _services.GetRequiredService<EdifactDownloader>();
         _downloader.DirectoryNotFound += Downloader_DirectoryNotFound;
         _downloader.DirectoryDownloaded += _downloader_DirectoryDownloaded;
         _outputStreamFactory = _services.GetKeyedService<IStreamFactory>(_options.TargetUri!.Scheme);
@@ -67,7 +67,7 @@ public class EdifactDownloaderCLI : BackgroundService
         }
 
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-        builder.Services.AddSingleton<IDownloader, EdifactDownloader>();
+        builder.Services.AddSingleton<EdifactDownloader>();
         builder.Services.AddSingleton(options);
         builder.Services.AddHostedService<EdifactDownloaderCLI>();
         builder.Services.AddKeyedSingleton<IStreamFactory, LocalFileStreamFactory>(s_file);

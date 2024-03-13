@@ -14,7 +14,7 @@ using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
 
-public class EdifactDownloader : IDownloader
+public class EdifactDownloader
 {
     public event DirectoryNotFoundEventHandler? DirectoryNotFound;
     public event DirectoryDownloadedEventHandler? DirectoryDownloaded;
@@ -298,11 +298,8 @@ public class EdifactDownloader : IDownloader
     private async Task MakeMessageAsync(XmlSchemaSet schemaSet, string mess, CancellationToken stoppingToken)
     {
         XmlDocument doc = InitXmlDocument(s_message);
-        XPathNavigator? nav = doc.CreateNavigator()!.SelectSingleNode("/xs:schema/xs:complexType[@name='MESSAGE']/xs:*[1]", _man);
-        nav!.InsertBefore(string.Format(@"<xs:annotation>
-    <xs:appinfo>{0}.{1}</xs:appinfo>  
-</xs:annotation>
-", mess, _directory));
+        XPathNavigator? nav = doc.CreateNavigator()!.SelectSingleNode(s_messageXpath, _man);
+        nav!.InsertBefore(string.Format(s_messageTypeAndVersion, mess, _directory));
         string targetFile = Path.Combine(_directoryFolder!, string.Format(s_fileNameFormat, mess, s_xsd));
         SaveXmlDocument(
             doc,
@@ -389,7 +386,7 @@ public class EdifactDownloader : IDownloader
                     else if (segmentGroupsStack.Count > 0)
                     {
                         throw new Exception(
-                            string.Format(s_rmLabels.GetString("INVALID_SEQUENCE")!,
+                            string.Format(s_rmLabels.GetString(s_invalidSequence)!,
                                 mess,
                                 segment.Position,
                                 segmentGroupsStack.Peek().Children![positionStack.Peek()],
@@ -459,7 +456,7 @@ public class EdifactDownloader : IDownloader
         _generatedFiles.Add(targetFile);
     }
 
-    private async Task MakeSegmentsOfUsageMeanAsync(XmlDocument doc, TextReader reader, char nameFirstChar, CancellationToken stoppingToken)
+    private static async Task MakeSegmentsOfUsageMeanAsync(XmlDocument doc, TextReader reader, char nameFirstChar, CancellationToken stoppingToken)
     {
         Dictionary<string, int[]> occurs = [];
         Dictionary<string, Element> elements = [];
@@ -698,7 +695,6 @@ public class EdifactDownloader : IDownloader
         EnumerationParser enumerationParser = new();
         await foreach (Enumeration en in enumerationParser.ParseAsync(uncl, stoppingToken))
         {
-            //Console.WriteLine(JsonSerializer.Serialize(en));
             XmlElement restriction = (XmlElement)doc.CreateNavigator()!
                 .SelectSingleNode(
                     string.Format(s_typeForEnumXPathFormat, en.TypeCode),
