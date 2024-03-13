@@ -8,6 +8,8 @@ internal static class Constants
 {
     internal const string s_0 = "0";
     internal const string s_1 = "1";
+    internal const string s_a = "a";
+    internal const string s_action = "--action";
     internal const string s_allElementsCountXPath = "count(e:*)";
     internal const string s_allElementsXPath = "//e:*";
     internal const string s_annotation = "annotation";
@@ -23,6 +25,7 @@ internal static class Constants
     internal const string s_batchInterchange1 = "BATCH_INTERCHANGE";
     internal const string s_batchInterchangeXsd = "batch_interchange.xsd";
     internal const string s_bufferSize = "buffer-size";
+    internal const string s_c = "c";
     internal const string s_change = "change";
     internal const string s_children = "children";
     internal const string s_cmd = "cmd";
@@ -32,6 +35,7 @@ internal static class Constants
     internal const string s_complexType = "complexType";
     internal const string s_composites = "composites";
     internal const string s_compositesXsd = "composites.xsd";
+    internal const string s_customSchema = "--custom-schema";
     internal const string s_d = "D";
     internal const string s_d00 = "D00";
     internal const string s_d0036 = "D0036";
@@ -73,6 +77,7 @@ internal static class Constants
     internal const string s_finish = "finish";
     internal const string s_folderUriFormat = "{0}/_";
     internal const string s_function = "function";
+    internal const string s_g = "g";
     internal const string s_helpKey = "--help";
     internal const string s_i = "i";
     internal const string s_idcd = "IDCD";
@@ -119,6 +124,7 @@ internal static class Constants
     internal const string s_numberTypePatternFormat = "^-?([0-9]\\.?){{{0}{1}}}[0-9]$";
     internal const string s_numberTypePattern = "^-?[^.]*\\.?[^.]+$";
     internal const string s_o = "o";
+    internal const string s_originalSchema = "--original-schema";
     internal const string s_output = "output";
     internal const string s_parserCliUsage = "PARSER_CLI_USAGE";
     internal const string s_path1 = "/DAM/trade/untdid/{0}/{1}.zip";
@@ -142,6 +148,8 @@ internal static class Constants
     internal const string s_schemasRoot = "schemas-root";
     internal const string s_schemaXPathFormat = "/{0}:schema";
     internal const string s_secondLevelXPathFormat = "/e:{0}/e:{1}";
+    internal const string s_segment = "--segment";
+    internal const string s_segmentGroup = "--segment-group";
     internal const string s_segmentGroupNameFormat = "SG{0}";
     internal const string s_segments = "segments";
     internal const string s_segmentsXsd = "segments.xsd";
@@ -153,6 +161,7 @@ internal static class Constants
     internal const string s_src = "src";
     internal const string s_start = "start";
     internal const string s_strict = "strict";
+    internal const string s_suffix = "--suffix";
     internal const string s_suffixes = "suffixes";
     internal const string s_systemComposites = "system_composites";
     internal const string s_systemCompositesXsd = "system_composites.xsd";
@@ -162,7 +171,9 @@ internal static class Constants
     internal const string s_systemSegmentsXsd = "system_segments.xsd";
     internal const string s_targetNamespaceXPath = "@targetNamespace";
     internal const string s_targetNamespaceXPath1 = "/xs:schema/@targetNamespace";
+    internal const string s_t = "t";
     internal const string s_type = "type";
+    internal const string s_type1 = "--type";
     internal const string s_typeForEnumXPathFormat = "/xs:schema/xs:complexType[@name='D{0}']/xs:simpleContent/xs:restriction";
     internal const string s_uih = "UIH";
     internal const string s_uit = "UIT";
