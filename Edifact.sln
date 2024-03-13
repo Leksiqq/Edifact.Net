@@ -19,9 +19,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schema2TreeCLI", "Schema2Tr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StreamsAbstraction", "..\StreamsAbstraction\StreamsAbstraction.csproj", "{CF28F317-1A73-4977-B883-D917D7B37947}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EdifactParserCLI", "EdifactParserCLI\EdifactParserCLI.csproj", "{B8B04520-0D7A-41DB-8234-29195CCAF308}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EdifactParserCLI", "EdifactParserCLI\EdifactParserCLI.csproj", "{B8B04520-0D7A-41DB-8234-29195CCAF308}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParseAll", "Tests\ParseAll\ParseAll.csproj", "{22C9A7DE-D6CB-4C75-9656-9ACC021D4BA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParseAll", "Tests\ParseAll\ParseAll.csproj", "{22C9A7DE-D6CB-4C75-9656-9ACC021D4BA1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{A5CB85B8-9570-4944-A5CD-3AA049867941}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Customizer1", "Tests\Customizer1\Customizer1.csproj", "{7D66B71A-F433-46DE-8F2C-186DA305D8FA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -57,9 +61,17 @@ Global
 		{22C9A7DE-D6CB-4C75-9656-9ACC021D4BA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22C9A7DE-D6CB-4C75-9656-9ACC021D4BA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22C9A7DE-D6CB-4C75-9656-9ACC021D4BA1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D66B71A-F433-46DE-8F2C-186DA305D8FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D66B71A-F433-46DE-8F2C-186DA305D8FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D66B71A-F433-46DE-8F2C-186DA305D8FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D66B71A-F433-46DE-8F2C-186DA305D8FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{22C9A7DE-D6CB-4C75-9656-9ACC021D4BA1} = {A5CB85B8-9570-4944-A5CD-3AA049867941}
+		{7D66B71A-F433-46DE-8F2C-186DA305D8FA} = {A5CB85B8-9570-4944-A5CD-3AA049867941}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {45289AFF-85B0-4CAE-A578-B2ABA1DB9245}

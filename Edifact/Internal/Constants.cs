@@ -13,6 +13,7 @@ internal static class Constants
     internal const string s_annotation = "annotation";
     internal const string s_annotationPrefixDeclaration = "xmlns:an";
     internal const string s_args = "args";
+    internal const string s_askKey = "/?";
     internal const string s_askSign = "?";
     internal const string s_asterisk = "*";
     internal const string s_attr = "attr";
@@ -21,6 +22,7 @@ internal static class Constants
     internal const string s_batchInterchange = "batch_interchange";
     internal const string s_batchInterchange1 = "BATCH_INTERCHANGE";
     internal const string s_batchInterchangeXsd = "batch_interchange.xsd";
+    internal const string s_bufferSize = "buffer-size";
     internal const string s_change = "change";
     internal const string s_children = "children";
     internal const string s_cmd = "cmd";
@@ -52,6 +54,7 @@ internal static class Constants
     internal const string s_directoryNotFound = "DIRECTORY_NOT_FOUND";
     internal const string s_doctype = "<!DOCTYPE";
     internal const string s_documentation = "documentation";
+    internal const string s_e = "e";
     internal const string s_edcd = "EDCD";
     internal const string s_eded = "EDED";
     internal const string s_edifactDownloaderUsage = "EDIFACT_DOWNLOADER_USAGE";
@@ -61,15 +64,20 @@ internal static class Constants
     internal const string s_element = "element";
     internal const string s_elements = "elements";
     internal const string s_elementsXsd = "elements.xsd";
+    internal const string s_encoding = "encoding";
     internal const string s_enumeration = "enumeration";
     internal const string s_extension = "extension";
     internal const string s_failedUnzip = "FAILED_UNZIP";
     internal const string s_file = "file";
     internal const string s_fileNameFormat = "{0}.{1}";
     internal const string s_finish = "finish";
+    internal const string s_folderUriFormat = "{0}/_";
     internal const string s_function = "function";
+    internal const string s_helpKey = "--help";
+    internal const string s_i = "i";
     internal const string s_idcd = "IDCD";
     internal const string s_idsd = "IDSD";
+    internal const string s_input = "input";
     internal const string s_interactiveInterchange = "interactive_interchange";
     internal const string s_interactiveInterchange1 = "INTERACTIVE_INTERCHANGE";
     internal const string s_interactiveInterchangeXsd = "interactive_interchange.xsd";
@@ -93,7 +101,7 @@ internal static class Constants
 </xs:annotation>
 ";
     internal const string s_messageXpath = "/xs:schema/xs:complexType[@name='MESSAGE']/xs:*[1]";
-    internal const string s_messageXsdFormat = "{0}/{1}{2}/{3}.xsd";
+    internal const string s_messageXsdFormat = "{0}/{1}{2}/{3}{4}.xsd";
     internal const string s_minLength = "minLength";
     internal const string s_minOccurs = "minOccurs";
     internal const string s_minOccursPatternFormat = "{0},";
@@ -110,6 +118,9 @@ internal static class Constants
     internal const string s_noTypesFound = "NO_TYPES_FOUND";
     internal const string s_numberTypePatternFormat = "^-?([0-9]\\.?){{{0}{1}}}[0-9]$";
     internal const string s_numberTypePattern = "^-?[^.]*\\.?[^.]+$";
+    internal const string s_o = "o";
+    internal const string s_output = "output";
+    internal const string s_parserCliUsage = "PARSER_CLI_USAGE";
     internal const string s_path1 = "/DAM/trade/untdid/{0}/{1}.zip";
     internal const string s_path2 = "/fileadmin/DAM/trade/untdid/{0}/{1}.zip";
     internal const string s_parentXPath = "..";
@@ -123,9 +134,11 @@ internal static class Constants
     internal const string s_restriction = "restriction";
     internal const string s_rmLabelsName = "labels";
     internal const string s_rmFixedName = "fixed";
+    internal const string s_s = "s";
     internal const string s_s009 = "S009";
     internal const string s_s306 = "S306";
     internal const string s_schema = "schema";
+    internal const string s_schemasRoot = "schemas-root";
     internal const string s_schemaXPathFormat = "/{0}:schema";
     internal const string s_secondLevelXPathFormat = "/e:{0}/e:{1}";
     internal const string s_segmentGroupNameFormat = "SG{0}";
@@ -138,6 +151,8 @@ internal static class Constants
     internal const string s_sourceArchiveDir = "--source";
     internal const string s_src = "src";
     internal const string s_start = "start";
+    internal const string s_strict = "strict";
+    internal const string s_suffixes = "suffixes";
     internal const string s_systemComposites = "system_composites";
     internal const string s_systemCompositesXsd = "system_composites.xsd";
     internal const string s_systemElements = "system_elements";
@@ -170,6 +185,8 @@ internal static class Constants
     internal const string s_value = "value";
     internal const string s_webSite = "https://unece.org";
     internal const string s_webSite1 = "https://www.unece.org";
+    internal const string s_x = "x";
+    internal const string s_xml = "xml";
     internal const string s_xsd = "xsd";
     internal const string s_xsPrefix = "xs";
     internal const string s_zip = "zip";

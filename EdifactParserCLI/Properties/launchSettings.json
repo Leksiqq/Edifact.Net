@@ -3,6 +3,10 @@
     "EdifactParserCLI": {
       "commandName": "Project",
       "commandLineArgs": "W:\\C#\\Edifact\\var\\xsd \r\nW:\\C#\\Edifact\\misc\\PDF73217 \r\nW:\\C#\\Edifact\\var\\out\r\n"
+    },
+    "Профиль 1": {
+      "commandName": "Project",
+      "commandLineArgs": "/s W:\\C#\\Edifact\\var\\xsd \r\n/i W:\\C#\\Edifact\\misc\\PDF73217 \r\n/o W:\\C#\\Edifact\\var\\out\r\n/x \"IFCSUM=.1;IFTMBF=.1\"\r\n/e ISO-8859-1\r\n"
     }
   }
 }

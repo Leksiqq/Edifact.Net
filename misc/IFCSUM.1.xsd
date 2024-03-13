@@ -1,0 +1,378 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="EDIFACT" xmlns="EDIFACT" xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified" xmlns:an="http://leksi.net/annotation">
+  <xs:include schemaLocation="segments.xsd" />
+  <xs:complexType name="MESSAGE">
+    <xs:complexContent>
+      <xs:extension base="BASE-MESSAGE">
+        <xs:sequence>
+          <xs:element name="BGM" type="BGM" />
+          <xs:element name="DTM" type="DTM" minOccurs="0" maxOccurs="9" />
+          <xs:element name="SG4" minOccurs="0" maxOccurs="9">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="NAD" type="NAD" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="SG8" minOccurs="0" maxOccurs="9">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="TDT" type="TDT" />
+                <xs:element name="LOC" type="LOC" minOccurs="0" maxOccurs="9" />
+                <xs:element name="DTM" type="DTM" minOccurs="0" maxOccurs="9" />
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+          <xs:element name="SG19" minOccurs="0" maxOccurs="9999">
+            <xs:complexType>
+              <xs:sequence>
+                <xs:element name="CNI" type="CNI" />
+                <xs:element name="FTX" type="FTX.1" minOccurs="0" maxOccurs="99" />
+                <xs:element name="SG26" minOccurs="0" maxOccurs="999">
+                  <xs:complexType>
+                    <xs:sequence>
+                      <xs:element name="RFF" type="RFF" />
+                    </xs:sequence>
+                  </xs:complexType>
+                </xs:element>
+                <xs:element name="SG30" minOccurs="0" maxOccurs="99">
+                  <xs:complexType>
+                    <xs:sequence>
+                      <xs:element name="TCC" type="TCC" />
+                      <xs:element name="PRI" type="PRI" minOccurs="0" />
+                      <xs:element name="PCD" type="PCD" minOccurs="0" />
+                      <xs:element name="MOA" type="MOA" minOccurs="0" maxOccurs="9" />
+                      <xs:element name="QTY" type="QTY" minOccurs="0" maxOccurs="9" />
+                    </xs:sequence>
+                  </xs:complexType>
+                </xs:element>
+                <xs:element name="SG31" minOccurs="0" maxOccurs="99">
+                  <xs:complexType>
+                    <xs:sequence>
+                      <xs:element name="TDT" type="TDT" />
+                      <xs:element name="DTM" type="DTM" minOccurs="0" maxOccurs="9" />
+                      <xs:element name="SG-32" minOccurs="0" maxOccurs="99">
+                        <xs:complexType>
+                          <xs:sequence>
+                            <xs:element name="LOC" type="LOC" />
+                          </xs:sequence>
+                        </xs:complexType>
+                      </xs:element>
+                    </xs:sequence>
+                  </xs:complexType>
+                </xs:element>
+                <xs:element name="SG41" minOccurs="0" maxOccurs="999">
+                  <xs:complexType>
+                    <xs:sequence>
+                      <xs:element name="GID" type="GID" />
+                      <xs:element name="HAN" type="HAN" minOccurs="0" />
+                      <xs:element name="LOC" type="LOC" minOccurs="0" maxOccurs="9" />
+                      <xs:element name="PIA" type="PIA" minOccurs="0" maxOccurs="9" />
+                      <xs:element name="FTX" type="FTX.1" minOccurs="0" maxOccurs="9" />
+                      <xs:element name="SG43" minOccurs="0" maxOccurs="99">
+                        <xs:complexType>
+                          <xs:sequence>
+                            <xs:element name="MEA" type="MEA" />
+                            <xs:element name="EQN" type="EQN" minOccurs="0" />
+                          </xs:sequence>
+                        </xs:complexType>
+                      </xs:element>
+                      <xs:element name="SG44" minOccurs="0" maxOccurs="99">
+                        <xs:complexType>
+                          <xs:sequence>
+                            <xs:element name="DIM" type="DIM" />
+                          </xs:sequence>
+                        </xs:complexType>
+                      </xs:element>
+                      <xs:element name="SG45" minOccurs="0" maxOccurs="9">
+                        <xs:complexType>
+                          <xs:sequence>
+                            <xs:element name="RFF" type="RFF" />
+                          </xs:sequence>
+                        </xs:complexType>
+                      </xs:element>
+                      <xs:element name="SG46" minOccurs="0" maxOccurs="999">
+                        <xs:complexType>
+                          <xs:sequence>
+                            <xs:element name="PCI" type="PCI" />
+                          </xs:sequence>
+                        </xs:complexType>
+                      </xs:element>
+                      <xs:element name="SG52" minOccurs="0" maxOccurs="999">
+                        <xs:complexType>
+                          <xs:sequence>
+                            <xs:element name="SGP" type="SGP" />
+                          </xs:sequence>
+                        </xs:complexType>
+                      </xs:element>
+                      <xs:element name="SG55" minOccurs="0" maxOccurs="9">
+                        <xs:complexType>
+                          <xs:sequence>
+                            <xs:element name="DGS" type="DGS" />
+                            <xs:element name="FTX" type="FTX.1" minOccurs="0" maxOccurs="99" />
+                            <xs:element name="SG-57" minOccurs="0" maxOccurs="9">
+                              <xs:complexType>
+                                <xs:sequence>
+                                  <xs:element name="MEA" type="MEA" />
+                                </xs:sequence>
+                              </xs:complexType>
+                            </xs:element>
+                            <xs:element name="SG-58" minOccurs="0" maxOccurs="999">
+                              <xs:complexType>
+                                <xs:sequence>
+                                  <xs:element name="SGP" type="SGP" />
+                                </xs:sequence>
+                              </xs:complexType>
+                            </xs:element>
+                          </xs:sequence>
+                        </xs:complexType>
+                      </xs:element>
+                    </xs:sequence>
+                  </xs:complexType>
+                </xs:element>
+                <xs:element name="SG60" minOccurs="0" maxOccurs="999">
+                  <xs:complexType>
+                    <xs:sequence>
+                      <xs:element name="EQD" type="EQD.1" />
+                      <xs:element name="MEA" type="MEA" minOccurs="0" maxOccurs="9" />
+                      <xs:element name="DIM" type="DIM" minOccurs="0" maxOccurs="9" />
+                      <xs:element name="SEL" type="SEL" minOccurs="0" maxOccurs="99" />
+                      <xs:element name="HAN" type="HAN" minOccurs="0" />
+                      <xs:element name="FTX" type="FTX.1" minOccurs="0" maxOccurs="9" />
+                      <xs:element name="SG61" minOccurs="0" maxOccurs="99">
+                        <xs:complexType>
+                          <xs:sequence>
+                            <xs:element name="TCC" type="TCC" />
+                            <xs:element name="PRI" type="PRI" minOccurs="0" />
+                            <xs:element name="PCD" type="PCD" minOccurs="0" />
+                            <xs:element name="MOA" type="MOA" minOccurs="0" maxOccurs="9" />
+                            <xs:element name="QTY" type="QTY" minOccurs="0" maxOccurs="9" />
+                          </xs:sequence>
+                        </xs:complexType>
+                      </xs:element>
+                      <xs:element name="SG63" minOccurs="0" maxOccurs="99">
+                        <xs:complexType>
+                          <xs:sequence>
+                            <xs:element name="EQA" type="EQA.1" />
+                          </xs:sequence>
+                        </xs:complexType>
+                      </xs:element>
+                    </xs:sequence>
+                  </xs:complexType>
+                </xs:element>
+              </xs:sequence>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="C224.1">
+    <xs:annotation>
+      <xs:documentation an:name="name">EQUIPMENT SIZE AND TYPE</xs:documentation>
+      <xs:documentation an:name="description">
+        Code and/or name identifying size and type of equipment
+        used in transport. Code preferred.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="D8155" type="D8155.1" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Equipment size and type identification</xs:documentation>
+          <xs:documentation an:name="position">010</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D1131" type="D1131" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Code list qualifier</xs:documentation>
+          <xs:documentation an:name="position">020</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D3055" type="D3055" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Code list responsible agency, coded</xs:documentation>
+          <xs:documentation an:name="position">030</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D8154" type="D8154" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation an:name="name">Equipment size and type</xs:documentation>
+          <xs:documentation an:name="position">040</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="EQD.1">
+    <xs:annotation>
+      <xs:documentation an:name="name">EQUIPMENT DETAILS</xs:documentation>
+      <xs:documentation an:name="function">To identify a unit of equipment.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BASE-SEGMENT">
+        <xs:sequence>
+          <xs:element name="D8053" type="D8053.1">
+            <xs:annotation>
+              <xs:documentation an:name="name">EQUIPMENT QUALIFIER</xs:documentation>
+              <xs:documentation an:name="position">010</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="C237" type="C237" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">EQUIPMENT IDENTIFICATION</xs:documentation>
+              <xs:documentation an:name="position">020</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="C224" type="C224.1" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">EQUIPMENT SIZE AND TYPE</xs:documentation>
+              <xs:documentation an:name="position">030</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="D8077" type="D8077" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">EQUIPMENT SUPPLIER, CODED</xs:documentation>
+              <xs:documentation an:name="position">040</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="D8249" type="D8249" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">EQUIPMENT STATUS, CODED</xs:documentation>
+              <xs:documentation an:name="position">050</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="D8169" type="D8169" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">FULL/EMPTY INDICATOR, CODED</xs:documentation>
+              <xs:documentation an:name="position">060</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="D8155.1">
+    <xs:annotation>
+      <xs:documentation an:name="name">Equipment size and type identification</xs:documentation>
+      <xs:documentation an:name="description">
+        Coded description of the size and type of equipment e.g. unit
+        load device.
+      </xs:documentation>
+      <xs:documentation an:name="note">
+        User or association defined code. May be used in combination
+        with 1131/3055. See ISO 6346 for seagoing containers.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="10" />
+        <xs:enumeration value="MCAR" />
+        <xs:enumeration value="20TA" />
+        <xs:enumeration value="WHLL" />
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="FTX.1">
+    <xs:annotation>
+      <xs:documentation an:name="name">FREE TEXT</xs:documentation>
+      <xs:documentation an:name="function">To provide free form or coded text information.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BASE-SEGMENT">
+        <xs:sequence>
+          <xs:element name="D4451" type="D4451.1">
+            <xs:annotation>
+              <xs:documentation an:name="name">TEXT SUBJECT QUALIFIER</xs:documentation>
+              <xs:documentation an:name="position">010</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="D4453" type="D4453" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">TEXT FUNCTION, CODED</xs:documentation>
+              <xs:documentation an:name="position">020</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="C107" type="C107" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">TEXT REFERENCE</xs:documentation>
+              <xs:documentation an:name="position">030</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="C108" type="C108" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">TEXT LITERAL</xs:documentation>
+              <xs:documentation an:name="position">040</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="D3453" type="D3453" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">LANGUAGE, CODED</xs:documentation>
+              <xs:documentation an:name="position">050</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="D4451.1">
+    <xs:annotation>
+      <xs:documentation an:name="name">Text subject qualifier</xs:documentation>
+      <xs:documentation an:name="description">Code specifying subject of a free text.</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="3" />
+        <xs:enumeration value="AAA" />
+        <xs:enumeration value="AAI" />
+        <xs:enumeration value="AEB" />
+        <xs:enumeration value="ZCS" />
+        <xs:enumeration value="ZCT" />
+        <xs:enumeration value="ZGL" />
+        <xs:enumeration value="ZSD" />
+        <xs:enumeration value="ZSS" />
+        <xs:enumeration value="ZTT" />
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="EQA.1">
+    <xs:annotation>
+      <xs:documentation an:name="name">ATTACHED EQUIPMENT</xs:documentation>
+      <xs:documentation an:name="function">To specify attached or related equipment.</xs:documentation>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="BASE-SEGMENT">
+        <xs:sequence>
+          <xs:element name="D8053" type="D8053.1">
+            <xs:annotation>
+              <xs:documentation an:name="name">EQUIPMENT QUALIFIER</xs:documentation>
+              <xs:documentation an:name="position">010</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="C237" type="C237" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation an:name="name">EQUIPMENT IDENTIFICATION</xs:documentation>
+              <xs:documentation an:name="position">020</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="D8053.1">
+    <xs:annotation>
+      <xs:documentation an:name="name">Equipment qualifier</xs:documentation>
+      <xs:documentation an:name="description">Code identifying type of equipment.</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="4" />
+        <xs:enumeration value="20RT" />
+        <xs:enumeration value="30RT" />
+        <xs:enumeration value="40RT" />
+        <xs:enumeration value="42RT" />
+        <xs:enumeration value="CN" />
+        <xs:enumeration value="ZBU" />
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:element name="MESSAGE" type="MESSAGE" />
+</xs:schema>

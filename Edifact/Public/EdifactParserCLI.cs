@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Net.Leksi.Streams;
+using System.Text;
 using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
@@ -19,13 +21,48 @@ public class EdifactParserCLI : BackgroundService
     }
     public static async Task RunAsync(string[] args, Action<IHostApplicationBuilder>? config = null)
     {
-        HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+        IConfiguration bootstrapConfig = new ConfigurationBuilder()
+            .AddCommandLine(args)
+            .Build();
+        if(args.Contains(s_askKey) || args.Contains(s_helpKey))
+        {
+            Usage();
+            return;
+        }
         EdifactParserOptions options = new()
         {
-            SchemasUri = args[0],
-            InputUri = args[1],
-            OutputUri = args[2],
+            SchemasUri = bootstrapConfig[s_schemasRoot] ?? bootstrapConfig[s_s],
+            InputUri = bootstrapConfig[s_input] ?? bootstrapConfig[s_i],
+            OutputUri = bootstrapConfig[s_output] ?? bootstrapConfig[s_o],
         };
+        if(options.SchemasUri is null || options.InputUri is null || options.OutputUri is null)
+        {
+            Usage();
+            return;
+        }
+        if ((bootstrapConfig[s_encoding] ?? bootstrapConfig[s_e]) is string encoding)
+        {
+            options.Encoding = Encoding.GetEncoding(encoding);
+        }
+        if ((bootstrapConfig[s_suffixes] ?? bootstrapConfig[s_x]) is string suffixes)
+        {
+            string[] items = suffixes.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if(items.Length > 0)
+            {
+                options.MessagesSuffixes = [];
+                foreach(var it in items)
+                {
+                    string[] parts = it.Split('=', 2, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    options.MessagesSuffixes.TryAdd(parts[0], parts[1]);
+                }
+            }
+        }
+        if (bootstrapConfig[s_strict] is string strict)
+        {
+            options.IsStrict = !strict.Equals("no", StringComparison.OrdinalIgnoreCase);
+        }
+
+        HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
         builder.Services.AddSingleton(options);
         builder.Services.AddSingleton<EdifactParser>();
         builder.Services.AddHostedService<EdifactParserCLI>();
@@ -37,12 +74,30 @@ public class EdifactParserCLI : BackgroundService
         await host.RunAsync();
 
     }
+
+    private static void Usage()
+    {
+        Console.WriteLine(
+            string.Format(
+                s_rmLabels.GetString(s_parserCliUsage)!,
+                Path.GetFileName(Environment.ProcessPath),
+                s_schemasRoot, s_s,
+                s_input, s_i,
+                s_output, s_o,
+                s_suffixes, s_x,
+                s_encoding, s_e,
+                s_strict,
+                s_bufferSize
+            )
+        );
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
             _parser.Message += _parser_Message;
-            await _parser.Parse(_options);
+            await _parser.Parse(_options, stoppingToken);
         }
         finally
         {
@@ -53,7 +108,7 @@ public class EdifactParserCLI : BackgroundService
     private void _parser_Message(object sender, MessageEventArgs e)
     {
         if(e.EventKind is MessageEventKind.Start){
-            Uri uri = new(new Uri($"{_options.OutputUri}/_"), $"{e.MessageReferenceNumber}.xml");
+            Uri uri = new(new Uri(string.Format(s_folderUriFormat, _options.OutputUri)), string.Format(s_fileNameFormat, e.MessageReferenceNumber, s_xml));
             e.Stream = _services.GetRequiredKeyedService<IStreamFactory>(uri.Scheme).GetOutputStream(uri);
         }
     }

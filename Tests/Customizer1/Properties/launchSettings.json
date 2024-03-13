@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Customizer1": {
+      "commandName": "Project",
+      "commandLineArgs": "W:\\C#\\Edifact\\misc\\IFCSUM.1.xsd"
+    }
+  }
+}

@@ -21,8 +21,10 @@ public class EdifactParser
     private readonly StringBuilder _sb = new();
     private readonly XmlResolver _xmlResolver;
     private readonly Dictionary<string, XmlSchema> _messageSchemaCache = [];
+    private readonly HashSet<string> _validationWarningsCache = [];
     private readonly List<Sequence> _sequencesStack = [];
     private readonly List<string> _path = [];
+    private EdifactParserOptions _options;
     private XmlSchemaSet _schemaSet = null!;
     private XmlNameTable _nameTable = null!;
     private XmlDocument _interchangeHeaderXml = null!;
@@ -31,6 +33,7 @@ public class EdifactParser
     private XmlDocument _groupTrailerXml = null!;
     private XmlDocument _messageHeaderXml = null!;
     private XmlDocument _messageTrailerXml = null!;
+    private XmlDocument _elementXml = null!;
     private XmlNamespaceManager _man = null!;
     private XmlWriterSettings _xws = null!;
     private EdifactTokenizer _tokenizer = null!;
@@ -58,10 +61,11 @@ public class EdifactParser
         _xmlResolver = new Resolver(_services);
         
 }
-    public async Task Parse(EdifactParserOptions options)
+    public async Task Parse(EdifactParserOptions options, CancellationToken? cancellationToken)
     {
         try
         {
+            _options = options;
             if(Interlocked.Increment(ref _entersNum) != 1)
             {
                 throw new Exception("TODO: Thread unsafety.");
@@ -86,10 +90,13 @@ public class EdifactParser
             _groupTrailerXml = new XmlDocument(_nameTable);
             _messageHeaderXml = new XmlDocument(_nameTable);
             _messageTrailerXml = new XmlDocument(_nameTable);
+            _elementXml = new XmlDocument(_nameTable);
+            _elementXml.LoadXml("<root/>");
             _schemaSet = new(_nameTable)
             {
                 XmlResolver = _xmlResolver
             };
+            _elementXml.Schemas = _schemaSet;
             _schemaSet.ValidationEventHandler += SchemaSet_ValidationEventHandler;
             _schemas = new($"{options.SchemasUri!}/_");
             _messageSchemaCache.Clear();
@@ -111,6 +118,8 @@ public class EdifactParser
                 ?? throw new Exception("TODO: edifact.xsd not found.");
             _man = new(_nameTable);
             _man.AddNamespace(s_xsPrefix, Properties.Resources.schema_ns);
+            _man.AddNamespace("xsi", Properties.Resources.schema_instance_ns);
+
             XmlDocument doc = new(_nameTable);
             doc.Load(edifact);
             XPathNavigator nav = doc.CreateNavigator()!;
@@ -125,6 +134,8 @@ public class EdifactParser
 
             await foreach (SegmentToken segment in _tokenizer.Tokenize(inputStreamFactory.GetInputStream(input)))
             {
+                cancellationToken?.ThrowIfCancellationRequested();
+
                 if (segment.ExplcitNestingIndication is { } && segment.ExplcitNestingIndication.Count > 0)
                 {
                     throw new NotImplementedException("TODO: explicit indication of nesting");
@@ -222,7 +233,7 @@ public class EdifactParser
                             await _writer!.WriteStartElementAsync(null, _path.Last(), _targetNamespace);
                         }
                         _sequencesStack[i].IncrementOccurs();
-                        await ParseSegmentAsync(segment, el, _writer!, _targetNamespace);
+                        await ParseSegmentAsync(segment, el);
                         break;
                     }
                     else
@@ -289,7 +300,7 @@ public class EdifactParser
             {
                 _path.RemoveAt(_path.Count - 1);
                 await _writer!.WriteEndElementAsync();
-                await ParseSegmentAsync(segment, el, _writer, _targetNamespace);
+                await ParseSegmentAsync(segment, el);
                 _path.RemoveAt(_path.Count - 1);
                 await _writer.WriteEndElementAsync();
                 await _writer.WriteEndDocumentAsync();
@@ -308,7 +319,7 @@ public class EdifactParser
                 _sb.Clear();
                 _writer = XmlWriter.Create(_sb, _xws);
                 await _writer.WriteStartDocumentAsync();
-                await ParseSegmentAsync(segment, el, _writer!, _targetNamespace);
+                await ParseSegmentAsync(segment, el);
                 await _writer!.WriteEndDocumentAsync();
                 _writer.Close();
                 _sequencesStack.Last().Reset();
@@ -355,7 +366,7 @@ public class EdifactParser
                 _sb.Clear();
                 _writer = XmlWriter.Create(_sb, _xws);
                 await _writer.WriteStartDocumentAsync();
-                await ParseSegmentAsync(segment, el, _writer!, _targetNamespace);
+                await ParseSegmentAsync(segment, el);
                 await _writer!.WriteEndDocumentAsync();
                 _writer.Close();
                 _interchangeTrailerXml.LoadXml(_sb.ToString());
@@ -385,7 +396,7 @@ public class EdifactParser
                 _sb.Clear();
                 _writer = XmlWriter.Create(_sb, _xws);
                 await _writer.WriteStartDocumentAsync();
-                await ParseSegmentAsync(segment, el, _writer!, _targetNamespace);
+                await ParseSegmentAsync(segment, el);
                 await _writer!.WriteEndDocumentAsync();
                 _writer.Close();
                 _messageHeaderXml.LoadXml(_sb.ToString());
@@ -412,12 +423,19 @@ public class EdifactParser
 
                 Message?.Invoke(this, _messageEventArgs);
 
+
+                if(_options.MessagesSuffixes is null ||  !_options.MessagesSuffixes.TryGetValue(_messageEventArgs.MessageType, out string? suffix))
+                {
+                    suffix = string.Empty;
+                }
+
                 _messageXsd = string.Format(
                     s_messageXsdFormat,
                     _messageEventArgs.ControllingAgencyCoded,
                     _messageEventArgs.MessageVersion,
                     _messageEventArgs.MessageRelease,
-                    _messageEventArgs.MessageType
+                    _messageEventArgs.MessageType,
+                    suffix
                 );
 
                 if (_messageSchema is { })
@@ -541,7 +559,7 @@ public class EdifactParser
                     _sb.Clear();
                     _writer = XmlWriter.Create(_sb, _xws);
                     await _writer.WriteStartDocumentAsync();
-                    await ParseSegmentAsync(segment, el, _writer!, _targetNamespace);
+                    await ParseSegmentAsync(segment, el);
                     await _writer!.WriteEndDocumentAsync();
                     _writer.Close();
                     _groupTrailerXml.LoadXml(_sb.ToString());
@@ -592,7 +610,7 @@ public class EdifactParser
                     _sb.Clear();
                     _writer = XmlWriter.Create(_sb, _xws);
                     await _writer.WriteStartDocumentAsync();
-                    await ParseSegmentAsync(segment, el, _writer!, _targetNamespace);
+                    await ParseSegmentAsync(segment, el);
                     await _writer!.WriteEndDocumentAsync();
                     _writer.Close();
                     _groupHeaderXml.LoadXml(_sb.ToString());
@@ -652,7 +670,7 @@ public class EdifactParser
         }
         else
         {
-            throw new Exception($"TODO: expected: {nameof(XmlSchemaChoice)}, got: {_sequencesStack.Last().Item}");
+            throw new NotImplementedException("Never occurs.");
         }
     }
 
@@ -700,7 +718,7 @@ public class EdifactParser
                 _sequencesStack.Last().Move()
             )
             {
-                await ParseSegmentAsync(segment, _sequencesStack.Last().Item, _writer!, _targetNamespace);
+                await ParseSegmentAsync(segment, _sequencesStack.Last().Item);
                 await _writer!.WriteEndDocumentAsync();
                 _writer.Close();
                 _interchangeHeaderXml.LoadXml(_sb.ToString());
@@ -712,17 +730,18 @@ public class EdifactParser
         }
     }
 
-    private async Task ParseSegmentAsync(SegmentToken segment, XmlSchemaObject? obj, XmlWriter writer, string? ns)
+    private async Task ParseSegmentAsync(SegmentToken segment, XmlSchemaObject? obj)
     {
         if (obj is XmlSchemaElement el)
         {
             if (
-                el.QualifiedName == new XmlQualifiedName(segment.Tag, ns)
+                el.QualifiedName == new XmlQualifiedName(segment.Tag, _targetNamespace)
                 && el.ElementSchemaType is XmlSchemaComplexType ct
                 && ct.ContentTypeParticle is XmlSchemaSequence seq
             )
             {
-                await writer.WriteStartElementAsync(null, el.QualifiedName.Name, el.QualifiedName.Namespace);
+                _path.Add(segment.Tag!);
+                await _writer.WriteStartElementAsync(null, el.QualifiedName.Name, el.QualifiedName.Namespace);
                 if (seq.Items.Count > 0)
                 {
                     Sequence sequence = new(el.Name!, seq);
@@ -750,11 +769,12 @@ public class EdifactParser
                                     && ct1.ContentModel is XmlSchemaSimpleContent
                                 )
                                 {
-                                    await writer.WriteElementStringAsync(null, ((XmlSchemaElement)sequence.Item).Name!, ns, et.Elements[0]);
+                                    ValidateElement((XmlSchemaElement)sequence.Item!, et.Elements[0]);
+                                    await _writer.WriteElementStringAsync(null, ((XmlSchemaElement)sequence.Item).Name!, _targetNamespace, et.Elements[0]);
                                 }
                                 else
                                 {
-                                    await ParseCompositeAsync(segment.Tag!, et, (XmlSchemaElement)sequence.Item, writer, ns);
+                                    await ParseCompositeAsync(segment.Tag!, et, (XmlSchemaElement)sequence.Item);
                                 }
                                 if (!sequence.IncrementOccurs())
                                 {
@@ -768,7 +788,8 @@ public class EdifactParser
                 {
                     throw new Exception($"TODO: unexpected components at segment {segment.Tag}");
                 }
-                await writer.WriteEndElementAsync();
+                await _writer.WriteEndElementAsync();
+                _path.RemoveAt(_path.Count - 1);
             }
             else
             {
@@ -781,14 +802,15 @@ public class EdifactParser
         }
     }
 
-    private static async Task ParseCompositeAsync(string tag, ComponentToken token, XmlSchemaElement el, XmlWriter writer, string? ns)
+    private async Task ParseCompositeAsync(string tag, ComponentToken token, XmlSchemaElement el)
     {
         if (
             el.ElementSchemaType is XmlSchemaComplexType ct
             && ct.ContentTypeParticle is XmlSchemaSequence seq
         )
         {
-            await writer.WriteStartElementAsync(null, el.QualifiedName.Name, el.QualifiedName.Namespace);
+            _path.Add(el.QualifiedName.Name);
+            await _writer.WriteStartElementAsync(null, el.QualifiedName.Name, el.QualifiedName.Namespace);
             if (seq.Items.Count > 0)
             {
                 Sequence sequence = new(el.Name!, seq);
@@ -804,7 +826,8 @@ public class EdifactParser
                         }
                         if (!string.IsNullOrEmpty(value))
                         {
-                            await writer.WriteElementStringAsync(null, ((XmlSchemaElement)sequence.Item!).Name!, ns, value);
+                            ValidateElement((XmlSchemaElement)sequence.Item!, value);
+                            await _writer.WriteElementStringAsync(null, ((XmlSchemaElement)sequence.Item!).Name!, _targetNamespace, value);
                             if (!sequence.IncrementOccurs())
                             {
                                 throw new Exception($"TODO: extra element {((XmlSchemaElement)sequence.Item).Name} at composite {el.Name} at segment {tag}, maxOccurs: {((XmlSchemaElement)sequence.Item).MaxOccursString}, occurs: {sequence.Occurs}.");
@@ -817,23 +840,42 @@ public class EdifactParser
             {
                 throw new Exception($"TODO: unexpected elements at composite {el.Name} at segment {tag}");
             }
-            await writer.WriteEndElementAsync();
+            await _writer.WriteEndElementAsync();
+            _path.RemoveAt(_path.Count - 1);
         }
         else
         {
             throw new Exception($"TODO: unexpected composite");
         }
     }
+
+    private void ValidateElement(XmlSchemaElement xmlSchemaElement, string value)
+    {
+        _path.Add(xmlSchemaElement.Name!);
+        _elementXml.RemoveAll();
+        XmlElement elem = (XmlElement)_elementXml.AppendChild(_elementXml.CreateElement(null, xmlSchemaElement.Name!, _targetNamespace))!;
+        elem.AppendChild(_elementXml.CreateTextNode(value));
+        elem.SetAttribute("xmlns:e", _targetNamespace);
+        elem.SetAttribute("type", Properties.Resources.schema_instance_ns, string.Format("e:{0}", xmlSchemaElement.ElementSchemaType!.Name!));
+        _elementXml.Validate(SchemaSet_ValidationEventHandler);
+        _path.RemoveAt(_path.Count - 1);
+    }
+
     private void SchemaSet_ValidationEventHandler(object? sender, ValidationEventArgs e)
     {
-        switch (e.Severity)
+        string message = string.Format("/{0}: {1}", string.Join('/', _path.Skip(1)), e.Message);
+        if (_validationWarningsCache.Add(message))
         {
-            case XmlSeverityType.Warning:
-                _logger?.LogWarning(s_logMessage, e.Message);
-                break;
-            case XmlSeverityType.Error:
-                _logger?.LogWarning(s_logMessage, e.Message);
-                break;
+            
+            switch (e.Severity)
+            {
+                case XmlSeverityType.Warning:
+                    _logger?.LogWarning(s_logMessage, message);
+                    break;
+                case XmlSeverityType.Error:
+                    _logger?.LogError(s_logMessage, message);
+                    break;
+            }
         }
     }
 }

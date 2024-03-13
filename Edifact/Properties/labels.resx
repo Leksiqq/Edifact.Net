@@ -280,4 +280,23 @@ ARGS:
   <data name="URI_SCHEME_NOT_SUPPORTED" xml:space="preserve">
     <value>Uri scheme is not supported: '{0}'.</value>
   </data>
+  <data name="PARSER_CLI_USAGE" xml:space="preserve">
+    <value>Usage:
+{0} OPTIONS
+
+where OPTIONS:
+                --{1}, /{2} URI    (Mandatory) The root folder URI where EDIFACT Xml-schemas are placed.
+
+                       --{3}, /{4} URI    (Mandatory) The URI of input EDIFACT interchange file.
+
+                      --{5}, /{6} URI    (Mandatory) The URI of output folder, where message Xml-files will be placed.
+
+--{7}, /{8} "&lt;Type1&gt;=&lt;suffix1&gt;;..."    (Optional) List of type=suffix pairs separated with semicolon (;) of EDIFACT messages Xml-schemas files to use instead of original ones.
+
+               --{9}, /{10} ENCODING    (Optional) Encoding name to use when failed to extract from data.
+
+                       --{11} yes|no    (Optional, default yes) Allows to check EDIFACT data a bit less strictly.
+
+                    --{12} SIZE    (Optional) Internal buffer size for possible optimization.</value>
+  </data>
 </root>

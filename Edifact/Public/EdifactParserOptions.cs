@@ -10,4 +10,5 @@ public class EdifactParserOptions
     public bool? IsStrict { get; set; }
     public string? OutputUri { get; set; }
     public int? BufferLength { get; set; }
+    public Dictionary<string, string>? MessagesSuffixes { get; set; }
 }
