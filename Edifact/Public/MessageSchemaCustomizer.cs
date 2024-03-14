@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Net.Leksi.Streams;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Xml;
 using System.Xml.Schema;
@@ -11,6 +12,8 @@ namespace Net.Leksi.Edifact;
 
 public class MessageSchemaCustomizer
 {
+    private static readonly Regex s_reMessageIdentifier = 
+        new("^(?<type>[A-Z]{6}):(?<version>[^:]{1,3}):(?<release>[^:]{1,3}):(?<agency>[^:]{1,3})$");
     private readonly IServiceProvider _services;
     private readonly ILogger<MessageSchemaCustomizer>? _logger;
     private readonly XmlResolver _resolver;
@@ -27,7 +30,7 @@ public class MessageSchemaCustomizer
         _resolver = new Resolver(_services);
     }
 
-    public async Task Customize(MessageSchemaCustomizerOptions options)
+    public async Task Customize(MessageSchemaCustomizerOptions options, CancellationToken cancellationToken)
     {
         try
         {
@@ -44,26 +47,12 @@ public class MessageSchemaCustomizer
                 XmlResolver = _resolver,
             };
             _schemaSet.ValidationEventHandler += _schemaSet_ValidationEventHandler;
-            await InvokeAction();
+            await InvokeAction(cancellationToken);
         }
         finally
         {
             Interlocked.Decrement(ref _entersNum);
         }
-        //XmlDocument doc = new(nameTable);
-        //Uri customUri = new(options.CustomSchemaUri!);
-        //IStreamFactory customStreamFactory = _services.GetRequiredKeyedService<IStreamFactory>(customUri.Scheme);
-        //Stream input = customStreamFactory.GetInputStream(customUri);
-        //doc.Load(input);
-        //input.Close();
-
-        //XmlWriterSettings xws = new() 
-        //{
-        //    Indent = true,
-        //};
-        //XmlWriter writer = XmlWriter.Create(customStreamFactory.GetOutputStream(customUri, FileMode.Create), xws);
-        //doc.WriteTo(writer);
-        //writer.Close();
     }
 
     private void _schemaSet_ValidationEventHandler(object? sender, ValidationEventArgs e)
@@ -78,50 +67,64 @@ public class MessageSchemaCustomizer
         }
     }
 
-    private async Task InvokeAction()
+    private async Task InvokeAction(CancellationToken cancellationToken)
     {
         switch (_options.Action)
         {
             case MessageSchemaCustomizerAction.CopySchema:
-                await CopySchema();
+                CopySchema(cancellationToken);
                 break;
             case MessageSchemaCustomizerAction.RemoveSegmentGroup:
-                await RemoveSegmentGroup();
+                await RemoveSegmentGroup(cancellationToken);
                 break;
             case MessageSchemaCustomizerAction.RemoveSegment:
-                await RemoveSegment();
+                await RemoveSegment(cancellationToken);
                 break;
             case MessageSchemaCustomizerAction.ChangeType:
-                await ChangeType();
+                await ChangeType(cancellationToken);
                 break;
             default:
                 throw new InvalidOperationException("TODO: Action is missed.");
         }
     }
 
-    private async Task ChangeType()
+    private async Task ChangeType(CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    private async Task RemoveSegment()
+    private async Task RemoveSegment(CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    private async Task RemoveSegmentGroup()
+    private async Task RemoveSegmentGroup(CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }
 
-    private async Task CopySchema()
+    private void CopySchema(CancellationToken cancellationToken)
     {
-        Uri uri = new(_options.OriginalSchemaUri!);
-        string path = HttpUtility.UrlDecode(uri.AbsolutePath);
-        if (!s_reOriginalMessageXsd.IsMatch(Path.GetFileName(path)))
+        if (string.IsNullOrEmpty(_options.MessageIdentifier))
         {
-            throw new Exception($"TODO: Seems to be not an original schema: {Path.GetFileName(path)}.");
+            throw new Exception($"TODO: --{s_message} is mandatary.");
         }
+        Match match = s_reMessageIdentifier.Match(_options.MessageIdentifier!);
+        if(!match.Success)
+        {
+            throw new Exception($"TODO: Not a message identifier: {_options.MessageIdentifier}.");
+        }
+        Uri uri = new(
+            new Uri(string.Format(s_folderUriFormat, _options.SchemasUri)),
+            string.Format(
+                s_messageXsdFormat, 
+                match.Groups[s_agensy].Value,
+                match.Groups[s_version].Value,
+                match.Groups[s_release].Value,
+                match.Groups[s_type].Value,
+                string.Empty
+            )
+        );
 
         IStreamFactory streamFactory = _services.GetRequiredKeyedService<IStreamFactory>(uri.Scheme);
         Stream input = streamFactory.GetInputStream(uri)
@@ -135,6 +138,29 @@ public class MessageSchemaCustomizer
         }
         _schemaSet.Add(tns.Value, uri.ToString());
         _schemaSet.Compile();
-        await Task.CompletedTask;
+        if (string.IsNullOrEmpty(_options.Suffix))
+        {
+            throw new Exception($"TODO: --{s_suffix} is mandatary.");
+        }
+        Uri outputUri = new(
+            new Uri(string.Format(s_folderUriFormat, _options.SchemasUri)),
+            string.Format(
+                s_messageXsdFormat,
+                match.Groups[s_agensy].Value,
+                match.Groups[s_version].Value,
+                match.Groups[s_release].Value,
+                match.Groups[s_type].Value,
+                _options.Suffix
+            )
+        );
+        streamFactory = _services.GetRequiredKeyedService<IStreamFactory>(outputUri.Scheme);
+        Stream output = streamFactory.GetOutputStream(outputUri, FileMode.Create);
+        XmlWriterSettings xws = new()
+        {
+            Indent = true,
+        };
+        XmlWriter writer = XmlWriter.Create(output, xws);
+        doc.WriteTo(writer);
+        writer.Close();
     }
 }

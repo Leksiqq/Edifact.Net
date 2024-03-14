@@ -2,7 +2,7 @@
   "profiles": {
     "Customizer1": {
       "commandName": "Project",
-      "commandLineArgs": "W:\\C#\\Edifact\\misc\\IFCSUM.1.xsd"
+      "commandLineArgs": "--original-schema W:\\C#\\Edifact\\var\\xsd\\UN\\D97B\\IFCSUM.xsd\r\n--suffix .2\r\n--action cs"
     }
   }
 }

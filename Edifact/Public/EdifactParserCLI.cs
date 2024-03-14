@@ -31,20 +31,20 @@ public class EdifactParserCLI : BackgroundService
         }
         EdifactParserOptions options = new()
         {
-            SchemasUri = bootstrapConfig[s_schemasRoot] ?? bootstrapConfig[s_s],
-            InputUri = bootstrapConfig[s_input] ?? bootstrapConfig[s_i],
-            OutputUri = bootstrapConfig[s_output] ?? bootstrapConfig[s_o],
+            SchemasUri = bootstrapConfig[s_schemasRoot],
+            InputUri = bootstrapConfig[s_input],
+            OutputUri = bootstrapConfig[s_output],
         };
         if(options.SchemasUri is null || options.InputUri is null || options.OutputUri is null)
         {
             Usage();
             return;
         }
-        if ((bootstrapConfig[s_encoding] ?? bootstrapConfig[s_e]) is string encoding)
+        if ((bootstrapConfig[s_encoding]) is string encoding)
         {
             options.Encoding = Encoding.GetEncoding(encoding);
         }
-        if ((bootstrapConfig[s_suffixes] ?? bootstrapConfig[s_x]) is string suffixes)
+        if ((bootstrapConfig[s_suffixes]) is string suffixes)
         {
             string[] items = suffixes.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             if(items.Length > 0)
@@ -81,11 +81,11 @@ public class EdifactParserCLI : BackgroundService
             string.Format(
                 s_rmLabels.GetString(s_parserCliUsage)!,
                 Path.GetFileName(Environment.ProcessPath),
-                s_schemasRoot, s_s,
-                s_input, s_i,
-                s_output, s_o,
-                s_suffixes, s_x,
-                s_encoding, s_e,
+                s_schemasRoot,
+                s_input,
+                s_output,
+                s_suffixes,
+                s_encoding,
                 s_strict,
                 s_bufferSize
             )

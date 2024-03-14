@@ -9,7 +9,8 @@ internal static class Constants
     internal const string s_0 = "0";
     internal const string s_1 = "1";
     internal const string s_a = "a";
-    internal const string s_action = "--action";
+    internal const string s_action = "action";
+    internal const string s_agensy = "agency";
     internal const string s_allElementsCountXPath = "count(e:*)";
     internal const string s_allElementsXPath = "//e:*";
     internal const string s_annotation = "annotation";
@@ -35,7 +36,6 @@ internal static class Constants
     internal const string s_complexType = "complexType";
     internal const string s_composites = "composites";
     internal const string s_compositesXsd = "composites.xsd";
-    internal const string s_customSchema = "--custom-schema";
     internal const string s_d = "D";
     internal const string s_d00 = "D00";
     internal const string s_d0036 = "D0036";
@@ -58,7 +58,6 @@ internal static class Constants
     internal const string s_directoryNotFound = "DIRECTORY_NOT_FOUND";
     internal const string s_doctype = "<!DOCTYPE";
     internal const string s_documentation = "documentation";
-    internal const string s_e = "e";
     internal const string s_edcd = "EDCD";
     internal const string s_eded = "EDED";
     internal const string s_edifactDownloaderUsage = "EDIFACT_DOWNLOADER_USAGE";
@@ -74,12 +73,12 @@ internal static class Constants
     internal const string s_failedUnzip = "FAILED_UNZIP";
     internal const string s_file = "file";
     internal const string s_fileNameFormat = "{0}.{1}";
+    internal const string s_xsdFileWithSuffuxFormat = "{0}{1}.xsd";
     internal const string s_finish = "finish";
     internal const string s_folderUriFormat = "{0}/_";
     internal const string s_function = "function";
     internal const string s_g = "g";
     internal const string s_helpKey = "--help";
-    internal const string s_i = "i";
     internal const string s_idcd = "IDCD";
     internal const string s_idsd = "IDSD";
     internal const string s_input = "input";
@@ -123,8 +122,6 @@ internal static class Constants
     internal const string s_noTypesFound = "NO_TYPES_FOUND";
     internal const string s_numberTypePatternFormat = "^-?([0-9]\\.?){{{0}{1}}}[0-9]$";
     internal const string s_numberTypePattern = "^-?[^.]*\\.?[^.]+$";
-    internal const string s_o = "o";
-    internal const string s_originalSchema = "--original-schema";
     internal const string s_output = "output";
     internal const string s_parserCliUsage = "PARSER_CLI_USAGE";
     internal const string s_path1 = "/DAM/trade/untdid/{0}/{1}.zip";
@@ -134,6 +131,7 @@ internal static class Constants
     internal const string s_placeholderElement = "<root/>";
     internal const string s_position = "position";
     internal const string s_receivingDirectory = "RECEIVING_DIRECTORY";
+    internal const string s_release = "release";
     internal const string s_renameElementFormat = "D{0}";
     internal const string s_replaceNsFormat = "{0}=\"{1}\"";
     internal const string s_repr = "representation";
@@ -141,15 +139,14 @@ internal static class Constants
     internal const string s_restriction = "restriction";
     internal const string s_rmLabelsName = "labels";
     internal const string s_rmFixedName = "fixed";
-    internal const string s_s = "s";
     internal const string s_s009 = "S009";
     internal const string s_s306 = "S306";
     internal const string s_schema = "schema";
     internal const string s_schemasRoot = "schemas-root";
     internal const string s_schemaXPathFormat = "/{0}:schema";
     internal const string s_secondLevelXPathFormat = "/e:{0}/e:{1}";
-    internal const string s_segment = "--segment";
-    internal const string s_segmentGroup = "--segment-group";
+    internal const string s_segment = "segment";
+    internal const string s_segmentGroup = "segment-group";
     internal const string s_segmentGroupNameFormat = "SG{0}";
     internal const string s_segments = "segments";
     internal const string s_segmentsXsd = "segments.xsd";
@@ -161,7 +158,7 @@ internal static class Constants
     internal const string s_src = "src";
     internal const string s_start = "start";
     internal const string s_strict = "strict";
-    internal const string s_suffix = "--suffix";
+    internal const string s_suffix = "suffix";
     internal const string s_suffixes = "suffixes";
     internal const string s_systemComposites = "system_composites";
     internal const string s_systemCompositesXsd = "system_composites.xsd";
@@ -173,7 +170,6 @@ internal static class Constants
     internal const string s_targetNamespaceXPath1 = "/xs:schema/@targetNamespace";
     internal const string s_t = "t";
     internal const string s_type = "type";
-    internal const string s_type1 = "--type";
     internal const string s_typeForEnumXPathFormat = "/xs:schema/xs:complexType[@name='D{0}']/xs:simpleContent/xs:restriction";
     internal const string s_uih = "UIH";
     internal const string s_uit = "UIT";
@@ -195,9 +191,9 @@ internal static class Constants
     internal const string s_uriFormat = "{0}{1}";
     internal const string s_uriSchemeNotSupported = "URI_SCHEME_NOT_SUPPORTED";
     internal const string s_value = "value";
+    internal const string s_version = "version";
     internal const string s_webSite = "https://unece.org";
     internal const string s_webSite1 = "https://www.unece.org";
-    internal const string s_x = "x";
     internal const string s_xml = "xml";
     internal const string s_xsd = "xsd";
     internal const string s_xsPrefix = "xs";
@@ -205,7 +201,7 @@ internal static class Constants
     internal const string s_zipPattern = "*.zip";
 
     internal static readonly Regex s_reSegmentGroup = new("^SG(?<code>\\d+)$");
-    internal static readonly Regex s_reOriginalMessageXsd = new("^(?<message>[A-Z]{6}\\.XSD)$");
+    internal static readonly Regex s_reOriginalMessageXsd = new("^(?<message>[A-Z]{6}\\.xsd)$");
 
     internal static readonly ResourceManager s_rmLabels;
 

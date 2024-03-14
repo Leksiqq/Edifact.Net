@@ -285,18 +285,18 @@ ARGS:
 {0} OPTIONS
 
 where OPTIONS:
-                --{1}, /{2} URI    (Mandatory) The root folder URI where EDIFACT Xml-schemas are placed.
+                --{1} URI    (Mandatory) The root folder URI where EDIFACT Xml-schemas are placed.
 
-                       --{3}, /{4} URI    (Mandatory) The URI of input EDIFACT interchange file.
+                       --{2} URI    (Mandatory) The URI of input EDIFACT interchange file.
 
-                      --{5}, /{6} URI    (Mandatory) The URI of output folder, where message Xml-files will be placed.
+                      --{3} URI    (Mandatory) The URI of output folder, where message Xml-files will be placed.
 
---{7}, /{8} "&lt;Type1&gt;=&lt;suffix1&gt;;..."    (Optional) List of type=suffix pairs separated with semicolon (;) of EDIFACT messages Xml-schemas files to use instead of original ones.
+--{4} "&lt;Type1&gt;=&lt;suffix1&gt;;..."    (Optional) List of type=suffix pairs separated with semicolon (;) of EDIFACT messages Xml-schemas files to use instead of original ones.
 
-               --{9}, /{10} ENCODING    (Optional) Encoding name to use when failed to extract from data.
+               --{5} ENCODING    (Optional) Encoding name to use when failed to extract from data.
 
-                       --{11} yes|no    (Optional, default yes) Allows to check EDIFACT data a bit less strictly.
+                       --{6} yes|no    (Optional, default yes) Allows to check EDIFACT data a bit less strictly.
 
-                    --{12} SIZE    (Optional) Internal buffer size for possible optimization.</value>
+                    --{7} SIZE    (Optional) Internal buffer size for possible optimization.</value>
   </data>
 </root>

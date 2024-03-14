@@ -2,8 +2,8 @@
 
 public class MessageSchemaCustomizerOptions
 {
-    public string? OriginalSchemaUri { get; set; }
-    public string? CustomSchemaUri { get; set;}
+    public string? SchemasUri { get; set; }
+    public string? MessageIdentifier { get; set; }
     public MessageSchemaCustomizerAction? Action { get; set;}
     public string? SegmentGroup { get; set; }
     public string? Segment { get; set; }

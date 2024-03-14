@@ -2,7 +2,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Net.Leksi.Streams;
-using System.Text;
 using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
@@ -21,13 +20,13 @@ public class MessageSchemaCustomizerCLI(IServiceProvider services) : BackgroundS
         }
         MessageSchemaCustomizerOptions options = new()
         {
-            OriginalSchemaUri = bootstrapConfig[s_originalSchema] ?? bootstrapConfig[s_o],
-            CustomSchemaUri = bootstrapConfig[s_customSchema] ?? bootstrapConfig[s_c],
-            Action = ParseAction(bootstrapConfig[s_action] ?? bootstrapConfig[s_a]),
-            SegmentGroup = ParseSegmentGroup(bootstrapConfig[s_segmentGroup] ?? bootstrapConfig[s_g]),
-            Segment = bootstrapConfig[s_segment] ?? bootstrapConfig[s_s],
-            Suffix = bootstrapConfig[s_suffix] ?? bootstrapConfig[s_x],
-            Type = bootstrapConfig[s_type1] ?? bootstrapConfig[s_t],
+            SchemasUri = bootstrapConfig[s_schemasRoot],
+            MessageIdentifier = bootstrapConfig[s_message],
+            Action = ParseAction(bootstrapConfig[s_action]),
+            SegmentGroup = bootstrapConfig[s_segmentGroup],
+            Segment = bootstrapConfig[s_segment],
+            Suffix = bootstrapConfig[s_suffix],
+            Type = bootstrapConfig[s_type],
         };
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
         builder.Services.AddSingleton(options);
@@ -42,27 +41,29 @@ public class MessageSchemaCustomizerCLI(IServiceProvider services) : BackgroundS
         await host.RunAsync();
 
     }
-
-    private static string ParseSegmentGroup(string? v)
-    {
-        throw new NotImplementedException();
-    }
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
             MessageSchemaCustomizer msc = services.GetRequiredService<MessageSchemaCustomizer>();
-            await msc.Customize(services.GetRequiredService<MessageSchemaCustomizerOptions>());
+            await msc.Customize(
+                services.GetRequiredService<MessageSchemaCustomizerOptions>(), 
+                stoppingToken
+            );
         }
         finally
         {
             await services.GetRequiredService<IHost>().StopAsync(stoppingToken);
         }
     }
-    private static MessageSchemaCustomizerAction? ParseAction(string? v)
+    private static MessageSchemaCustomizerAction? ParseAction(string? arg)
     {
-        throw new NotImplementedException();
+        return arg switch 
+        {
+            "cs" => MessageSchemaCustomizerAction.CopySchema,
+            "ct" => MessageSchemaCustomizerAction.ChangeType,
+            _ => null,
+        };
     }
     private static void Usage()
     {
