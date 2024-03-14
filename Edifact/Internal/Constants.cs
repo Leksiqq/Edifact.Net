@@ -9,7 +9,6 @@ internal static class Constants
     internal const string s_0 = "0";
     internal const string s_1 = "1";
     internal const string s_a = "a";
-    internal const string s_action = "action";
     internal const string s_agensy = "agency";
     internal const string s_allElementsCountXPath = "count(e:*)";
     internal const string s_allElementsXPath = "//e:*";
@@ -101,10 +100,10 @@ internal static class Constants
     internal const string s_messageNotFound = "MESSAGE_NOT_FOUND";
     internal const string s_messagesPatternFormat = "{0}_D.{1}";
     internal const string s_messageTypeAndVersion = @"<xs:annotation>
-    <xs:appinfo>{0}.{1}</xs:appinfo>  
+    <xs:appinfo>{0}{1}:{2}:{3}:{4}</xs:appinfo>  
 </xs:annotation>
 ";
-    internal const string s_messageXpath = "/xs:schema/xs:complexType[@name='MESSAGE']/xs:*[1]";
+    internal const string s_messageFirstChildXpath = "/xs:schema/xs:complexType[@name='MESSAGE']/xs:*[1]";
     internal const string s_messageXsdFormat = "{0}/{1}{2}/{3}{4}.xsd";
     internal const string s_minLength = "minLength";
     internal const string s_minOccurs = "minOccurs";
@@ -144,9 +143,8 @@ internal static class Constants
     internal const string s_schema = "schema";
     internal const string s_schemasRoot = "schemas-root";
     internal const string s_schemaXPathFormat = "/{0}:schema";
+    internal const string s_script = "script";
     internal const string s_secondLevelXPathFormat = "/e:{0}/e:{1}";
-    internal const string s_segment = "segment";
-    internal const string s_segmentGroup = "segment-group";
     internal const string s_segmentGroupNameFormat = "SG{0}";
     internal const string s_segments = "segments";
     internal const string s_segmentsXsd = "segments.xsd";

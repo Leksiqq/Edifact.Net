@@ -295,8 +295,8 @@ where OPTIONS:
 
                --{5} ENCODING    (Optional) Encoding name to use when failed to extract from data.
 
-                       --{6} yes|no    (Optional, default yes) Allows to check EDIFACT data a bit less strictly.
+                   --{6} yes|no    (Optional, default yes) Allows to check EDIFACT data a bit less strictly.
 
-                    --{7} SIZE    (Optional) Internal buffer size for possible optimization.</value>
+                --{7} SIZE    (Optional) Internal buffer size for possible optimization.</value>
   </data>
 </root>

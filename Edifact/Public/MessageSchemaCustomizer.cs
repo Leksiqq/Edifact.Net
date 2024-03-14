@@ -39,6 +39,22 @@ public class MessageSchemaCustomizer
                 throw new Exception("TODO: Thread unsafety.");
             }
             _options = options;
+            if (string.IsNullOrEmpty(_options.MessageIdentifier))
+            {
+                throw new Exception($"TODO: --{s_message} is mandatary.");
+            }
+            if (string.IsNullOrEmpty(_options.SchemasUri))
+            {
+                throw new Exception($"TODO: --{s_schemasRoot} is mandatary.");
+            }
+            if (string.IsNullOrEmpty(_options.ScriptUri))
+            {
+                throw new Exception($"TODO: --{s_script} is mandatary.");
+            }
+            if (string.IsNullOrEmpty(_options.Suffix))
+            {
+                throw new Exception($"TODO: --{s_suffix} is mandatary.");
+            }
             _nameTable = new NameTable();
             _man = new(_nameTable);
             _man.AddNamespace(s_xsPrefix, Properties.Resources.schema_ns);
@@ -47,14 +63,80 @@ public class MessageSchemaCustomizer
                 XmlResolver = _resolver,
             };
             _schemaSet.ValidationEventHandler += _schemaSet_ValidationEventHandler;
-            await InvokeAction(cancellationToken);
+            Match match = s_reMessageIdentifier.Match(_options.MessageIdentifier!);
+            if (!match.Success)
+            {
+                throw new Exception($"TODO: Not a message identifier: {_options.MessageIdentifier}.");
+            }
+            Uri inputUri = new(
+                new Uri(string.Format(s_folderUriFormat, _options.SchemasUri)),
+                string.Format(
+                    s_messageXsdFormat,
+                    match.Groups[s_agensy].Value,
+                    match.Groups[s_version].Value,
+                    match.Groups[s_release].Value,
+                    match.Groups[s_type].Value,
+                    string.Empty
+                )
+            );
+
+            IStreamFactory streamFactory = _services.GetRequiredKeyedService<IStreamFactory>(inputUri.Scheme);
+            Stream input = streamFactory.GetInputStream(inputUri)
+                ?? throw new Exception($"TODO: File does not exist: {inputUri}");
+            XmlDocument doc = new(_nameTable);
+            doc.Load(input);
+            XPathNavigator nav = doc.CreateNavigator()!;
+            if (nav.SelectSingleNode(s_targetNamespaceXPath1, _man) is not XPathNavigator tns)
+            {
+                throw new Exception("TODO: not schema.");
+            }
+            _schemaSet.Add(tns.Value, inputUri.ToString());
+            _schemaSet.Compile();
+            nav.SelectSingleNode(s_messageFirstChildXpath)?
+                .ReplaceSelf(
+                    string.Format(
+                        s_messageTypeAndVersion, 
+                        match.Groups[s_type].Value, 
+                        _options.Suffix,
+                        match.Groups[s_version].Value,
+                        match.Groups[s_release].Value,
+                        match.Groups[s_agensy].Value
+                    )
+                );
+
+
+
+
+            Uri outputUri = new(
+                new Uri(string.Format(s_folderUriFormat, _options.SchemasUri)),
+                string.Format(
+                    s_messageXsdFormat,
+                    match.Groups[s_agensy].Value,
+                    match.Groups[s_version].Value,
+                    match.Groups[s_release].Value,
+                    match.Groups[s_type].Value,
+                    _options.Suffix
+                )
+            );
+            streamFactory = _services.GetRequiredKeyedService<IStreamFactory>(outputUri.Scheme);
+            Stream output = streamFactory.GetOutputStream(outputUri, FileMode.Create);
+            XmlWriterSettings xws = new()
+            {
+                Indent = true,
+            };
+            XmlWriter writer = XmlWriter.Create(output, xws);
+            doc.WriteTo(writer);
+            writer.Close();
+        }
+        catch(Exception ex)
+        {
+            _logger?.LogCritical(ex, string.Empty);
         }
         finally
         {
             Interlocked.Decrement(ref _entersNum);
         }
     }
-
     private void _schemaSet_ValidationEventHandler(object? sender, ValidationEventArgs e)
     {
         switch (e.Severity)
@@ -65,102 +147,5 @@ public class MessageSchemaCustomizer
             case XmlSeverityType.Error:
                 throw e.Exception;
         }
-    }
-
-    private async Task InvokeAction(CancellationToken cancellationToken)
-    {
-        switch (_options.Action)
-        {
-            case MessageSchemaCustomizerAction.CopySchema:
-                CopySchema(cancellationToken);
-                break;
-            case MessageSchemaCustomizerAction.RemoveSegmentGroup:
-                await RemoveSegmentGroup(cancellationToken);
-                break;
-            case MessageSchemaCustomizerAction.RemoveSegment:
-                await RemoveSegment(cancellationToken);
-                break;
-            case MessageSchemaCustomizerAction.ChangeType:
-                await ChangeType(cancellationToken);
-                break;
-            default:
-                throw new InvalidOperationException("TODO: Action is missed.");
-        }
-    }
-
-    private async Task ChangeType(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    private async Task RemoveSegment(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    private async Task RemoveSegmentGroup(CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    private void CopySchema(CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrEmpty(_options.MessageIdentifier))
-        {
-            throw new Exception($"TODO: --{s_message} is mandatary.");
-        }
-        Match match = s_reMessageIdentifier.Match(_options.MessageIdentifier!);
-        if(!match.Success)
-        {
-            throw new Exception($"TODO: Not a message identifier: {_options.MessageIdentifier}.");
-        }
-        Uri uri = new(
-            new Uri(string.Format(s_folderUriFormat, _options.SchemasUri)),
-            string.Format(
-                s_messageXsdFormat, 
-                match.Groups[s_agensy].Value,
-                match.Groups[s_version].Value,
-                match.Groups[s_release].Value,
-                match.Groups[s_type].Value,
-                string.Empty
-            )
-        );
-
-        IStreamFactory streamFactory = _services.GetRequiredKeyedService<IStreamFactory>(uri.Scheme);
-        Stream input = streamFactory.GetInputStream(uri)
-            ?? throw new Exception($"TODO: File does not exist: {uri}");
-        XmlDocument doc = new(_nameTable);
-        doc.Load(input);
-        XPathNavigator nav = doc.CreateNavigator()!;
-        if (nav.SelectSingleNode(s_targetNamespaceXPath1, _man) is not XPathNavigator tns)
-        {
-            throw new Exception("TODO: not schema.");
-        }
-        _schemaSet.Add(tns.Value, uri.ToString());
-        _schemaSet.Compile();
-        if (string.IsNullOrEmpty(_options.Suffix))
-        {
-            throw new Exception($"TODO: --{s_suffix} is mandatary.");
-        }
-        Uri outputUri = new(
-            new Uri(string.Format(s_folderUriFormat, _options.SchemasUri)),
-            string.Format(
-                s_messageXsdFormat,
-                match.Groups[s_agensy].Value,
-                match.Groups[s_version].Value,
-                match.Groups[s_release].Value,
-                match.Groups[s_type].Value,
-                _options.Suffix
-            )
-        );
-        streamFactory = _services.GetRequiredKeyedService<IStreamFactory>(outputUri.Scheme);
-        Stream output = streamFactory.GetOutputStream(outputUri, FileMode.Create);
-        XmlWriterSettings xws = new()
-        {
-            Indent = true,
-        };
-        XmlWriter writer = XmlWriter.Create(output, xws);
-        doc.WriteTo(writer);
-        writer.Close();
     }
 }

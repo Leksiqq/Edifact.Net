@@ -21,12 +21,9 @@ public class MessageSchemaCustomizerCLI(IServiceProvider services) : BackgroundS
         MessageSchemaCustomizerOptions options = new()
         {
             SchemasUri = bootstrapConfig[s_schemasRoot],
+            ScriptUri = bootstrapConfig[s_script],
             MessageIdentifier = bootstrapConfig[s_message],
-            Action = ParseAction(bootstrapConfig[s_action]),
-            SegmentGroup = bootstrapConfig[s_segmentGroup],
-            Segment = bootstrapConfig[s_segment],
             Suffix = bootstrapConfig[s_suffix],
-            Type = bootstrapConfig[s_type],
         };
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
         builder.Services.AddSingleton(options);
@@ -55,15 +52,6 @@ public class MessageSchemaCustomizerCLI(IServiceProvider services) : BackgroundS
         {
             await services.GetRequiredService<IHost>().StopAsync(stoppingToken);
         }
-    }
-    private static MessageSchemaCustomizerAction? ParseAction(string? arg)
-    {
-        return arg switch 
-        {
-            "cs" => MessageSchemaCustomizerAction.CopySchema,
-            "ct" => MessageSchemaCustomizerAction.ChangeType,
-            _ => null,
-        };
     }
     private static void Usage()
     {

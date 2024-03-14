@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="annotation_ns" xml:space="preserve">
-    <value>http://leksi.net/annotation</value>
+    <value>http://leksi.net/EDIFACT/annotation</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="batch_interchange" type="System.Resources.ResXFileRef, System.Windows.Forms">
@@ -131,7 +131,7 @@
     <value>..\files\edifact.xsd;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
   <data name="edifact_ns" xml:space="preserve">
-    <value>EDIFACT</value>
+    <value>http://leksi.net/EDIFACT</value>
   </data>
   <data name="elements" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\files\UN\D\elements.xsd;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>

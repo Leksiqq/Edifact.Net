@@ -298,8 +298,17 @@ public class EdifactDownloader
     private async Task MakeMessageAsync(XmlSchemaSet schemaSet, string mess, CancellationToken stoppingToken)
     {
         XmlDocument doc = InitXmlDocument(s_message);
-        XPathNavigator? nav = doc.CreateNavigator()!.SelectSingleNode(s_messageXpath, _man);
-        nav!.InsertBefore(string.Format(s_messageTypeAndVersion, mess, _directory));
+        XPathNavigator? nav = doc.CreateNavigator()!.SelectSingleNode(s_messageFirstChildXpath, _man);
+        nav!.InsertBefore(
+            string.Format(
+                s_messageTypeAndVersion, 
+                mess, 
+                string.Empty,
+                _directory![..1],
+                _directory[1..],
+                s_un
+            )
+        );
         string targetFile = Path.Combine(_directoryFolder!, string.Format(s_fileNameFormat, mess, s_xsd));
         SaveXmlDocument(
             doc,

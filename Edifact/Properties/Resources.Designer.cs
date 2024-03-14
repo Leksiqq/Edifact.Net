@@ -61,7 +61,7 @@ namespace Net.Leksi.Edifact.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на http://leksi.net/annotation.
+        ///   Ищет локализованную строку, похожую на http://leksi.net/EDIFACT/annotation.
         /// </summary>
         internal static string annotation_ns {
             get {
@@ -80,12 +80,12 @@ namespace Net.Leksi.Edifact.Properties {
         ///  xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
         ///  elementFormDefault=&quot;qualified&quot; attributeFormDefault=&quot;unqualified&quot;
         ///&gt;
-        ///  &lt;xs:include schemaLocation=&quot;segments.xsd&quot;/&gt;
+        ///  &lt;xs:include schemaLocation=&quot;system_segments.xsd&quot;/&gt;
         ///  &lt;xs:complexType name=&quot;BATCH_INTERCHANGE&quot;&gt;
         ///    &lt;xs:sequence&gt;
         ///      &lt;xs:element name=&quot;UNB&quot; type=&quot;UNB&quot;/&gt;
         ///      &lt;xs:choice&gt;
-        ///        &lt;xs:sequence maxOccurs=&quot;unbou [остаток строки не уместился]&quot;;.
+        ///        &lt;xs:sequence maxOccurs [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string batch_interchange {
             get {
@@ -106,7 +106,6 @@ namespace Net.Leksi.Edifact.Properties {
         ///  xmlns:an=&quot;http://leksi.net/annotation&quot;
         ///&gt;
         ///  &lt;xs:include schemaLocation=&quot;elements.xsd&quot;/&gt;
-        ///
         ///&lt;/xs:schema&gt;.
         /// </summary>
         internal static string composites {
@@ -140,7 +139,7 @@ namespace Net.Leksi.Edifact.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на EDIFACT.
+        ///   Ищет локализованную строку, похожую на http://leksi.net/EDIFACT.
         /// </summary>
         internal static string edifact_ns {
             get {
@@ -161,8 +160,10 @@ namespace Net.Leksi.Edifact.Properties {
         ///  xmlns:an=&quot;http://leksi.net/annotation&quot;
         ///&gt;
         ///  &lt;xs:include schemaLocation=&quot;../../edifact.xsd&quot; /&gt;
-        ///
-        ///&lt;/xs:schema&gt;.
+        ///  &lt;xs:complexType name=&quot;D0081&quot;&gt;
+        ///    &lt;xs:simpleContent&gt;
+        ///      &lt;xs:restriction base=&quot;D&quot;&gt;
+        ///        &lt;xs:pattern value= [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string elements {
             get {
@@ -181,12 +182,12 @@ namespace Net.Leksi.Edifact.Properties {
         ///  xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot;
         ///  elementFormDefault=&quot;qualified&quot; attributeFormDefault=&quot;unqualified&quot;
         ///&gt;
-        ///  &lt;xs:include schemaLocation=&quot;segments.xsd&quot;/&gt;
+        ///  &lt;xs:include schemaLocation=&quot;system_segments.xsd&quot;/&gt;
         ///  &lt;xs:complexType name=&quot;INTERACTIVE_INTERCHANGE&quot;&gt;
         ///    &lt;xs:sequence&gt;
         ///      &lt;xs:element name=&quot;UIB&quot; type=&quot;UIB&quot;/&gt;
         ///      &lt;xs:choice&gt;
-        ///        &lt;xs:sequence maxOccurs= [остаток строки не уместился]&quot;;.
+        ///        &lt;xs:sequence max [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string interactive_interchange {
             get {
@@ -250,8 +251,9 @@ namespace Net.Leksi.Edifact.Properties {
         ///  xmlns:an=&quot;http://leksi.net/annotation&quot;
         ///&gt;
         ///  &lt;xs:include schemaLocation=&quot;composites.xsd&quot;/&gt;
-        ///
-        ///&lt;/xs:schema&gt;.
+        ///  &lt;xs:complexType name=&quot;UNS&quot;&gt;
+        ///    &lt;xs:annotation&gt;
+        ///      &lt;xs:documentation an:name=&quot;name&quot;&gt;Section Control&lt;/xs:documenta [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string segments {
             get {

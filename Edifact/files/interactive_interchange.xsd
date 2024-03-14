@@ -3,8 +3,8 @@
 <!-- The file was automatically generated -->
 <!-- Don't edit! -->
 <xs:schema
-  targetNamespace="EDIFACT"
-  xmlns="EDIFACT"
+  targetNamespace="http://leksi.net/EDIFACT"
+  xmlns="http://leksi.net/EDIFACT"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="qualified" attributeFormDefault="unqualified"
 >
