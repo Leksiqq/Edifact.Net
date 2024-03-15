@@ -26,7 +26,6 @@ internal class EdifactParserAll : BackgroundService
             Console.WriteLine(path);
             if (File.Exists(path))
             {
-                Console.WriteLine($"Parsing {path}");
                 await _parser.Parse(_options, stoppingToken);
             }
             else if(Directory.Exists(path))
@@ -34,7 +33,6 @@ internal class EdifactParserAll : BackgroundService
                 foreach (var item in Directory.GetFiles(path))
                 {
                     stoppingToken.ThrowIfCancellationRequested();
-                    Console.WriteLine($"Parsing {item}");
                     _options.InputUri = item;
                     await _parser.Parse(_options, stoppingToken);
                 }

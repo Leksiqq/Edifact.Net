@@ -1,0 +1,118 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="script"
+    targetNamespace="http://leksi.net/EDIFACT/script"
+    elementFormDefault="qualified"
+    xmlns="http://leksi.net/EDIFACT/script"
+    xmlns:ef="http://leksi.net/EDIFACT"
+    xmlns:eu="http://leksi.net/EDIFACT/utility"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://leksi.net/EDIFACT ../Edifact/files/edifact.xsd"
+>
+  <xs:annotation>
+    <xs:appinfo eu:name="messageIdentifier">IFCSUM:D:97B:UN</xs:appinfo>
+    <xs:appinfo eu:name="suffix">.2</xs:appinfo>
+  </xs:annotation>
+
+  <xs:complexType name="D1153">
+    <xs:simpleContent>
+      <xs:restriction base="ef:D" eu:action="clearEnumerations">
+        <xs:enumeration value="BN" />
+        <xs:enumeration value="CU" />
+        <xs:enumeration value="ZBI" />
+        <xs:enumeration value="ZSU" />
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D3035">
+    <xs:simpleContent>
+      <xs:restriction base="ef:D">
+        <xs:enumeration value="ZN2" />
+        <xs:enumeration value="ZN3" />
+        <xs:enumeration value="ZN4" />
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D4451">
+    <xs:simpleContent>
+      <xs:restriction base="ef:D" eu:action="clearEnumerations">
+        <xs:enumeration value="AAA" />
+        <xs:enumeration value="AAC" />
+        <xs:enumeration value="AAD" />
+        <xs:enumeration value="AAI" />
+        <xs:enumeration value="AEB" />
+        <xs:enumeration value="LOI" />
+        <xs:enumeration value="ZCI" />
+        <xs:enumeration value="ZCS" />
+        <xs:enumeration value="ZCT" />
+        <xs:enumeration value="ZGL" />
+        <xs:enumeration value="ZLQ" />
+        <xs:enumeration value="ZND"/>
+        <xs:enumeration value="ZSD"/>
+        <xs:enumeration value="ZSB"/>
+        <xs:enumeration value="ZSS"/>
+        <xs:enumeration value="ZTI"/>
+        <xs:enumeration value="ZTT"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D6311">
+    <xs:simpleContent>
+      <xs:restriction base="ef:D" eu:action="clearEnumerations">
+        <xs:enumeration value="AAA" />
+        <xs:enumeration value="AAE" />
+        <xs:enumeration value="AAW" />
+        <xs:enumeration value="ZST" />
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D6313">
+    <xs:simpleContent>
+      <xs:restriction base="ef:D" eu:action="clearEnumerations">
+        <xs:enumeration value="AAA" />
+        <xs:enumeration value="AAC" />
+        <xs:enumeration value="AAD" />
+        <xs:enumeration value="AAW" />
+        <xs:enumeration value="T" />
+        <xs:enumeration value="U" />
+        <xs:enumeration value="ZPC" />
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D8053">
+    <xs:simpleContent>
+      <xs:restriction base="ef:D" eu:action="clearEnumerations">
+        <xs:maxLength value="4"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D8155">
+    <xs:simpleContent>
+      <xs:restriction base="ef:D" eu:action="clearEnumerations">
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D8339">
+    <xs:simpleContent>
+      <xs:restriction base="ef:D">
+        <xs:enumeration value="I" />
+        <xs:enumeration value="II" />
+        <xs:enumeration value="III" />
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D8364">
+    <xs:simpleContent>
+      <xs:restriction base="ef:D">
+        <xs:maxLength value="7" />
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D9308">
+    <xs:simpleContent>
+      <xs:restriction base="ef:D">
+        <xs:maxLength value="100"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+</xs:schema>

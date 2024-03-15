@@ -7,7 +7,7 @@
   xmlns="http://leksi.net/EDIFACT"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="qualified" attributeFormDefault="unqualified"
-  xmlns:an="http://leksi.net/annotation"
+  xmlns:eu="http://leksi.net/EDIFACT/utility"
 >
   <xs:include schemaLocation="../../edifact.xsd" />
   <xs:complexType name="D0081">
@@ -19,7 +19,7 @@
   </xs:complexType>
   <xs:complexType name="D0087">
     <xs:annotation>
-      <xs:documentation an:name="name">Anti-collision segment group identification</xs:documentation>
+      <xs:documentation eu:name="name">Anti-collision segment group identification</xs:documentation>
     </xs:annotation>
     <xs:simpleContent>
       <xs:restriction base="D">

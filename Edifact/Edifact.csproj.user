@@ -47,5 +47,8 @@
     <None Update="files\system_segments.xsd">
       <SubType>Designer</SubType>
     </None>
+    <None Update="files\utility.xsd">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
 </Project>

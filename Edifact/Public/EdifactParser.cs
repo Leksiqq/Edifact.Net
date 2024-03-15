@@ -430,7 +430,7 @@ public class EdifactParser
                 }
 
                 _messageXsd = string.Format(
-                    s_messageXsdFormat,
+                    s_fileInDirectoryXsdFormat,
                     _messageEventArgs.ControllingAgencyCoded,
                     _messageEventArgs.MessageVersion,
                     _messageEventArgs.MessageRelease,
@@ -857,8 +857,17 @@ public class EdifactParser
         elem.AppendChild(_elementXml.CreateTextNode(value));
         elem.SetAttribute("xmlns:e", _targetNamespace);
         elem.SetAttribute("type", Properties.Resources.schema_instance_ns, string.Format("e:{0}", xmlSchemaElement.ElementSchemaType!.Name!));
-        _elementXml.Validate(SchemaSet_ValidationEventHandler);
+        _elementXml.Validate(ElementValidationEventHandler);
         _path.RemoveAt(_path.Count - 1);
+    }
+
+    private void ElementValidationEventHandler(object? sender, ValidationEventArgs e)
+    {
+        string message = string.Format("/{0}: {1}", string.Join('/', _path.Skip(1)), e.Message);
+        if (_validationWarningsCache.Add(message))
+        {
+            _logger?.LogWarning(s_logMessage, message);
+        }
     }
 
     private void SchemaSet_ValidationEventHandler(object? sender, ValidationEventArgs e)

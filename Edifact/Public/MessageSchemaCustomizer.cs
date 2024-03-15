@@ -1,9 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Net.Leksi.Streams;
+using System.Diagnostics;
 using System.Text.RegularExpressions;
-using System.Web;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.XPath;
 using static Net.Leksi.Edifact.Constants;
@@ -14,14 +15,17 @@ public class MessageSchemaCustomizer
 {
     private static readonly Regex s_reMessageIdentifier = 
         new("^(?<type>[A-Z]{6}):(?<version>[^:]{1,3}):(?<release>[^:]{1,3}):(?<agency>[^:]{1,3})$");
+    private static readonly Regex s_reXmlns = new("xmlns(?::[^=]+)?=\"[^\"]*\"");
     private readonly IServiceProvider _services;
     private readonly ILogger<MessageSchemaCustomizer>? _logger;
     private readonly XmlResolver _resolver;
+    private readonly Dictionary<string, XmlDocument> _sourcesCache = [];
     private MessageSchemaCustomizerOptions _options;
     private int _entersNum = 0;
     private XmlNameTable _nameTable;
     private XmlNamespaceManager _man = null!;
     private XmlSchemaSet _schemaSet;
+    private string _targetNamespace = string.Empty;
 
     public MessageSchemaCustomizer(IServiceProvider services)
     {
@@ -39,10 +43,6 @@ public class MessageSchemaCustomizer
                 throw new Exception("TODO: Thread unsafety.");
             }
             _options = options;
-            if (string.IsNullOrEmpty(_options.MessageIdentifier))
-            {
-                throw new Exception($"TODO: --{s_message} is mandatary.");
-            }
             if (string.IsNullOrEmpty(_options.SchemasUri))
             {
                 throw new Exception($"TODO: --{s_schemasRoot} is mandatary.");
@@ -51,27 +51,41 @@ public class MessageSchemaCustomizer
             {
                 throw new Exception($"TODO: --{s_script} is mandatary.");
             }
-            if (string.IsNullOrEmpty(_options.Suffix))
-            {
-                throw new Exception($"TODO: --{s_suffix} is mandatary.");
-            }
+            _sourcesCache.Clear();
+            _targetNamespace = string.Empty;
             _nameTable = new NameTable();
             _man = new(_nameTable);
             _man.AddNamespace(s_xsPrefix, Properties.Resources.schema_ns);
-            _schemaSet = new()
+            _man.AddNamespace(s_euPrefix, Properties.Resources.edifact_utility_ns);
+            _man.AddNamespace("s", Properties.Resources.edifact_script_ns);
+    
+                _schemaSet = new()
             {
                 XmlResolver = _resolver,
             };
             _schemaSet.ValidationEventHandler += _schemaSet_ValidationEventHandler;
-            Match match = s_reMessageIdentifier.Match(_options.MessageIdentifier!);
+
+            XmlDocument script = new();
+            Uri scriptUri = new(_options.ScriptUri);
+            using (Stream s = (Stream)_resolver.GetEntity(scriptUri, null, typeof(Stream))!)
+            {
+                script.Load(s);
+            }
+
+            string messageIdentifier = script.CreateNavigator()!.SelectSingleNode(s_scriptMessageIdentifierXpath, _man)?.Value
+                ?? throw new Exception($"TODO: File is not a script: {scriptUri}"); ;
+            string suffix = script.CreateNavigator()!.SelectSingleNode(s_scriptMessageSuffixXpath, _man)?.Value
+                ?? throw new Exception($"TODO: File is not a script: {scriptUri}"); ;
+
+            Match match = s_reMessageIdentifier.Match(messageIdentifier);
             if (!match.Success)
             {
-                throw new Exception($"TODO: Not a message identifier: {_options.MessageIdentifier}.");
+                throw new Exception($"TODO: Not a message identifier: {messageIdentifier}.");
             }
             Uri inputUri = new(
                 new Uri(string.Format(s_folderUriFormat, _options.SchemasUri)),
                 string.Format(
-                    s_messageXsdFormat,
+                    s_fileInDirectoryXsdFormat,
                     match.Groups[s_agensy].Value,
                     match.Groups[s_version].Value,
                     match.Groups[s_release].Value,
@@ -80,53 +94,164 @@ public class MessageSchemaCustomizer
                 )
             );
 
-            IStreamFactory streamFactory = _services.GetRequiredKeyedService<IStreamFactory>(inputUri.Scheme);
-            Stream input = streamFactory.GetInputStream(inputUri)
-                ?? throw new Exception($"TODO: File does not exist: {inputUri}");
             XmlDocument doc = new(_nameTable);
-            doc.Load(input);
+            using (Stream s = (Stream)_resolver.GetEntity(inputUri, null, typeof(Stream))!)
+            {
+                doc.Load(s);
+            }
+
             XPathNavigator nav = doc.CreateNavigator()!;
             if (nav.SelectSingleNode(s_targetNamespaceXPath1, _man) is not XPathNavigator tns)
             {
                 throw new Exception("TODO: not schema.");
             }
-            _schemaSet.Add(tns.Value, inputUri.ToString());
-            _schemaSet.Compile();
-            nav.SelectSingleNode(s_messageFirstChildXpath)?
-                .ReplaceSelf(
-                    string.Format(
-                        s_messageTypeAndVersion, 
-                        match.Groups[s_type].Value, 
-                        _options.Suffix,
-                        match.Groups[s_version].Value,
-                        match.Groups[s_release].Value,
-                        match.Groups[s_agensy].Value
-                    )
-                );
+            _targetNamespace = tns.Value;
+            _schemaSet.Add(
+                Properties.Resources.edifact_utility_ns,
+                new Uri(
+                    new Uri(
+                        string.Format(s_folderUriFormat, _options.SchemasUri)
+                    ),
+                    s_utilityXsd
+                ).ToString()
+            );
+            _schemaSet.Add(
+                _targetNamespace,
+                new Uri(
+                    new Uri(
+                        string.Format(s_folderUriFormat, _options.SchemasUri)
+                    ),
+                    s_systemSegmentsXsd
+                ).ToString()
+            );
+            _schemaSet.Add(_targetNamespace, inputUri.ToString());
+            _schemaSet.Add(
+                Properties.Resources.edifact_script_ns,
+                _options.ScriptUri
+            );
 
+            _schemaSet.Compile();
+            XPathNavigator nav1 = nav.SelectSingleNode(s_messageIdentifierXpath, _man)!;
+            nav1.MoveToParent();
+            nav1.AppendChild(string.Format(s_suffixAppInfoFormat, suffix));
+
+            XPathNodeIterator scriptOperationsNI = script.CreateNavigator()!.Select("/xs:schema/xs:complexType", _man);
+            while (scriptOperationsNI.MoveNext())
+            {
+                string name = scriptOperationsNI.Current!.GetAttribute("name", string.Empty);
+                XmlDocument source = GetSchemaSource(name) 
+                    ?? throw new Exception($"TODO: Type {name} not found.");
+                XPathNavigator originalType = source.CreateNavigator()!.SelectSingleNode(string.Format("/xs:schema/xs:complexType[@name='{0}']", name), _man)!;
+                XPathNodeIterator segmentsNI = doc.CreateNavigator()!.Select(".//xs:element", _man);
+                Dictionary<string, XPathNavigator> nodes = [];
+                while (segmentsNI.MoveNext())
+                {
+                    string elementName = segmentsNI.Current!.GetAttribute("name", string.Empty);
+                    if (!s_reSegmentGroup.IsMatch(elementName) && elementName != s_message1)
+                    {
+                        if (WalkSegmentTree(doc, segmentsNI.Current, name, nodes))
+                        {
+                            segmentsNI.Current!.SelectSingleNode("@type")!.SetValue(string.Format("{0}.1", elementName));
+                        }
+                    }
+                }
+                if(scriptOperationsNI.Current!.SelectSingleNode(".//*[@eu:action]", _man) is XPathNavigator actionNav)
+                {
+                    string action = actionNav.GetAttribute("action", Properties.Resources.edifact_utility_ns);
+                    if(action == "clearEnumerations")
+                    {
+                        if(actionNav.LocalName != "restriction")
+                        {
+                            throw new Exception($"TODO: 'clearEnumerations' action is expected at 'xs:restriction' element, got {actionNav.Name}.");
+                        }
+                        XPathNavigator copiedRestrictionNav = doc.CreateNavigator()!
+                            .SelectSingleNode(
+                                string.Format(
+                                    "/xs:schema/xs:complexType[@name='{0}.1']/xs:simpleContent/xs:restriction", 
+                                    name
+                                ), 
+                                _man
+                            )!;
+                        XPathNodeIterator enumerationsNI = copiedRestrictionNav.Select("xs:enumeration", _man);
+                        List<XPathNavigator> enumerationsToDelete = [];
+                        while (enumerationsNI.MoveNext())
+                        {
+                            enumerationsToDelete.Add(enumerationsNI.Current!.CreateNavigator());
+                        }
+                        foreach(XPathNavigator it in enumerationsToDelete)
+                        {
+                            it.DeleteSelf();
+                        }
+                    }
+                }
+                if (scriptOperationsNI.Current!.SelectSingleNode("xs:simpleContent/xs:restriction", _man) is XPathNavigator restrictionNav)
+                {
+                    XPathNodeIterator facetsNI = restrictionNav.Select("xs:*", _man);
+                    XPathNavigator copiedRestrictionNav = doc.CreateNavigator()!
+                        .SelectSingleNode(
+                            string.Format(
+                                "/xs:schema/xs:complexType[@name='{0}.1']/xs:simpleContent/xs:restriction",
+                                name
+                            ),
+                            _man
+                        )!;
+                    while (facetsNI.MoveNext())
+                    {
+                        if(facetsNI.Current!.LocalName == "enumeration")
+                        {
+                            if(
+                                originalType
+                                    .SelectSingleNode(
+                                        string.Format(
+                                            "xs:simpleContent/xs:restriction/xs:enumeration[@value='{0}']", 
+                                            facetsNI.Current.SelectSingleNode("@value")!.Value
+                                        ), 
+                                        _man
+                                    ) is XPathNavigator originalEnumeration
+                            )
+                            {
+                                copiedRestrictionNav.AppendChild(s_reXmlns.Replace(originalEnumeration.OuterXml, string.Empty).Trim());
+                            }
+                            else
+                            {
+                                copiedRestrictionNav.AppendChild(s_reXmlns.Replace(facetsNI.Current.OuterXml, string.Empty).Trim());
+                            }
+                        }
+                        else if(copiedRestrictionNav.SelectSingleNode(string.Format("xs:*[local-name()='{0}']", facetsNI.Current!.LocalName), _man) is XPathNavigator copiedFacet)
+                        {
+                                copiedFacet.SelectSingleNode("@value")!.SetValue(facetsNI.Current.SelectSingleNode("@value")!.Value);
+                        }
+                        else
+                        {
+                            copiedRestrictionNav.AppendChild(s_reXmlns.Replace(facetsNI.Current.OuterXml, string.Empty).Trim());
+                        }
+                    }
+                }
+            }
 
 
 
             Uri outputUri = new(
                 new Uri(string.Format(s_folderUriFormat, _options.SchemasUri)),
                 string.Format(
-                    s_messageXsdFormat,
+                    s_fileInDirectoryXsdFormat,
                     match.Groups[s_agensy].Value,
                     match.Groups[s_version].Value,
                     match.Groups[s_release].Value,
                     match.Groups[s_type].Value,
-                    _options.Suffix
+                    suffix
                 )
             );
-            streamFactory = _services.GetRequiredKeyedService<IStreamFactory>(outputUri.Scheme);
-            Stream output = streamFactory.GetOutputStream(outputUri, FileMode.Create);
-            XmlWriterSettings xws = new()
+
+            IStreamFactory streamFactory = _services.GetRequiredKeyedService<IStreamFactory>(outputUri.Scheme);
+            using (Stream output = streamFactory.GetOutputStream(outputUri, FileMode.Create))
             {
-                Indent = true,
-            };
-            XmlWriter writer = XmlWriter.Create(output, xws);
-            doc.WriteTo(writer);
-            writer.Close();
+                using XmlWriter writer = XmlWriter.Create(output, new XmlWriterSettings
+                {
+                    Indent = true,
+                });
+                doc.WriteTo(writer);
+            }
         }
         catch(Exception ex)
         {
@@ -137,6 +262,70 @@ public class MessageSchemaCustomizer
             Interlocked.Decrement(ref _entersNum);
         }
     }
+    private XmlDocument? GetSchemaSource(string typeName)
+    {
+        XmlDocument? source = null;
+        if(_schemaSet.GlobalTypes[new XmlQualifiedName(typeName, _targetNamespace)] is XmlSchemaObject obj)
+        {
+            if (!_sourcesCache.TryGetValue(obj.SourceUri!, out source))
+            {
+                source = new XmlDocument();
+                using (Stream s = (Stream)_resolver.GetEntity(new Uri(obj.SourceUri!), null, typeof(Stream))!)
+                {
+                    source.Load(s);
+
+                }
+                _sourcesCache.Add(obj.SourceUri!, source);
+            }
+        }
+        return source;
+    }
+    private bool WalkSegmentTree(XmlDocument doc, XPathNavigator current, string name, Dictionary<string, XPathNavigator> nodes)
+    {
+        bool result = false;
+        string currentName = current.GetAttribute("name", string.Empty);
+
+        XmlDocument source = GetSchemaSource(currentName) 
+            ?? throw new Exception($"TODO: Type {current.GetAttribute("name", string.Empty)} not found.");
+
+        XPathNavigator originalTypeNav = source.CreateNavigator()!
+            .SelectSingleNode(
+                string.Format(
+                    "//xs:complexType[@name='{0}']",
+                    currentName
+                ),
+                _man
+            )!;
+
+        if(currentName == name)
+        {
+            result = true;
+            if(doc.CreateNavigator()!.SelectSingleNode(string.Format("/xs:schema/xs:complexType[@name='{0}.1']", currentName), _man) is not XPathNavigator nav1)
+            {
+                doc.DocumentElement!.CreateNavigator()!.AppendChild(s_reXmlns.Replace(originalTypeNav.OuterXml, string.Empty).Trim());
+                ((XmlElement)doc.DocumentElement!.LastChild!).SetAttribute("name", string.Format("{0}.1", currentName));
+            }
+            
+        }
+        else
+        {
+            XPathNodeIterator ni = originalTypeNav.Select(".//xs:sequence/xs:element", _man);
+            while (ni.MoveNext())
+            {
+                if (WalkSegmentTree(doc, ni.Current!, name, nodes))
+                {
+                    result = true;
+                    if (doc.CreateNavigator()!.SelectSingleNode(string.Format("/xs:schema/xs:complexType[@name='{0}.1']", currentName), _man) is not XPathNavigator nav1)
+                    {
+                        doc.DocumentElement!.CreateNavigator()!.AppendChild(s_reXmlns.Replace(originalTypeNav.OuterXml, string.Empty).Trim());
+                        ((XmlElement)doc.DocumentElement!.LastChild!).SetAttribute("name", string.Format("{0}.1", currentName));
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     private void _schemaSet_ValidationEventHandler(object? sender, ValidationEventArgs e)
     {
         switch (e.Severity)

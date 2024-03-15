@@ -13,7 +13,6 @@ internal static class Constants
     internal const string s_allElementsCountXPath = "count(e:*)";
     internal const string s_allElementsXPath = "//e:*";
     internal const string s_annotation = "annotation";
-    internal const string s_annotationPrefixDeclaration = "xmlns:an";
     internal const string s_args = "args";
     internal const string s_askKey = "/?";
     internal const string s_askSign = "?";
@@ -68,9 +67,11 @@ internal static class Constants
     internal const string s_elementsXsd = "elements.xsd";
     internal const string s_encoding = "encoding";
     internal const string s_enumeration = "enumeration";
+    internal const string s_euPrefix = "eu";
     internal const string s_extension = "extension";
     internal const string s_failedUnzip = "FAILED_UNZIP";
     internal const string s_file = "file";
+    internal const string s_fileInDirectoryXsdFormat = "{0}/{1}{2}/{3}{4}.xsd";
     internal const string s_fileNameFormat = "{0}.{1}";
     internal const string s_xsdFileWithSuffuxFormat = "{0}{1}.xsd";
     internal const string s_finish = "finish";
@@ -99,12 +100,9 @@ internal static class Constants
     internal const string s_message1 = "MESSAGE";
     internal const string s_messageNotFound = "MESSAGE_NOT_FOUND";
     internal const string s_messagesPatternFormat = "{0}_D.{1}";
-    internal const string s_messageTypeAndVersion = @"<xs:annotation>
-    <xs:appinfo>{0}{1}:{2}:{3}:{4}</xs:appinfo>  
-</xs:annotation>
-";
-    internal const string s_messageFirstChildXpath = "/xs:schema/xs:complexType[@name='MESSAGE']/xs:*[1]";
-    internal const string s_messageXsdFormat = "{0}/{1}{2}/{3}{4}.xsd";
+    internal const string s_messageIdentifierFormat = "{0}:{1}:{2}:{3}";
+    internal const string s_messageIdentifierXpath = "/xs:schema/xs:complexType[@name='MESSAGE']/xs:annotation/xs:appinfo[@eu:name='messageIdentifier']";
+    internal const string s_messageSuffixXpath = "/xs:schema/xs:complexType[@name='MESSAGE']/xs:annotation/xs:appinfo[@eu:name='suffix']";
     internal const string s_minLength = "minLength";
     internal const string s_minOccurs = "minOccurs";
     internal const string s_minOccursPatternFormat = "{0},";
@@ -144,6 +142,8 @@ internal static class Constants
     internal const string s_schemasRoot = "schemas-root";
     internal const string s_schemaXPathFormat = "/{0}:schema";
     internal const string s_script = "script";
+    internal const string s_scriptMessageIdentifierXpath = "/xs:schema/xs:annotation/xs:appinfo[@eu:name='messageIdentifier']";
+    internal const string s_scriptMessageSuffixXpath = "/xs:schema/xs:annotation/xs:appinfo[@eu:name='suffix']";
     internal const string s_secondLevelXPathFormat = "/e:{0}/e:{1}";
     internal const string s_segmentGroupNameFormat = "SG{0}";
     internal const string s_segments = "segments";
@@ -156,7 +156,7 @@ internal static class Constants
     internal const string s_src = "src";
     internal const string s_start = "start";
     internal const string s_strict = "strict";
-    internal const string s_suffix = "suffix";
+    internal const string s_suffixAppInfoFormat = "<xs:appinfo eu:name=\"suffix\">{0}</xs:appinfo>";
     internal const string s_suffixes = "suffixes";
     internal const string s_systemComposites = "system_composites";
     internal const string s_systemCompositesXsd = "system_composites.xsd";
@@ -188,6 +188,8 @@ internal static class Constants
     internal const string s_unz = "UNZ";
     internal const string s_uriFormat = "{0}{1}";
     internal const string s_uriSchemeNotSupported = "URI_SCHEME_NOT_SUPPORTED";
+    internal const string s_utility = "utility";
+    internal const string s_utilityXsd = "utility.xsd";
     internal const string s_value = "value";
     internal const string s_version = "version";
     internal const string s_webSite = "https://unece.org";

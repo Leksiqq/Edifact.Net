@@ -7,13 +7,13 @@
   xmlns="http://leksi.net/EDIFACT"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
   elementFormDefault="qualified" attributeFormDefault="unqualified"
-  xmlns:an="http://leksi.net/annotation"
+  xmlns:eu="http://leksi.net/EDIFACT/utility"
 >
   <xs:include schemaLocation="system_composites.xsd"/>
   <xs:complexType name="UNB">
     <xs:annotation>
-      <xs:documentation an:name="name">Interchange Header</xs:documentation>
-      <xs:documentation an:name="function">
+      <xs:documentation eu:name="name">Interchange Header</xs:documentation>
+      <xs:documentation eu:name="function">
         To start, identify and specify an interchange.  This segment is used to envelope the interchange
         and also to identify the party for whom the interchange is intended and the party who has sent
         the interchange.  The principle of the UNB segment is the same as a physical envelope which
@@ -26,71 +26,71 @@
         <xs:sequence>
           <xs:element name="S001" type="S001">
             <xs:annotation>
-              <xs:documentation an:name="name">SYNTAX IDENTIFIER</xs:documentation>
-              <xs:documentation an:name="position">010</xs:documentation>
+              <xs:documentation eu:name="name">SYNTAX IDENTIFIER</xs:documentation>
+              <xs:documentation eu:name="position">010</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S002" type="S002">
             <xs:annotation>
-              <xs:documentation an:name="name">INTERCHANGE SENDER</xs:documentation>
-              <xs:documentation an:name="position">020</xs:documentation>
+              <xs:documentation eu:name="name">INTERCHANGE SENDER</xs:documentation>
+              <xs:documentation eu:name="position">020</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S003" type="S003">
             <xs:annotation>
-              <xs:documentation an:name="name">INTERCHANGE RECIPIENT</xs:documentation>
-              <xs:documentation an:name="position">030</xs:documentation>
+              <xs:documentation eu:name="name">INTERCHANGE RECIPIENT</xs:documentation>
+              <xs:documentation eu:name="position">030</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S004" type="S004">
             <xs:annotation>
-              <xs:documentation an:name="name">DATE/TIME OF PREPARATION</xs:documentation>
-              <xs:documentation an:name="position">040</xs:documentation>
+              <xs:documentation eu:name="name">DATE/TIME OF PREPARATION</xs:documentation>
+              <xs:documentation eu:name="position">040</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0020" type="D0020">
             <xs:annotation>
-              <xs:documentation an:name="name">INTERCHANGE CONTROL REFERENCE</xs:documentation>
-              <xs:documentation an:name="description">Unique reference assigned by sender</xs:documentation>
-              <xs:documentation an:name="position">050</xs:documentation>
+              <xs:documentation eu:name="name">INTERCHANGE CONTROL REFERENCE</xs:documentation>
+              <xs:documentation eu:name="description">Unique reference assigned by sender</xs:documentation>
+              <xs:documentation eu:name="position">050</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S005" type="S005" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">RECIPIENT&apos;S REFERENCE/PASSWORD DETAILS</xs:documentation>
-              <xs:documentation an:name="position">060</xs:documentation>
+              <xs:documentation eu:name="name">RECIPIENT&apos;S REFERENCE/PASSWORD DETAILS</xs:documentation>
+              <xs:documentation eu:name="position">060</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0026" type="D0026" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">APPLICATION REFERENCE</xs:documentation>
-              <xs:documentation an:name="position">070</xs:documentation>
+              <xs:documentation eu:name="name">APPLICATION REFERENCE</xs:documentation>
+              <xs:documentation eu:name="position">070</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0029" type="D0029" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">PROCESSING PRIORITY CODE</xs:documentation>
-              <xs:documentation an:name="position">080</xs:documentation>
+              <xs:documentation eu:name="name">PROCESSING PRIORITY CODE</xs:documentation>
+              <xs:documentation eu:name="position">080</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0031" type="D0031" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">ACKNOWLEDGEMENT REQUEST</xs:documentation>
-              <xs:documentation an:name="description">Set = 1 if sender requests acknowledgement, i.e. UNB and UNZ segments received and identified</xs:documentation>
-              <xs:documentation an:name="position">090</xs:documentation>
+              <xs:documentation eu:name="name">ACKNOWLEDGEMENT REQUEST</xs:documentation>
+              <xs:documentation eu:name="description">Set = 1 if sender requests acknowledgement, i.e. UNB and UNZ segments received and identified</xs:documentation>
+              <xs:documentation eu:name="position">090</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0032" type="D0032" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">COMMUNICATIONS AGREEMENT ID</xs:documentation>
-              <xs:documentation an:name="position">100</xs:documentation>
+              <xs:documentation eu:name="name">COMMUNICATIONS AGREEMENT ID</xs:documentation>
+              <xs:documentation eu:name="position">100</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0035" type="D0035" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">TEST INDICATOR</xs:documentation>
-              <xs:documentation an:name="description">Set = 1 if the interchange is a test. Otherwise not used</xs:documentation>
-              <xs:documentation an:name="position">110</xs:documentation>
+              <xs:documentation eu:name="name">TEST INDICATOR</xs:documentation>
+              <xs:documentation eu:name="description">Set = 1 if the interchange is a test. Otherwise not used</xs:documentation>
+              <xs:documentation eu:name="position">110</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -99,27 +99,27 @@
   </xs:complexType>
   <xs:complexType name="UNZ">
     <xs:annotation>
-      <xs:documentation an:name="name">Interchange Trailer</xs:documentation>
-      <xs:documentation an:name="function">To end and check the completeness of an interchange</xs:documentation>
+      <xs:documentation eu:name="name">Interchange Trailer</xs:documentation>
+      <xs:documentation eu:name="function">To end and check the completeness of an interchange</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
           <xs:element name="D0036" type="D0036">
             <xs:annotation>
-              <xs:documentation an:name="name">INTERCHANGE CONTROL COUNT</xs:documentation>
-              <xs:documentation an:name="description">
+              <xs:documentation eu:name="name">INTERCHANGE CONTROL COUNT</xs:documentation>
+              <xs:documentation eu:name="description">
                 The count of the number of messages or, if used, the number of functional groups in the interchange.
                 One of these counts shall appear.
               </xs:documentation>
-              <xs:documentation an:name="position">010</xs:documentation>
+              <xs:documentation eu:name="position">010</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0020" type="D0020">
             <xs:annotation>
-              <xs:documentation an:name="name">INTERCHANGE CONTROL REFERENCE</xs:documentation>
-              <xs:documentation an:name="description">Shall be identical to 0020 in UNB</xs:documentation>
-              <xs:documentation an:name="position">020</xs:documentation>
+              <xs:documentation eu:name="name">INTERCHANGE CONTROL REFERENCE</xs:documentation>
+              <xs:documentation eu:name="description">Shall be identical to 0020 in UNB</xs:documentation>
+              <xs:documentation eu:name="position">020</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -128,8 +128,8 @@
   </xs:complexType>
   <xs:complexType name="UIB">
     <xs:annotation>
-      <xs:documentation an:name="name">Interactive interchange header</xs:documentation>
-      <xs:documentation an:name="function">
+      <xs:documentation eu:name="name">Interactive interchange header</xs:documentation>
+      <xs:documentation eu:name="function">
         To head and identify an interchange.
       </xs:documentation>
     </xs:annotation>
@@ -138,63 +138,63 @@
         <xs:sequence>
           <xs:element name="S001" type="S001">
             <xs:annotation>
-              <xs:documentation an:name="name">SYNTAX IDENTIFIER</xs:documentation>
-              <xs:documentation an:name="position">010</xs:documentation>
+              <xs:documentation eu:name="name">SYNTAX IDENTIFIER</xs:documentation>
+              <xs:documentation eu:name="position">010</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S302" type="S302" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">DIALOGUE REFERENCE</xs:documentation>
-              <xs:documentation an:name="position">020</xs:documentation>
+              <xs:documentation eu:name="name">DIALOGUE REFERENCE</xs:documentation>
+              <xs:documentation eu:name="position">020</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S303" type="S303" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">TRANSACTION REFERENCE</xs:documentation>
-              <xs:documentation an:name="position">030</xs:documentation>
+              <xs:documentation eu:name="name">TRANSACTION REFERENCE</xs:documentation>
+              <xs:documentation eu:name="position">030</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S018" type="S018" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">SCENARIO IDENTIFICATION</xs:documentation>
-              <xs:documentation an:name="position">040</xs:documentation>
+              <xs:documentation eu:name="name">SCENARIO IDENTIFICATION</xs:documentation>
+              <xs:documentation eu:name="position">040</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S305" type="S305" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">DIALOGUE IDENTIFICATION</xs:documentation>
-              <xs:documentation an:name="position">050</xs:documentation>
+              <xs:documentation eu:name="name">DIALOGUE IDENTIFICATION</xs:documentation>
+              <xs:documentation eu:name="position">050</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S002" type="S002" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">INTERCHANGE SENDER</xs:documentation>
-              <xs:documentation an:name="position">060</xs:documentation>
+              <xs:documentation eu:name="name">INTERCHANGE SENDER</xs:documentation>
+              <xs:documentation eu:name="position">060</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S003" type="S003" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">INTERCHANGE RECIPIENT</xs:documentation>
-              <xs:documentation an:name="position">070</xs:documentation>
+              <xs:documentation eu:name="name">INTERCHANGE RECIPIENT</xs:documentation>
+              <xs:documentation eu:name="position">070</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S300" type="S300" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">DATE AND/OR TIME OF INITIATION</xs:documentation>
-              <xs:documentation an:name="position">080</xs:documentation>
+              <xs:documentation eu:name="name">DATE AND/OR TIME OF INITIATION</xs:documentation>
+              <xs:documentation eu:name="position">080</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0325" type="D0325" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">Duplicate Indicator</xs:documentation>
-              <xs:documentation an:name="position">090</xs:documentation>
+              <xs:documentation eu:name="name">Duplicate Indicator</xs:documentation>
+              <xs:documentation eu:name="position">090</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0035" type="D0035" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">TEST INDICATOR</xs:documentation>
-              <xs:documentation an:name="description">Set = 1 if the interchange is a test. Otherwise not used</xs:documentation>
-              <xs:documentation an:name="position">100</xs:documentation>
+              <xs:documentation eu:name="name">TEST INDICATOR</xs:documentation>
+              <xs:documentation eu:name="description">Set = 1 if the interchange is a test. Otherwise not used</xs:documentation>
+              <xs:documentation eu:name="position">100</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -203,32 +203,32 @@
   </xs:complexType>
   <xs:complexType name="UIZ">
     <xs:annotation>
-      <xs:documentation an:name="name">Interactive interchange trailer</xs:documentation>
-      <xs:documentation an:name="function">To end and check the completeness of an interchange</xs:documentation>
+      <xs:documentation eu:name="name">Interactive interchange trailer</xs:documentation>
+      <xs:documentation eu:name="function">To end and check the completeness of an interchange</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
           <xs:element name="S302" type="S302" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">DIALOGUE REFERENCE</xs:documentation>
-              <xs:documentation an:name="position">010</xs:documentation>
+              <xs:documentation eu:name="name">DIALOGUE REFERENCE</xs:documentation>
+              <xs:documentation eu:name="position">010</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0036" type="D0036" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">INTERCHANGE CONTROL COUNT</xs:documentation>
-              <xs:documentation an:name="description">
+              <xs:documentation eu:name="name">INTERCHANGE CONTROL COUNT</xs:documentation>
+              <xs:documentation eu:name="description">
                 The count of the number of messages or, if used, the number of functional groups in the interchange.
                 One of these counts shall appear.
               </xs:documentation>
-              <xs:documentation an:name="position">020</xs:documentation>
+              <xs:documentation eu:name="position">020</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0325" type="D0325" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">Duplicate Indicator</xs:documentation>
-              <xs:documentation an:name="position">030</xs:documentation>
+              <xs:documentation eu:name="name">Duplicate Indicator</xs:documentation>
+              <xs:documentation eu:name="position">030</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -237,54 +237,54 @@
   </xs:complexType>
   <xs:complexType name="UNG">
     <xs:annotation>
-      <xs:documentation an:name="name">Functional Group Header</xs:documentation>
-      <xs:documentation an:name="function">To head, identify and specify a Functional Group</xs:documentation>
+      <xs:documentation eu:name="name">Functional Group Header</xs:documentation>
+      <xs:documentation eu:name="function">To head, identify and specify a Functional Group</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
           <xs:element name="D0038" type="D0038" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">FUNCTIONAL GROUP IDENTIFICATION</xs:documentation>
-              <xs:documentation an:name="description">Identifies the one message type in the functional group</xs:documentation>
+              <xs:documentation eu:name="name">FUNCTIONAL GROUP IDENTIFICATION</xs:documentation>
+              <xs:documentation eu:name="description">Identifies the one message type in the functional group</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S006" type="S006" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">APPLICATION SENDER'S IDENTIFICATION</xs:documentation>
+              <xs:documentation eu:name="name">APPLICATION SENDER'S IDENTIFICATION</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S007" type="S007" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">APPLICATION RECIPIENT'S IDENTIFICATION</xs:documentation>
+              <xs:documentation eu:name="name">APPLICATION RECIPIENT'S IDENTIFICATION</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S004" type="S004" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">DATE/TIME OF PREPARATION</xs:documentation>
+              <xs:documentation eu:name="name">DATE/TIME OF PREPARATION</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0048" type="D0048">
             <xs:annotation>
-              <xs:documentation an:name="name">FUNCTIONAL GROUP REFERENCE NUMBER</xs:documentation>
-              <xs:documentation an:name="description">Unique reference number assigned by sender's division, department etc.</xs:documentation>
+              <xs:documentation eu:name="name">FUNCTIONAL GROUP REFERENCE NUMBER</xs:documentation>
+              <xs:documentation eu:name="description">Unique reference number assigned by sender's division, department etc.</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0051" type="D0051" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">CONTROLLING AGENCY</xs:documentation>
-              <xs:documentation an:name="description">Code to identify the agency controlling the specification, maintenance and publication of the message type</xs:documentation>
+              <xs:documentation eu:name="name">CONTROLLING AGENCY</xs:documentation>
+              <xs:documentation eu:name="description">Code to identify the agency controlling the specification, maintenance and publication of the message type</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S008" type="S008" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">MESSAGE VERSION</xs:documentation>
+              <xs:documentation eu:name="name">MESSAGE VERSION</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0058" type="D0058" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">APPLICATION PASSWORD</xs:documentation>
-              <xs:documentation an:name="description">
+              <xs:documentation eu:name="name">APPLICATION PASSWORD</xs:documentation>
+              <xs:documentation eu:name="description">
                 Password to recepient's division, department or sectional system (if required)
               </xs:documentation>
             </xs:annotation>
@@ -295,22 +295,22 @@
   </xs:complexType>
   <xs:complexType name="UNE">
     <xs:annotation>
-      <xs:documentation an:name="name">Functional Group Trailer</xs:documentation>
-      <xs:documentation an:name="function">To end and check the completeness of a Functional Group</xs:documentation>
+      <xs:documentation eu:name="name">Functional Group Trailer</xs:documentation>
+      <xs:documentation eu:name="function">To end and check the completeness of a Functional Group</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
           <xs:element name="D0060" type="D0060">
             <xs:annotation>
-              <xs:documentation an:name="name">NUMBER OF MESSAGES</xs:documentation>
-              <xs:documentation an:name="description">The count of the number of messages in the functional group</xs:documentation>
+              <xs:documentation eu:name="name">NUMBER OF MESSAGES</xs:documentation>
+              <xs:documentation eu:name="description">The count of the number of messages in the functional group</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0048" type="D0048">
             <xs:annotation>
-              <xs:documentation an:name="name">FUNCTIONAL GROUP REFERENCE NUMBER</xs:documentation>
-              <xs:documentation an:name="description">Shall be identical to 0048 in UNG</xs:documentation>
+              <xs:documentation eu:name="name">FUNCTIONAL GROUP REFERENCE NUMBER</xs:documentation>
+              <xs:documentation eu:name="description">Shall be identical to 0048 in UNG</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -319,27 +319,27 @@
   </xs:complexType>
   <xs:complexType name="UNH">
     <xs:annotation>
-      <xs:documentation an:name="name">Message Header</xs:documentation>
-      <xs:documentation an:name="function">To head, identify and specify a Message</xs:documentation>
+      <xs:documentation eu:name="name">Message Header</xs:documentation>
+      <xs:documentation eu:name="function">To head, identify and specify a Message</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
           <xs:element name="D0062" type="D0062">
             <xs:annotation>
-              <xs:documentation an:name="name">MESSAGE REFERENCE NUMBER</xs:documentation>
-              <xs:documentation an:name="description">A sender's unique message reference</xs:documentation>
+              <xs:documentation eu:name="name">MESSAGE REFERENCE NUMBER</xs:documentation>
+              <xs:documentation eu:name="description">A sender's unique message reference</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S009" type="S009">
             <xs:annotation>
-              <xs:documentation an:name="name">MESSAGE IDENTIFIER</xs:documentation>
+              <xs:documentation eu:name="name">MESSAGE IDENTIFIER</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0068" type="D0068" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">COMMON ACCESS REFERENCE</xs:documentation>
-              <xs:documentation an:name="description">
+              <xs:documentation eu:name="name">COMMON ACCESS REFERENCE</xs:documentation>
+              <xs:documentation eu:name="description">
                 Key to relate all subsequent transfers of data to the same business case of file.
                 Within the 35 characters the IA may specify component elements
               </xs:documentation>
@@ -347,7 +347,7 @@
           </xs:element>
           <xs:element name="S010" type="S010" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">STATUS OF THE TRANSFER</xs:documentation>
+              <xs:documentation eu:name="name">STATUS OF THE TRANSFER</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -356,46 +356,46 @@
   </xs:complexType>
   <xs:complexType name="UIH">
     <xs:annotation>
-      <xs:documentation an:name="name">Interactive message header</xs:documentation>
-      <xs:documentation an:name="function">To head, identify and specify a message.</xs:documentation>
+      <xs:documentation eu:name="name">Interactive message header</xs:documentation>
+      <xs:documentation eu:name="function">To head, identify and specify a message.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
           <xs:element name="S306" type="S306">
             <xs:annotation>
-              <xs:documentation an:name="name">INTERACTIVE MESSAGE IDENTIFIER</xs:documentation>
-              <xs:documentation an:name="position">010</xs:documentation>
+              <xs:documentation eu:name="name">INTERACTIVE MESSAGE IDENTIFIER</xs:documentation>
+              <xs:documentation eu:name="position">010</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0340" type="D0340" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">Interactive message reference number</xs:documentation>
-              <xs:documentation an:name="position">020</xs:documentation>
+              <xs:documentation eu:name="name">Interactive message reference number</xs:documentation>
+              <xs:documentation eu:name="position">020</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S302" type="S302" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">DIALOGUE REFERENCE</xs:documentation>
-              <xs:documentation an:name="position">030</xs:documentation>
+              <xs:documentation eu:name="name">DIALOGUE REFERENCE</xs:documentation>
+              <xs:documentation eu:name="position">030</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S301" type="S301" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">STATUS OF TRANSFER - INTERACTIVE</xs:documentation>
-              <xs:documentation an:name="position">040</xs:documentation>
+              <xs:documentation eu:name="name">STATUS OF TRANSFER - INTERACTIVE</xs:documentation>
+              <xs:documentation eu:name="position">040</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S300" type="S300" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">DATE AND/OR TIME OF INITIATION</xs:documentation>
-              <xs:documentation an:name="position">050</xs:documentation>
+              <xs:documentation eu:name="name">DATE AND/OR TIME OF INITIATION</xs:documentation>
+              <xs:documentation eu:name="position">050</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0035" type="D0035" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">	Test indicator</xs:documentation>
-              <xs:documentation an:name="position">060</xs:documentation>
+              <xs:documentation eu:name="name">	Test indicator</xs:documentation>
+              <xs:documentation eu:name="position">060</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -404,22 +404,22 @@
   </xs:complexType>
   <xs:complexType name="UNT">
     <xs:annotation>
-      <xs:documentation an:name="name">Message Trailer</xs:documentation>
-      <xs:documentation an:name="function">To end and check the completeness of a Message</xs:documentation>
+      <xs:documentation eu:name="name">Message Trailer</xs:documentation>
+      <xs:documentation eu:name="function">To end and check the completeness of a Message</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
           <xs:element name="D0074" type="D0074" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">NUMBER OF SEGMENTS IN THE MESSAGE</xs:documentation>
-              <xs:documentation an:name="description">Control count including UNH and UNT</xs:documentation>
+              <xs:documentation eu:name="name">NUMBER OF SEGMENTS IN THE MESSAGE</xs:documentation>
+              <xs:documentation eu:name="description">Control count including UNH and UNT</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0062" type="D0062">
             <xs:annotation>
-              <xs:documentation an:name="name">MESSAGE REFERENCE NUMBER</xs:documentation>
-              <xs:documentation an:name="description">Shall be identical to 0062 in UNH</xs:documentation>
+              <xs:documentation eu:name="name">MESSAGE REFERENCE NUMBER</xs:documentation>
+              <xs:documentation eu:name="description">Shall be identical to 0062 in UNH</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -428,22 +428,22 @@
   </xs:complexType>
   <xs:complexType name="UIT">
     <xs:annotation>
-      <xs:documentation an:name="name">Interactive message trailer</xs:documentation>
-      <xs:documentation an:name="function">To end and check the completeness of a message.</xs:documentation>
+      <xs:documentation eu:name="name">Interactive message trailer</xs:documentation>
+      <xs:documentation eu:name="function">To end and check the completeness of a message.</xs:documentation>
     </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BASE-SEGMENT">
         <xs:sequence>
           <xs:element name="D0340" type="D0340" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">Interactive message reference number</xs:documentation>
-              <xs:documentation an:name="position">010</xs:documentation>
+              <xs:documentation eu:name="name">Interactive message reference number</xs:documentation>
+              <xs:documentation eu:name="position">010</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0074" type="D0074" minOccurs="0">
             <xs:annotation>
-              <xs:documentation an:name="name">NUMBER OF SEGMENTS IN THE MESSAGE</xs:documentation>
-              <xs:documentation an:name="position">020</xs:documentation>
+              <xs:documentation eu:name="name">NUMBER OF SEGMENTS IN THE MESSAGE</xs:documentation>
+              <xs:documentation eu:name="position">020</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>

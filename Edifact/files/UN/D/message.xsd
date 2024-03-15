@@ -6,10 +6,14 @@
   targetNamespace="http://leksi.net/EDIFACT"
   xmlns="http://leksi.net/EDIFACT"
   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  xmlns:eu="http://leksi.net/EDIFACT/utility"
   elementFormDefault="qualified" attributeFormDefault="unqualified"
 >
   <xs:include schemaLocation="segments.xsd"/>
   <xs:complexType name="MESSAGE">
+    <xs:annotation>
+      <xs:appinfo eu:name="messageIdentifier"/>
+    </xs:annotation>
     <xs:complexContent>
       <xs:extension base="BASE-MESSAGE">
         <xs:sequence id="structure">

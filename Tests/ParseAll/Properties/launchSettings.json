@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ParseAll": {
+      "commandName": "Project",
+      "commandLineArgs": "--schemas-root W:\\C#\\Edifact\\var\\xsd\r\n--input W:\\C#\\Edifact\\var\\manifest.poll\r\n--output W:\\C#\\Edifact\\var\\out\\manifest.poll\r\n--suffixes \"IFCSUM=.2;IFTMBF=.1\""
+    }
+  }
+}

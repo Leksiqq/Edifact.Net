@@ -85,7 +85,8 @@ public class EdifactDownloader
         }
         _man = new XmlNamespaceManager(_nameTable);
         _man.AddNamespace(s_xsPrefix, Properties.Resources.schema_ns);
-        if(_options.ConnectionTimeout is int timeout)
+        _man.AddNamespace(s_euPrefix, Properties.Resources.edifact_utility_ns);
+        if (_options.ConnectionTimeout is int timeout)
         {
             _wc.Timeout = TimeSpan.FromSeconds(timeout);
         }
@@ -249,6 +250,8 @@ public class EdifactDownloader
         _generatedFiles.Add(targetFile);
         targetFile = Path.Combine(_tmpDir, s_systemSegmentsXsd);
         SaveXmlDocument(InitXmlDocument(s_systemSegments), targetFile);
+        targetFile = Path.Combine(_tmpDir, s_utilityXsd);
+        SaveXmlDocument(InitXmlDocument(s_utility), targetFile);
         _generatedFiles.Add(targetFile);
 
         await MakeElementsAsync(stoppingToken);
@@ -298,10 +301,10 @@ public class EdifactDownloader
     private async Task MakeMessageAsync(XmlSchemaSet schemaSet, string mess, CancellationToken stoppingToken)
     {
         XmlDocument doc = InitXmlDocument(s_message);
-        XPathNavigator? nav = doc.CreateNavigator()!.SelectSingleNode(s_messageFirstChildXpath, _man);
-        nav!.InsertBefore(
+        XPathNavigator nav = doc.CreateNavigator()!.SelectSingleNode(s_messageIdentifierXpath, _man)!;
+        nav.SetValue(
             string.Format(
-                s_messageTypeAndVersion, 
+                s_messageIdentifierFormat, 
                 mess, 
                 string.Empty,
                 _directory![..1],
@@ -731,42 +734,42 @@ public class EdifactDownloader
             if (!string.IsNullOrEmpty(source.Name))
             {
                 XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
-                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_name);
+                documentation.SetAttribute(s_name, Properties.Resources.edifact_utility_ns, s_name);
                 documentation.AppendChild(element.OwnerDocument.CreateTextNode(source.Name));
                 ann.AppendChild(documentation);
             }
             if (!string.IsNullOrEmpty(source.Description))
             {
                 XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
-                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_description);
+                documentation.SetAttribute(s_name, Properties.Resources.edifact_utility_ns, s_description);
                 documentation.AppendChild(element.OwnerDocument.CreateTextNode(source.Description));
                 ann.AppendChild(documentation);
             }
             if (!string.IsNullOrEmpty(source.Note))
             {
                 XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
-                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_note);
+                documentation.SetAttribute(s_name, Properties.Resources.edifact_utility_ns, s_note);
                 documentation.AppendChild(element.OwnerDocument.CreateTextNode(source.Note));
                 ann.AppendChild(documentation);
             }
             if (!string.IsNullOrEmpty(source.Change))
             {
                 XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
-                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_change);
+                documentation.SetAttribute(s_name, Properties.Resources.edifact_utility_ns, s_change);
                 documentation.AppendChild(element.OwnerDocument.CreateTextNode(source.Change));
                 ann.AppendChild(documentation);
             }
             if (!string.IsNullOrEmpty(source.Function))
             {
                 XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
-                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_function);
+                documentation.SetAttribute(s_name, Properties.Resources.edifact_utility_ns, s_function);
                 documentation.AppendChild(element.OwnerDocument.CreateTextNode(source.Function));
                 ann.AppendChild(documentation);
             }
             if (!string.IsNullOrEmpty(source.Position))
             {
                 XmlElement documentation = element.OwnerDocument.CreateElement(s_xsPrefix, s_documentation, Properties.Resources.schema_ns);
-                documentation.SetAttribute(s_name, Properties.Resources.annotation_ns, s_position);
+                documentation.SetAttribute(s_name, Properties.Resources.edifact_utility_ns, s_position);
                 documentation.AppendChild(element.OwnerDocument.CreateTextNode(source.Position));
                 ann.AppendChild(documentation);
             }
@@ -881,7 +884,6 @@ public class EdifactDownloader
             ni1.Current.DeleteSelf();
         }
 
-        result.DocumentElement!.SetAttribute(s_annotationPrefixDeclaration, Properties.Resources.annotation_ns);
         return result;
     }
     private void LoadFixedFilesFromResources()

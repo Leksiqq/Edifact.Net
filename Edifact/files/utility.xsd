@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="utility"
+    targetNamespace="http://leksi.net/EDIFACT/utility"
+    elementFormDefault="qualified"
+    xmlns="http://leksi.net/EDIFACT/utility"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+  <xs:attribute name="name">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+        <xs:enumeration value="name">
+          <xs:annotation>
+            <xs:documentation>Used at annotations for segment/composite/element name</xs:documentation>
+          </xs:annotation>
+        </xs:enumeration>
+        <xs:enumeration value="description">
+          <xs:annotation>
+            <xs:documentation>Used at annotations for segment/composite/element description</xs:documentation>
+          </xs:annotation>
+        </xs:enumeration>
+        <xs:enumeration value="note">
+          <xs:annotation>
+            <xs:documentation>Used at annotations for segment/composite/element note</xs:documentation>
+          </xs:annotation>
+        </xs:enumeration>
+        <xs:enumeration value="change">
+          <xs:annotation>
+            <xs:documentation>Used at annotations for segment/composite/element change indicator</xs:documentation>
+          </xs:annotation>
+        </xs:enumeration>
+        <xs:enumeration value="function">
+          <xs:annotation>
+            <xs:documentation>Used at annotations for segment function</xs:documentation>
+          </xs:annotation>
+        </xs:enumeration>
+        <xs:enumeration value="position">
+          <xs:annotation>
+            <xs:documentation>Used at annotations for segment/composite components positions</xs:documentation>
+          </xs:annotation>
+        </xs:enumeration>
+        <xs:enumeration value="messageIdentifier">
+          <xs:annotation>
+            <xs:documentation>Used at annotations for message/script</xs:documentation>
+          </xs:annotation>
+        </xs:enumeration>
+        <xs:enumeration value="suffix">
+          <xs:annotation>
+            <xs:documentation>Used at annotations for script/customized message</xs:documentation>
+          </xs:annotation>
+        </xs:enumeration>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+  <xs:attribute name="action">
+    <xs:simpleType>
+      <xs:restriction base="xs:string">
+        <xs:enumeration value="clearEnumerations">
+          <xs:annotation>
+            <xs:documentation>Used at script to clear 'xs:enumeration' nodes of 'xs:restriction' element</xs:documentation>
+          </xs:annotation>
+        </xs:enumeration>
+      </xs:restriction>
+    </xs:simpleType>
+  </xs:attribute>
+</xs:schema>

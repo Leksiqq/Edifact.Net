@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="W:\C#\Edifact\misc\script.IFCSUM.D97B.2.xsd" Link="script.IFCSUM.D97B.2.xsd" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Edifact\Edifact.csproj" />
   </ItemGroup>
 

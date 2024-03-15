@@ -22,8 +22,6 @@ public class MessageSchemaCustomizerCLI(IServiceProvider services) : BackgroundS
         {
             SchemasUri = bootstrapConfig[s_schemasRoot],
             ScriptUri = bootstrapConfig[s_script],
-            MessageIdentifier = bootstrapConfig[s_message],
-            Suffix = bootstrapConfig[s_suffix],
         };
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
         builder.Services.AddSingleton(options);
