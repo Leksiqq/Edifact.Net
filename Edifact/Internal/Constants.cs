@@ -13,11 +13,13 @@ internal static class Constants
     internal const string s_allElementsCountXPath = "count(e:*)";
     internal const string s_allElementsXPath = "//e:*";
     internal const string s_annotation = "annotation";
+    internal const string s_appinfoXPathFormat = $"/xs:schema/xs:complexType[@name='{s_message1}']/xs:annotation/xs:appinfo[@eu:name='{{0}}']";
     internal const string s_args = "args";
     internal const string s_askKey = "/?";
     internal const string s_askSign = "?";
     internal const string s_asterisk = "*";
     internal const string s_attr = "attr";
+    internal const string s_attributeXPathFormat = "@{0}";
     internal const string s_base = "base";
     internal const string s_baseSegment = "BASE-SEGMENT";
     internal const string s_batchInterchange = "batch_interchange";
@@ -34,6 +36,7 @@ internal static class Constants
     internal const string s_complexType = "complexType";
     internal const string s_composites = "composites";
     internal const string s_compositesXsd = "composites.xsd";
+    internal const string s_controlAgency = "control-agency";
     internal const string s_d = "D";
     internal const string s_d00 = "D00";
     internal const string s_d0036 = "D0036";
@@ -52,6 +55,7 @@ internal static class Constants
     internal const string s_d99z = "D99Z";
     internal const string s_dataElementNotFound = "DATA_ELEMENT_NOT_FOUND";
     internal const string s_description = "description";
+    internal const string s_directory = "directory";
     internal const string s_directoryFormat = "D{0:00}{1}";
     internal const string s_directoryNotFound = "DIRECTORY_NOT_FOUND";
     internal const string s_doctype = "<!DOCTYPE";
@@ -100,9 +104,8 @@ internal static class Constants
     internal const string s_message1 = "MESSAGE";
     internal const string s_messageNotFound = "MESSAGE_NOT_FOUND";
     internal const string s_messagesPatternFormat = "{0}_D.{1}";
+    internal const string s_messageIdentifier = "messageIdentifier";
     internal const string s_messageIdentifierFormat = "{0}:{1}:{2}:{3}";
-    internal const string s_messageIdentifierXpath = "/xs:schema/xs:complexType[@name='MESSAGE']/xs:annotation/xs:appinfo[@eu:name='messageIdentifier']";
-    internal const string s_messageSuffixXpath = "/xs:schema/xs:complexType[@name='MESSAGE']/xs:annotation/xs:appinfo[@eu:name='suffix']";
     internal const string s_minLength = "minLength";
     internal const string s_minOccurs = "minOccurs";
     internal const string s_minOccursPatternFormat = "{0},";
@@ -120,6 +123,7 @@ internal static class Constants
     internal const string s_numberTypePatternFormat = "^-?([0-9]\\.?){{{0}{1}}}[0-9]$";
     internal const string s_numberTypePattern = "^-?[^.]*\\.?[^.]+$";
     internal const string s_output = "output";
+    internal const string s_pageWidth = "page-width";
     internal const string s_parserCliUsage = "PARSER_CLI_USAGE";
     internal const string s_path1 = "/DAM/trade/untdid/{0}/{1}.zip";
     internal const string s_path2 = "/fileadmin/DAM/trade/untdid/{0}/{1}.zip";
@@ -156,6 +160,7 @@ internal static class Constants
     internal const string s_src = "src";
     internal const string s_start = "start";
     internal const string s_strict = "strict";
+    internal const string s_suffix = "suffix";
     internal const string s_suffixAppInfoFormat = "<xs:appinfo eu:name=\"suffix\">{0}</xs:appinfo>";
     internal const string s_suffixes = "suffixes";
     internal const string s_systemComposites = "system_composites";

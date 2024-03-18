@@ -217,10 +217,10 @@
     <value>Usage: {0} ARGS 
 ARGS:
   /m, --message  {{MESSAGE|#}}                               - message type (# for no message, all messages if omitted)
-  /d, --directories  LIST                                  - message directory(ies) divided with commas and minuses
+  /d, --directory  LIST                                  - message directory(ies) divided with commas and minuses
                                                              for intervals (for example: "D97B,D10A-D11B")
   /n, --ns NS                                              - EDIFACT namespace substitution
-  /t, --target-folder  PATH                                - target folder where schemas will be placed
+  /s, --schemas-root  URI                                - URI where schemas will be placed
   --tmp-folder PATH                                        - temporary folder
   /p, --proxy  http[s]://[USER[:PASSWORD]@]ADDRESS:PORT    - use proxy for download
   --connection-timeout  SECONDS                            - connection timeout of web client</value>
@@ -235,11 +235,17 @@ ARGS:
     <value>The key '{0}' is unknown.</value>
   </data>
   <data name="SCHEMA2TREE_USAGE" xml:space="preserve">
-    <value>Usage: {0} ARGS
-ARGS:
-/s, --schema URI                   - URI of XML Schema file. 
-/o URI                             - URI of output file.
-/w, --width SIZE                   - width of output file.</value>
+    <value>Usage:
+{0} OPTIONS
+
+where OPTIONS:
+     --{1} URI    (Mandatory) The root folder URI where EDIFACT Xml-schemas are placed.
+         --{2} TYPE    (Mandatory) The type of EDIFACT message.
+  --{3} DIRECTORY    (Mandatory) The directory of EDIFACT message.
+           --{4} URI    (Mandatory) The output URI.
+  --{5} CODE    (Optional, default UN) The controlling agency of EDIFACT message.
+	--{6} SUFFIX    (Optional) The suffix of EDIFACT message.
+      --{7} SIZE    (Optional, default {8}) The page width of output.</value>
   </data>
   <data name="DOWNLOAD_MESSAGE" xml:space="preserve">
     <value>Downloading message '{0}:{1}'.</value>

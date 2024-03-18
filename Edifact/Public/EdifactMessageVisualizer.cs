@@ -7,7 +7,7 @@ using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
 
-public class Schema2Tree: IDisposable
+public class EdifactMessageVisualizer
 {
     internal const int s_deafultWidth = 80;
     private const string s_htmlBegin = @"<html>
@@ -36,67 +36,94 @@ public class Schema2Tree: IDisposable
     private static readonly Regex s_reCollapseSpaces = new("( )+");
 
     private readonly StringBuilder _sb = new();
+    private readonly XmlResolver _resolver;
     private int _width;
     private TextWriter? _output;
 
-    public void Dispose()
+    public EdifactMessageVisualizer(IServiceProvider services)
     {
-        _output?.Dispose();
-        GC.SuppressFinalize(this);
+        _resolver = new Resolver(services);
     }
-
-    public async Task RenderAsync(Uri schemaDocument, Stream output, XmlResolver? xmlResolver = null, int width = s_deafultWidth)
+    public async Task RenderAsync(EdifactMessageVisualizerOptions options)
     {
-        _width = width;
-        _output = new StreamWriter(output);
+        _width = options.PageWidth ?? s_deafultWidth;
+        if (options.SchemasUri is null)
+        {
+            throw new Exception($"TODO: {nameof(options)}.{nameof(options.SchemasUri)} is mandatory.");
+        }
+        if (options.MessageType is null)
+        {
+            throw new Exception($"TODO: {nameof(options)}.{nameof(options.MessageType)} is mandatory.");
+        }
+        if (options.MessageDirectory is null)
+        {
+            throw new Exception($"TODO: {nameof(options)}.{nameof(options.MessageDirectory)} is mandatory.");
+        }
+        if (options.Output is null)
+        {
+            throw new Exception($"TODO: {nameof(options)}.{nameof(options.Output)} is mandatory.");
+        }
+
+        string schemaPath = string.Format(
+            s_fileInDirectoryXsdFormat, 
+            options.ControllingAgency ?? s_un,
+            string.Empty,
+            options.MessageDirectory,
+            options.MessageType,
+            options.MessageSuffix ?? string.Empty
+        );
+
+        _output = new StreamWriter(options.Output!);
         XmlNameTable xmlNameTable = new NameTable();
         XmlDocument xml = new(xmlNameTable);
-        if (xmlResolver is { } && xmlResolver.GetEntity(schemaDocument, null, typeof(Stream)) is Stream stream)
+        Uri inputUri = new Uri(new Uri(string.Format(s_folderUriFormat, options.SchemasUri)), schemaPath);
+        if (_resolver.GetEntity(inputUri, null, typeof(Stream) ) is Stream input)
         {
-            xml.Load(XmlReader.Create(stream));
+            xml.Load(XmlReader.Create(input));
         }
         else
         {
-            xml.Load(XmlReader.Create(schemaDocument.ToString()));
+            throw new Exception($"TODO: {inputUri} not found.");
         }
 
         if (xml.DocumentElement!.NamespaceURI != Properties.Resources.schema_ns)
         {
-            throw new Exception(string.Format(s_rmLabels.GetString(s_notSchema)!, schemaDocument));
+            throw new Exception(string.Format(s_rmLabels.GetString(s_notSchema)!, inputUri));
         }
         XmlNamespaceManager man = new(xmlNameTable);
         man.AddNamespace(xml.DocumentElement.Prefix, xml.DocumentElement!.NamespaceURI);
+        man.AddNamespace(s_euPrefix, Properties.Resources.edifact_utility_ns);
         XPathNavigator nav = xml.CreateNavigator()!;
         XPathNavigator? schema = nav.SelectSingleNode(string.Format(s_schemaXPathFormat, xml.DocumentElement.Prefix), man) 
-            ?? throw new Exception(string.Format(s_rmLabels.GetString(s_notSchema)!, schemaDocument));
+            ?? throw new Exception(string.Format(s_rmLabels.GetString(s_notSchema)!, inputUri));
         string ns = schema.SelectSingleNode(s_targetNamespaceXPath)?.Value ?? string.Empty;
-
-        XmlQualifiedName root_qname = new(s_message1, ns);
-        XmlSchemaSet xmlSchemaSet = new(xmlNameTable);
-        if(xmlResolver is { })
+        string suffix = nav.SelectSingleNode(string.Format(s_appinfoXPathFormat, s_suffix), man)?.Value ?? string.Empty;
+        string messageIdentifier = nav.SelectSingleNode(string.Format(s_appinfoXPathFormat, s_messageIdentifier), man)?.Value ?? string.Empty;
+        if(!string.IsNullOrEmpty(suffix) && !string.IsNullOrEmpty(messageIdentifier))
         {
-            xmlSchemaSet.XmlResolver = xmlResolver;
+            string[] parts = messageIdentifier.Split(':');
+            messageIdentifier = string.Format(
+                s_messageIdentifierFormat,
+                string.Format(s_uriFormat, parts[0], suffix),
+                parts[1], parts[2], parts[3]
+            );
         }
 
-        xmlSchemaSet.Add(ns, schemaDocument.ToString());
+        XmlQualifiedName root_qname = new(s_message1, ns);
+        XmlSchemaSet xmlSchemaSet = new(xmlNameTable)
+        {
+            XmlResolver = _resolver,
+        };
+
+        xmlSchemaSet.Add(ns, inputUri.ToString());
         xmlSchemaSet.Compile();
         if (xmlSchemaSet.GlobalElements[root_qname] is not XmlSchemaElement root)
         {
-            throw new Exception(string.Format(s_rmLabels.GetString(s_notEdifactSchema)!, schemaDocument));
+            throw new Exception(string.Format(s_rmLabels.GetString(s_notEdifactSchema)!, inputUri));
         }
-        if(
-            root.ElementSchemaType!.Annotation?.Items is XmlSchemaObjectCollection items 
-            && items.Count > 0 
-            && items[0] is XmlSchemaAppInfo appInfo 
-            && appInfo.Markup is XmlNode[] mu && mu.Length > 0
-        )
-        {
-            await _output.WriteLineAsync(string.Format(s_htmlBegin, mu[0]!.Value));
-        }
-        else
-        {
-            await _output.WriteLineAsync(string.Format(s_htmlBegin, string.Empty));
-        }
+
+        await _output.WriteLineAsync(string.Format(s_htmlBegin, messageIdentifier, suffix));
+
         List<int> positions = [];
         List<bool> vlines = [];
         List<XmlSchemaElement> elementsStack = [];
@@ -198,8 +225,8 @@ public class Schema2Tree: IDisposable
         }
         await _output.WriteLineAsync(s_htmlEnd);
         await _output.FlushAsync();
-        await output.FlushAsync();
-        output.Close();
+        await options.Output!.FlushAsync();
+        options.Output!.Close();
     }
 
     private async Task WriteAsync(string str, bool end = false)

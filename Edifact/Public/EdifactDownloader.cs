@@ -301,15 +301,14 @@ public class EdifactDownloader
     private async Task MakeMessageAsync(XmlSchemaSet schemaSet, string mess, CancellationToken stoppingToken)
     {
         XmlDocument doc = InitXmlDocument(s_message);
-        XPathNavigator nav = doc.CreateNavigator()!.SelectSingleNode(s_messageIdentifierXpath, _man)!;
+        XPathNavigator nav = doc.CreateNavigator()!.SelectSingleNode(string.Format(s_appinfoXPathFormat, s_messageIdentifier), _man)!;
         nav.SetValue(
             string.Format(
                 s_messageIdentifierFormat, 
                 mess, 
-                string.Empty,
+                s_un,
                 _directory![..1],
-                _directory[1..],
-                s_un
+                _directory[1..]
             )
         );
         string targetFile = Path.Combine(_directoryFolder!, string.Format(s_fileNameFormat, mess, s_xsd));

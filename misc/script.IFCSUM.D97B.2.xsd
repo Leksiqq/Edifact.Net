@@ -3,12 +3,12 @@
     targetNamespace="http://leksi.net/EDIFACT/script"
     elementFormDefault="qualified"
     xmlns="http://leksi.net/EDIFACT/script"
-    xmlns:ef="http://leksi.net/EDIFACT"
     xmlns:eu="http://leksi.net/EDIFACT/utility"
     xmlns:xs="http://www.w3.org/2001/XMLSchema"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://leksi.net/EDIFACT ../Edifact/files/edifact.xsd"
 >
+  <xs:import namespace="http://leksi.net/EDIFACT/utility"/>
+
   <xs:annotation>
     <xs:appinfo eu:name="messageIdentifier">IFCSUM:D:97B:UN</xs:appinfo>
     <xs:appinfo eu:name="suffix">.2</xs:appinfo>
@@ -16,7 +16,7 @@
 
   <xs:complexType name="D1153">
     <xs:simpleContent>
-      <xs:restriction base="ef:D" eu:action="clearEnumerations">
+      <xs:restriction base="eu:D" eu:action="clearEnumerations">
         <xs:enumeration value="BN" />
         <xs:enumeration value="CU" />
         <xs:enumeration value="ZBI" />
@@ -26,7 +26,7 @@
   </xs:complexType>
   <xs:complexType name="D3035">
     <xs:simpleContent>
-      <xs:restriction base="ef:D">
+      <xs:restriction base="eu:D">
         <xs:enumeration value="ZN2" />
         <xs:enumeration value="ZN3" />
         <xs:enumeration value="ZN4" />
@@ -35,7 +35,7 @@
   </xs:complexType>
   <xs:complexType name="D4451">
     <xs:simpleContent>
-      <xs:restriction base="ef:D" eu:action="clearEnumerations">
+      <xs:restriction base="eu:D" eu:action="clearEnumerations">
         <xs:enumeration value="AAA" />
         <xs:enumeration value="AAC" />
         <xs:enumeration value="AAD" />
@@ -58,7 +58,7 @@
   </xs:complexType>
   <xs:complexType name="D6311">
     <xs:simpleContent>
-      <xs:restriction base="ef:D" eu:action="clearEnumerations">
+      <xs:restriction base="eu:D" eu:action="clearEnumerations">
         <xs:enumeration value="AAA" />
         <xs:enumeration value="AAE" />
         <xs:enumeration value="AAW" />
@@ -68,7 +68,7 @@
   </xs:complexType>
   <xs:complexType name="D6313">
     <xs:simpleContent>
-      <xs:restriction base="ef:D" eu:action="clearEnumerations">
+      <xs:restriction base="eu:D" eu:action="clearEnumerations">
         <xs:enumeration value="AAA" />
         <xs:enumeration value="AAC" />
         <xs:enumeration value="AAD" />
@@ -81,20 +81,20 @@
   </xs:complexType>
   <xs:complexType name="D8053">
     <xs:simpleContent>
-      <xs:restriction base="ef:D" eu:action="clearEnumerations">
+      <xs:restriction base="eu:D" eu:action="clearEnumerations">
         <xs:maxLength value="4"/>
       </xs:restriction>
     </xs:simpleContent>
   </xs:complexType>
   <xs:complexType name="D8155">
     <xs:simpleContent>
-      <xs:restriction base="ef:D" eu:action="clearEnumerations">
+      <xs:restriction base="eu:D" eu:action="clearEnumerations">
       </xs:restriction>
     </xs:simpleContent>
   </xs:complexType>
   <xs:complexType name="D8339">
     <xs:simpleContent>
-      <xs:restriction base="ef:D">
+      <xs:restriction base="eu:D">
         <xs:enumeration value="I" />
         <xs:enumeration value="II" />
         <xs:enumeration value="III" />
@@ -103,16 +103,162 @@
   </xs:complexType>
   <xs:complexType name="D8364">
     <xs:simpleContent>
-      <xs:restriction base="ef:D">
+      <xs:restriction base="eu:D">
         <xs:maxLength value="7" />
       </xs:restriction>
     </xs:simpleContent>
   </xs:complexType>
   <xs:complexType name="D9308">
     <xs:simpleContent>
-      <xs:restriction base="ef:D">
+      <xs:restriction base="eu:D">
         <xs:maxLength value="100"/>
       </xs:restriction>
     </xs:simpleContent>
   </xs:complexType>
+  <xs:element name="SG1" eu:action="remove"/>
+  <xs:element name="SG2" eu:action="remove"/>
+  <xs:element name="SG5" eu:action="remove"/>
+  <xs:element name="SG6" eu:action="remove"/>
+  <xs:element name="SG7" eu:action="remove"/>
+  <xs:element name="SG9" eu:action="remove"/>
+  <xs:element name="SG10" eu:action="remove"/>
+  <xs:element name="SG11" eu:action="remove"/>
+  <xs:element name="SG12" eu:action="remove"/>
+  <xs:element name="SG17" eu:action="remove"/>
+  <xs:element name="SG20" eu:action="remove"/>
+  <xs:element name="SG22" eu:action="remove"/>
+  <xs:element name="SG24" eu:action="remove"/>
+  <xs:element name="SG25" eu:action="remove"/>
+  <xs:element name="SG27" eu:action="remove"/>
+  <xs:element name="SG29" eu:action="remove"/>
+  <xs:element name="SG33" eu:action="remove"/>
+  <xs:element name="SG34" eu:action="remove"/>
+  <xs:element name="SG42" eu:action="remove"/>
+  <xs:element name="SG47" eu:action="remove"/>
+  <xs:element name="SG48" eu:action="remove"/>
+  <xs:element name="SG50" eu:action="remove"/>
+  <xs:element name="SG53" eu:action="remove"/>
+  <xs:element name="SG54" eu:action="remove"/>
+  <xs:element name="SG56" eu:action="remove"/>
+  <xs:element name="SG59" eu:action="remove"/>
+  <xs:element name="SG62" eu:action="remove"/>
+  <xs:element name="MOA" eu:action="removeUntilNext"/>
+  <xs:element name="SG8">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="TSR" eu:action="remove"/>
+        <xs:element name="SEL" eu:action="removeUntilNext"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SG19">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="CTA" eu:action="removeUntilNext"/>
+        <xs:element name="FTX"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SG26">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="DTM" eu:action="removeUntilNext"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SG30">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="LOC" eu:action="removeUntilNext"/>
+        <xs:element name="PRI"/>
+        <xs:element name="EQN" eu:action="remove"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SG31">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="TSR" eu:action="removeUntilNext"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SG32">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="DTM" eu:action="removeUntilNext"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SG41">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="HAN" eu:action="removeUntilNext"/>
+        <xs:element name="LOC"/>
+        <xs:element name="MOA" eu:action="remove"/>
+        <xs:element name="GIN" eu:action="remove"/>
+        <xs:element name="GDS" eu:action="remove"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SG44">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="EQN" eu:action="removeUntilNext"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SG45">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="DTM" eu:action="removeUntilNext"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SG46">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="RFF" eu:action="removeUntilNext"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SG52">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="SEQ" eu:action="removeUntilNext"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SG57">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="EQN" eu:action="removeUntilNext"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SG60">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="EQN" eu:action="removeUntilNext"/>
+        <xs:element name="MEA"/>
+        <xs:element name="TPL" eu:action="remove"/>
+        <xs:element name="TMP" eu:action="remove"/>
+        <xs:element name="PCD" eu:action="removeUntilNext"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SG61" eu:maxOccurs="999">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="CUX" eu:action="remove"/>
+        <xs:element name="EQN" eu:action="remove"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="SG63">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="EQN" eu:action="removeUntilNext"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
 </xs:schema>

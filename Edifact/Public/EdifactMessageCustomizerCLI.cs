@@ -6,7 +6,7 @@ using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
 
-public class MessageSchemaCustomizerCLI(IServiceProvider services) : BackgroundService
+public class EdifactMessageCustomizerCLI(IServiceProvider services) : BackgroundService
 {
     public static async Task RunAsync(string[] args, Action<IHostApplicationBuilder>? config = null)
     {
@@ -18,7 +18,7 @@ public class MessageSchemaCustomizerCLI(IServiceProvider services) : BackgroundS
             Usage();
             return;
         }
-        MessageSchemaCustomizerOptions options = new()
+        EdifactMessageCustomizerOptions options = new()
         {
             SchemasUri = bootstrapConfig[s_schemasRoot],
             ScriptUri = bootstrapConfig[s_script],
@@ -26,8 +26,8 @@ public class MessageSchemaCustomizerCLI(IServiceProvider services) : BackgroundS
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
         builder.Services.AddSingleton(options);
         builder.Services.AddSingleton<EdifactParser>();
-        builder.Services.AddSingleton<MessageSchemaCustomizer>();
-        builder.Services.AddHostedService<MessageSchemaCustomizerCLI>();
+        builder.Services.AddSingleton<EdifactMessageCustomizer>();
+        builder.Services.AddHostedService<EdifactMessageCustomizerCLI>();
         builder.Services.AddKeyedTransient<IStreamFactory, LocalFileStreamFactory>(s_file);
 
         config?.Invoke(builder);
@@ -40,11 +40,11 @@ public class MessageSchemaCustomizerCLI(IServiceProvider services) : BackgroundS
     {
         try
         {
-            MessageSchemaCustomizer msc = services.GetRequiredService<MessageSchemaCustomizer>();
-            await msc.Customize(
-                services.GetRequiredService<MessageSchemaCustomizerOptions>(), 
-                stoppingToken
-            );
+            services.GetRequiredService<EdifactMessageCustomizer>()
+                .Customize(
+                    services.GetRequiredService<EdifactMessageCustomizerOptions>(), 
+                    stoppingToken
+                );
         }
         finally
         {

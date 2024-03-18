@@ -170,10 +170,10 @@
 АРГУМЕНТЫ:
   /m, --message  {{MESSAGE|#}}                               - тип сообщения (# если загрузка сообщений не требуется, 
                                                              все сообщения, если опущен)
-  /d, --directories  LIST                                  - директория(и) сообщений, разделённые запятыми и минусами
+  /d, --directoriy  LIST                                  - директория(и) сообщений, разделённые запятыми и минусами
 						             для интервала (например: "D97B,D10A-D11B")
   /n, --ns NS                                              - пространство имён генерируемых схем (по умолчанию EDIFACT)
-  /t, --target-folder  PATH                                - каталог для размещения сгенерированных схем
+  /s, --schemas-root  URI                                - URI для размещения сгенерированных схем
   --tmp-folder PATH                                        - временный каталог
   /p, --proxy  http[s]://[USER[:PASSWORD]@]ADDRESS:PORT    - использовать прокси сервер для скачивания
   --connection-timeout  SECONDS                            - таймаут соединения веб-клиента</value>
@@ -217,13 +217,6 @@
   <data name="NOT_XML_SCHEMA" xml:space="preserve">
     <value>Файл '{0}' не содержит XML схему.</value>
   </data>
-  <data name="SCHEMA2TREE_USAGE" xml:space="preserve">
-    <value>Использование: {0} АРГУМЕНТЫ
-АРГУМЕНТЫ:
-/s, --schema URI                   - URI файла XMLсхемы. 
-/o URI                             - URI выходного файла.
-/w, --width SIZE                   - ширина выходного файла.</value>
-  </data>
   <data name="URI_SCHEME_NOT_SUPPORTED" xml:space="preserve">
     <value>Схема URI не поддерживается: '{0}'.</value>
   </data>
@@ -232,9 +225,9 @@
   </data>
   <data name="PARSER_CLI_USAGE" xml:space="preserve">
     <value>Использование:
-{0} OPTIONS
+{0} АРГУМЕНТЫ
 
-где OPTIONS:
+где АРГУМЕНТЫ:
                 --{1} URI    (Обязательно) Корневой URI папки, где расположены EDIFACT Xml-схемы.
 
                        --{2} URI    (Обязательно) URI входящего файла обмена EDIFACT.
@@ -248,5 +241,18 @@
                    --{6} yes|no    (Необязательно, по умолчанию yes) Позволяет проверять EDIFACT не слишком строго.
 
                 --{7} SIZE    (Необязательно) Размер внутреннего буфера для возможной оптимизации.</value>
+  </data>
+  <data name="SCHEMA2TREE_USAGE" xml:space="preserve">
+    <value>Использование:
+{0} АРГУМЕНТЫ
+
+где АРГУМЕНТЫ:
+     --{1} URI    (Обязательно) Корневой URI папки, где расположены EDIFACT Xml-схемы.
+         --{2} TYPE    (Обязательно) Тип EDIFACT-сообщения.
+  --{3} DIRECTORY    (Обязательно) Директория EDIFACT-сообщения.
+           --{4} URI    (Mandatory) URI выходного файла.
+  --{5} CODE    (Необязательно, по умолчанию UN) Контролирующее агентство EDIFACT-сообщения.
+	--{6} SUFFIX    (Необязательно) Суффикс EDIFACT-сообщения.
+      --{7} SIZE    (Необязательно, по умолчанию {8}) Ширина страницы выходного файла.</value>
   </data>
 </root>

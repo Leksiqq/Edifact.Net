@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "Schema2TreeCLI": {
+      "commandName": "Project",
+      "commandLineArgs": "--schemas-root W:\\c#\\Edifact\\var\\xsd\r\n--directory d97b\r\n--message IFCSUM\r\n--output W:\\c#\\Edifact\\var\\1.html"
+    },
+    "Профиль 2": {
+      "commandName": "Project"
+    },
+    "Профиль 1": {
+      "commandName": "Project",
+      "commandLineArgs": "--schemas-root W:\\c#\\Edifact\\var\\xsd\r\n--directory d97b\r\n--message IFCSUM\r\n--output W:\\c#\\Edifact\\var\\2.html\r\n--suffix=.2"
+    }
+  }
+}

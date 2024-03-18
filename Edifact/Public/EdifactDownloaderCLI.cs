@@ -151,7 +151,7 @@ public class EdifactDownloaderCLI : BackgroundService
                 }
                 prevArg = null;
             }
-            else if (waiting is Waiting.TargetFolder)
+            else if (waiting is Waiting.SchemasRoot)
             {
                 options.TargetUri = new Uri(arg);
                 prevArg = null;
@@ -208,7 +208,7 @@ public class EdifactDownloaderCLI : BackgroundService
                     }
                     prevArg = arg;
                 }
-                else if (waiting is Waiting.TargetFolder)
+                else if (waiting is Waiting.SchemasRoot)
                 {
                     if (options.Namespace is { })
                     {
@@ -282,7 +282,7 @@ public class EdifactDownloaderCLI : BackgroundService
     {
         return arg switch
         {
-            "/t" or "--target-folder" => Waiting.TargetFolder,
+            "/s" or "--schemas-root" => Waiting.SchemasRoot,
             "/m" or "--message" => Waiting.Message,
             "/d" or "--directories" => Waiting.Directories,
             "/n" or "--ns" => Waiting.Namespace,

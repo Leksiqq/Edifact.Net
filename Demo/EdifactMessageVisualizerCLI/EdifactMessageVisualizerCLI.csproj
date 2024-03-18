@@ -8,11 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(Configuration)'=='Debug'">
-    <ProjectReference Include="..\Edifact\Edifact.csproj" />
+    <ProjectReference Include="..\..\Edifact\Edifact.csproj" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)'=='Release'">
     <PackageReference Include="Net.Leksi.Edifact" Version="1.0.0" />
   </ItemGroup>
+
 
 </Project>

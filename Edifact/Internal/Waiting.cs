@@ -8,7 +8,7 @@ internal enum Waiting
     Directories,
     Namespace,
     Proxy,
-    TargetFolder,
+    SchemasRoot,
     TmpFolder,
     ExternalUnzipCommandLineFormat,
     SchemaDocument,

@@ -1,6 +1,6 @@
 ﻿namespace Net.Leksi.Edifact;
 
-public enum MessageEventKind
+public enum EventKind
 {
     Start,
     End

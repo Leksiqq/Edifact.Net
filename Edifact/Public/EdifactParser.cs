@@ -12,6 +12,7 @@ namespace Net.Leksi.Edifact;
 
 public class EdifactParser
 {
+    public event GroupEventHandler? Group;
     public event MessageEventHandler? Message;
 
     private static readonly Regex s_reSegmentGroup = new("^SG\\d+$");
@@ -313,7 +314,7 @@ public class EdifactParser
                 {
                     _messageEventArgs!.Xml = _sb.ToString();
                 }
-                _messageEventArgs.EventKind = MessageEventKind.End;
+                _messageEventArgs.EventKind = EventKind.End;
                 Message?.Invoke(this, _messageEventArgs);
 
                 _sb.Clear();
@@ -404,7 +405,7 @@ public class EdifactParser
                 string s = _tokenizer.IsInteractive ? s_s306 : s_s009;
                 string s1 = _tokenizer.IsInteractive ? s_d0340 : s_d0062;
                 _messageEventArgs ??= new MessageEventArgs();
-                _messageEventArgs.EventKind = MessageEventKind.Start;
+                _messageEventArgs.EventKind = EventKind.Start;
                 _messageEventArgs.MessageReferenceNumber = _messageHeaderXml.CreateNavigator()!.SelectSingleNode(string.Format(s_secondLevelXPathFormat, _messageHeader, s1), _man)!.Value;
                 XPathNavigator nav1 = _messageHeaderXml.CreateNavigator()!.SelectSingleNode(string.Format(s_secondLevelXPathFormat, _messageHeader, s), _man)!;
                 _messageEventArgs.MessageType = nav1.SelectSingleNode(s_d0065XPath, _man)!.Value;
