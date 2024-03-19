@@ -12,6 +12,7 @@ namespace Net.Leksi.Edifact;
 
 public class EdifactParser
 {
+    public event InterchangeEventHandler? Interchange;
     public event GroupEventHandler? Group;
     public event MessageEventHandler? Message;
 
@@ -46,6 +47,8 @@ public class EdifactParser
     private string _interchangeTrailer = string.Empty;
     private string _messageXsd = string.Empty;
     private MessageEventArgs _messageEventArgs = null!;
+    private GroupEventArgs _groupEventArgs = null!;
+    private InterchangeEventArgs _interchangeEventArgs = null!;
     private XmlSchema? _messageSchema = null;
 
     private bool _inMessage = false;
@@ -60,14 +63,14 @@ public class EdifactParser
         _services = services;
         _logger = _services.GetService<ILogger<EdifactParser>>();
         _xmlResolver = new Resolver(_services);
-        
-}
+
+    }
     public async Task Parse(EdifactParserOptions options, CancellationToken? cancellationToken)
     {
         try
         {
             _options = options;
-            if(Interlocked.Increment(ref _entersNum) != 1)
+            if (Interlocked.Increment(ref _entersNum) != 1)
             {
                 throw new Exception("TODO: Thread unsafety.");
             }
@@ -306,14 +309,7 @@ public class EdifactParser
                 await _writer.WriteEndElementAsync();
                 await _writer.WriteEndDocumentAsync();
                 _writer.Close();
-                if (_messageEventArgs!.Stream is { })
-                {
-                    _messageEventArgs!.Stream.Close();
-                }
-                else
-                {
-                    _messageEventArgs!.Xml = _sb.ToString();
-                }
+                _messageEventArgs!.Stream?.Close();
                 _messageEventArgs.EventKind = EventKind.End;
                 Message?.Invoke(this, _messageEventArgs);
 
@@ -377,6 +373,8 @@ public class EdifactParser
                 {
                     throw new Exception($"TODO: expected number of groups/messages: {exepectedCount}, got: {_interchangeControlCount}.");
                 }
+                _interchangeEventArgs.EventKind = EventKind.End;
+                Interchange?.Invoke(this, _interchangeEventArgs);
             }
         }
         else
@@ -406,52 +404,54 @@ public class EdifactParser
                 string s1 = _tokenizer.IsInteractive ? s_d0340 : s_d0062;
                 _messageEventArgs ??= new MessageEventArgs();
                 _messageEventArgs.EventKind = EventKind.Start;
-                _messageEventArgs.MessageReferenceNumber = _messageHeaderXml.CreateNavigator()!.SelectSingleNode(string.Format(s_secondLevelXPathFormat, _messageHeader, s1), _man)!.Value;
-                XPathNavigator nav1 = _messageHeaderXml.CreateNavigator()!.SelectSingleNode(string.Format(s_secondLevelXPathFormat, _messageHeader, s), _man)!;
-                _messageEventArgs.MessageType = nav1.SelectSingleNode(s_d0065XPath, _man)!.Value;
-                _messageEventArgs.MessageVersion = nav1.SelectSingleNode(s_d0052XPath, _man)!.Value;
-                _messageEventArgs.MessageRelease = nav1.SelectSingleNode(s_d0054XPath, _man)!.Value;
-                _messageEventArgs.ControllingAgencyCoded = nav1.SelectSingleNode(s_d0051XPath, _man)?.Value ?? s_un;
-                _messageEventArgs.InterchangeHeader = new XmlDocument(_nameTable);
-                _messageEventArgs.InterchangeHeader.LoadXml(_interchangeHeaderXml.OuterXml);
-                if (_inGroup)
+                if(_tokenizer.IsInteractive)
                 {
-                    _messageEventArgs.GroupHeader = new XmlDocument(_nameTable);
-                    _messageEventArgs.GroupHeader.LoadXml(_groupHeaderXml.OuterXml);
+                    _messageEventArgs.Header = new InteractiveMessageHeader();
                 }
-                _messageEventArgs.MessageHeader = new XmlDocument(_nameTable);
-                _messageEventArgs.MessageHeader.LoadXml(_messageHeaderXml.OuterXml);
+                else
+                {
+                    _messageEventArgs.Header = new BatchMessageHeader();
+                }
+                _messageEventArgs.IsInteractive = _tokenizer.IsInteractive;
+
+                BuildMessageHeader();
 
                 Message?.Invoke(this, _messageEventArgs);
 
 
-                if(_options.MessagesSuffixes is null ||  !_options.MessagesSuffixes.TryGetValue(_messageEventArgs.MessageType, out string? suffix))
+                if (
+                    _options.MessagesSuffixes is null 
+                    || !_options.MessagesSuffixes.TryGetValue(
+                        _messageEventArgs.Header.Identifier.MessageType, 
+                        out string? suffix
+                    )
+                )
                 {
                     suffix = string.Empty;
                 }
 
                 _messageXsd = string.Format(
                     s_fileInDirectoryXsdFormat,
-                    _messageEventArgs.ControllingAgencyCoded,
-                    _messageEventArgs.MessageVersion,
-                    _messageEventArgs.MessageRelease,
-                    _messageEventArgs.MessageType,
+                    _messageEventArgs.Header.Identifier.ControllingAgencyCoded,
+                    _messageEventArgs.Header.Identifier.MessageVersionNumber,
+                    _messageEventArgs.Header.Identifier.MessageReleaseNumber,
+                    _messageEventArgs.Header.Identifier.MessageType,
                     suffix
                 );
 
                 if (_messageSchema is { })
                 {
-                    if (_messageSchemaCache[_messageEventArgs.MessageType] != _messageSchema)
+                    if (_messageSchemaCache[_messageEventArgs.Header.Identifier.MessageType] != _messageSchema)
                     {
                         _schemaSet.Remove(_messageSchema);
-                        _messageSchema = _schemaSet.Add(_messageSchemaCache[_messageEventArgs.MessageType]);
+                        _messageSchema = _schemaSet.Add(_messageSchemaCache[_messageEventArgs.Header.Identifier.MessageType]);
                         _schemaSet.Compile();
                     }
                 }
                 else
                 {
                     _messageSchema = _schemaSet.Add(_targetNamespace, new Uri(_schemas, _messageXsd).ToString());
-                    _messageSchemaCache.Add(_messageEventArgs.MessageType, _messageSchema!);
+                    _messageSchemaCache.Add(_messageEventArgs.Header.Identifier.MessageType, _messageSchema!);
                     _schemaSet.Compile();
                 }
 
@@ -545,6 +545,11 @@ public class EdifactParser
         }
     }
 
+    private void BuildMessageHeader()
+    {
+        throw new NotImplementedException();
+    }
+
     private async Task ProcessGroupTraier(SegmentToken segment)
     {
         if (_inGroup)
@@ -580,6 +585,9 @@ public class EdifactParser
                     {
                         throw new Exception($"TODO: group references differ; expected: {groupReference1}, got: {groupReference2}.");
                     }
+                    _groupEventArgs.EventKind = EventKind.End;
+
+                    Group?.Invoke(this, _groupEventArgs);
                 }
                 else
                 {
@@ -627,6 +635,14 @@ public class EdifactParser
                     {
                         throw new Exception($"TODO: expected: {nameof(XmlSchemaSequence)}, got: {_sequencesStack.Last().Item}");
                     }
+                    _groupEventArgs ??= new GroupEventArgs()
+                    {
+                        Header = new GroupHeader()
+                    };
+                    BuildGroupHeader();
+                    _groupEventArgs.EventKind = EventKind.Start;
+
+                    Group?.Invoke(this, _groupEventArgs);
                 }
                 else
                 {
@@ -642,6 +658,11 @@ public class EdifactParser
         {
             throw new Exception($"TODO: unexpected tag: '{segment.Tag}'.");
         }
+    }
+
+    private void BuildGroupHeader()
+    {
+        throw new NotImplementedException();
     }
 
     private void SelectProperSequence(SegmentToken segment)
@@ -688,6 +709,8 @@ public class EdifactParser
 
         await _writer.WriteStartDocumentAsync();
         XmlSchemaElement? el0;
+        _interchangeEventArgs ??= new InterchangeEventArgs();
+
         if (_tokenizer.IsInteractive)
         {
             Uri interactiveUri = new(_schemas, s_interactiveInterchangeXsd);
@@ -697,6 +720,7 @@ public class EdifactParser
             _messageHeader = s_uih;
             _messageTrailer = s_uit;
             _interchangeTrailer = s_uiz;
+            _interchangeEventArgs.Header = new InteractiveInterchangeHeader();
         }
         else
         {
@@ -707,7 +731,9 @@ public class EdifactParser
             _messageHeader = s_unh;
             _messageTrailer = s_unt;
             _interchangeTrailer = s_unz;
+            _interchangeEventArgs.Header = new BatchInterchangeHeader();
         }
+        _interchangeEventArgs.IsInteractive = _tokenizer.IsInteractive;
         if (
             el0 is { }
             && el0.ElementSchemaType is XmlSchemaComplexType ct
@@ -715,22 +741,25 @@ public class EdifactParser
         )
         {
             _sequencesStack.Add(new Sequence(el0.Name!, seq));
-            if (
-                _sequencesStack.Last().Move()
-            )
-            {
-                await ParseSegmentAsync(segment, _sequencesStack.Last().Item);
-                await _writer!.WriteEndDocumentAsync();
-                _writer.Close();
-                _interchangeHeaderXml.LoadXml(_sb.ToString());
-            }
+            _sequencesStack.Last().Move();
+            await ParseSegmentAsync(segment, _sequencesStack.Last().Item);
+            await _writer!.WriteEndDocumentAsync();
+            _writer.Close();
+            _interchangeHeaderXml.LoadXml(_sb.ToString());
+            BuildInterchangeHeader();
+            _interchangeEventArgs.EventKind = EventKind.Start;
+
+            Interchange?.Invoke(this, _interchangeEventArgs);
         }
         else
         {
             throw new Exception($"TODO: expected tag: 'UNB' or 'UIB', got: '{segment.Tag}'");
         }
     }
-
+    private void BuildInterchangeHeader()
+    {
+        throw new NotImplementedException();
+    }
     private async Task ParseSegmentAsync(SegmentToken segment, XmlSchemaObject? obj)
     {
         if (obj is XmlSchemaElement el)
@@ -876,7 +905,7 @@ public class EdifactParser
         string message = string.Format("/{0}: {1}", string.Join('/', _path.Skip(1)), e.Message);
         if (_validationWarningsCache.Add(message))
         {
-            
+
             switch (e.Severity)
             {
                 case XmlSeverityType.Warning:

@@ -108,8 +108,21 @@ public class EdifactParserCLI : BackgroundService
     private void _parser_Message(object sender, MessageEventArgs e)
     {
         if(e.EventKind is EventKind.Start){
-            Uri uri = new(new Uri(string.Format(s_folderUriFormat, _options.OutputUri)), string.Format(s_fileNameFormat, e.MessageReferenceNumber, s_xml));
-            e.Stream = _services.GetRequiredKeyedService<IStreamFactory>(uri.Scheme).GetOutputStream(uri);
+            Uri uri = new(
+                new Uri(
+                    string.Format(
+                        s_folderUriFormat, 
+                        _options.OutputUri
+                    )
+                ), 
+                string.Format(
+                    s_fileNameFormat, 
+                    e.Header.MessageReferenceNumber, 
+                    s_xml
+                )
+            );
+            e.Stream = _services.GetRequiredKeyedService<IStreamFactory>(uri.Scheme)
+                .GetOutputStream(uri);
         }
     }
 }

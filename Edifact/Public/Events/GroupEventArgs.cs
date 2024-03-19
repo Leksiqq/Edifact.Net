@@ -1,7 +1,6 @@
 ﻿namespace Net.Leksi.Edifact;
 
-public class GroupEventArgs: EventArgs
+public class GroupEventArgs: EdifactEventArgs
 {
-    public EventKind EventKind { get; internal set; }
     public GroupHeader Header { get; internal set; } = null!;
 }
