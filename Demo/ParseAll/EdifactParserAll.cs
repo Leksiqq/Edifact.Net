@@ -47,7 +47,7 @@ internal class EdifactParserAll : BackgroundService
     {
         if (e.EventKind is EventKind.Start)
         {
-            Uri uri = new(new Uri($"{_options.OutputUri}/_"), $"{e.MessageReferenceNumber}.xml");
+            Uri uri = new(new Uri($"{_options.OutputUri}/_"), $"{e.Header.MessageReferenceNumber}.xml");
             e.Stream = _services.GetRequiredKeyedService<IStreamFactory>(uri.Scheme).GetOutputStream(uri);
         }
     }

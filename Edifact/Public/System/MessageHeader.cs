@@ -2,7 +2,6 @@
 
 public class MessageHeader
 {
-    public string MessageReferenceNumber { get; set; } = null!;
-    public MessageIdentifier Identifier { get; set; } = null!;
-    public StatusOfTransfer? StatusOfTransfer { get; set; }
+    public string? MessageReferenceNumber { get; set; } = null!;
+    public MessageIdentification Identifier { get; set; } = null!;
 }

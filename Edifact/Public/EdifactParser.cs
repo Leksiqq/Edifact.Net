@@ -57,13 +57,13 @@ public class EdifactParser
     private string _groupReference = string.Empty;
     private int _groupControlCount = 0;
     private int _interchangeControlCount = 0;
+    private bool _isInteractive = false;
 
     public EdifactParser(IServiceProvider services)
     {
         _services = services;
         _logger = _services.GetService<ILogger<EdifactParser>>();
         _xmlResolver = new Resolver(_services);
-
     }
     public async Task Parse(EdifactParserOptions options, CancellationToken? cancellationToken)
     {
@@ -113,6 +113,7 @@ public class EdifactParser
             _groupControlCount = 0;
             _interchangeControlCount = 0;
             _messageSchema = null;
+            _isInteractive = false;
 
             Uri input = new(options.InputUri!);
             IStreamFactory schemasStreamFactory = _services.GetKeyedService<IStreamFactory>(_schemas.Scheme)!;
@@ -328,7 +329,7 @@ public class EdifactParser
                 {
                     throw new Exception($"TODO: expected number of segments: {expectedSegments}, got: {_messageControlCount}.");
                 }
-                string s = _tokenizer.IsInteractive ? s_d0340 : s_d0062;
+                string s = _isInteractive ? s_d0340 : s_d0062;
                 string messageReference1 = _messageHeaderXml.CreateNavigator()!
                     .SelectSingleNode(string.Format(s_secondLevelXPathFormat, _messageHeader, s), _man)?.Value ?? string.Empty;
                 string messageReference2 = _messageTrailerXml.CreateNavigator()!
@@ -400,11 +401,11 @@ public class EdifactParser
                 _writer.Close();
                 _messageHeaderXml.LoadXml(_sb.ToString());
 
-                string s = _tokenizer.IsInteractive ? s_s306 : s_s009;
-                string s1 = _tokenizer.IsInteractive ? s_d0340 : s_d0062;
+                string s = _isInteractive ? s_s306 : s_s009;
+                string s1 = _isInteractive ? s_d0340 : s_d0062;
                 _messageEventArgs ??= new MessageEventArgs();
                 _messageEventArgs.EventKind = EventKind.Start;
-                if(_tokenizer.IsInteractive)
+                if(_isInteractive)
                 {
                     _messageEventArgs.Header = new InteractiveMessageHeader();
                 }
@@ -412,7 +413,7 @@ public class EdifactParser
                 {
                     _messageEventArgs.Header = new BatchMessageHeader();
                 }
-                _messageEventArgs.IsInteractive = _tokenizer.IsInteractive;
+                _messageEventArgs.IsInteractive = _isInteractive;
 
                 BuildMessageHeader();
 
@@ -422,7 +423,7 @@ public class EdifactParser
                 if (
                     _options.MessagesSuffixes is null 
                     || !_options.MessagesSuffixes.TryGetValue(
-                        _messageEventArgs.Header.Identifier.MessageType, 
+                        _messageEventArgs.Header.Identifier.Identifier, 
                         out string? suffix
                     )
                 )
@@ -433,25 +434,25 @@ public class EdifactParser
                 _messageXsd = string.Format(
                     s_fileInDirectoryXsdFormat,
                     _messageEventArgs.Header.Identifier.ControllingAgencyCoded,
-                    _messageEventArgs.Header.Identifier.MessageVersionNumber,
-                    _messageEventArgs.Header.Identifier.MessageReleaseNumber,
-                    _messageEventArgs.Header.Identifier.MessageType,
+                    _messageEventArgs.Header.Identifier.VersionNumber,
+                    _messageEventArgs.Header.Identifier.ReleaseNumber,
+                    _messageEventArgs.Header.Identifier.Identifier,
                     suffix
                 );
 
                 if (_messageSchema is { })
                 {
-                    if (_messageSchemaCache[_messageEventArgs.Header.Identifier.MessageType] != _messageSchema)
+                    if (_messageSchemaCache[_messageEventArgs.Header.Identifier.Identifier] != _messageSchema)
                     {
                         _schemaSet.Remove(_messageSchema);
-                        _messageSchema = _schemaSet.Add(_messageSchemaCache[_messageEventArgs.Header.Identifier.MessageType]);
+                        _messageSchema = _schemaSet.Add(_messageSchemaCache[_messageEventArgs.Header.Identifier.Identifier]);
                         _schemaSet.Compile();
                     }
                 }
                 else
                 {
                     _messageSchema = _schemaSet.Add(_targetNamespace, new Uri(_schemas, _messageXsd).ToString());
-                    _messageSchemaCache.Add(_messageEventArgs.Header.Identifier.MessageType, _messageSchema!);
+                    _messageSchemaCache.Add(_messageEventArgs.Header.Identifier.Identifier, _messageSchema!);
                     _schemaSet.Compile();
                 }
 
@@ -471,7 +472,7 @@ public class EdifactParser
                     _writer = XmlWriter.Create(_messageEventArgs.Stream, _xws);
                 }
                 await _writer.WriteStartDocumentAsync();
-                _path.Add(_tokenizer.IsInteractive ? s_interactiveInterchange1 : s_batchInterchange1);
+                _path.Add(_isInteractive ? s_interactiveInterchange1 : s_batchInterchange1);
                 await _writer.WriteStartElementAsync(
                 null,
                     _path.Last(),
@@ -547,7 +548,98 @@ public class EdifactParser
 
     private void BuildMessageHeader()
     {
-        throw new NotImplementedException();
+        XPathNavigator nav = _messageHeaderXml.CreateNavigator()!.SelectSingleNode(string.Format("/e:{0}", _isInteractive ? s_uih : s_unh), _man)!;
+        if(nav.SelectSingleNode("e:S009", _man) is XPathNavigator mi)
+        {
+            _messageEventArgs.Header.Identifier = new MessageIdentification
+            {
+                Identifier = mi.SelectSingleNode("e:D0065", _man)!.Value,
+                VersionNumber = mi.SelectSingleNode("e:D0052", _man)!.Value,
+                ReleaseNumber = mi.SelectSingleNode("e:D0054", _man)!.Value,
+                ControllingAgencyCoded = mi.SelectSingleNode("e:D0051", _man)!.Value,
+                AssociationAssignedCode = mi.SelectSingleNode("e:D0057", _man)?.Value,
+                CodeListDirectoryVersionNUmber = mi.SelectSingleNode("e:D0110", _man)?.Value,
+                MessageTypeSubfunctionIdentification = mi.SelectSingleNode("e:D0113", _man)?.Value,
+            };
+            if (_isInteractive)
+            {
+                InteractiveMessageHeader header = (_messageEventArgs.Header as InteractiveMessageHeader)!;
+                header.MessageReferenceNumber = nav.SelectSingleNode("e:D0340", _man)?.Value;
+                if (nav.SelectSingleNode("e:S009") is XPathNavigator dr)
+                {
+                    header.DialogueReference = new DialogueReference
+                    {
+                        InitiatorControlReference = dr.SelectSingleNode("e:D0300", _man)!.Value,
+                        InitiatorReferenceIdentification = dr.SelectSingleNode("e:D0303", _man)?.Value,
+                        ControllingAgencyCoded = dr.SelectSingleNode("e:D0051", _man)!.Value,
+                        ResponderControlReference = dr.SelectSingleNode("e:D0304", _man)?.Value,
+                    };
+                }
+                if (nav.SelectSingleNode("e:S301") is XPathNavigator sof)
+                {
+                    header.StatusOfTransfer = new InteractiveStatusOfTransfer
+                    {
+                        SenderSequenceNumber = sof.SelectSingleNode("e:D0320", _man)?.Value,
+                        TransferPositionCoded = sof.SelectSingleNode("e:D0323", _man)?.Value,
+                        DuplicateIndicator = sof.SelectSingleNode("e:D0325", _man)?.Value,
+                    };
+                }
+                if (nav.SelectSingleNode("e:S300", _man) is XPathNavigator dt)
+                {
+                    header.DateAndTimeOfInitiation = new DateTimeOfEvent
+                    {
+                        Date = dt.SelectSingleNode("e:D0338", _man)?.Value,
+                        Time = dt.SelectSingleNode("e:D0314", _man)?.Value,
+                        UtcOffset = dt.SelectSingleNode("e:D0336", _man)?.Value,
+                    };
+                }
+                header.TestIndicator = nav.SelectSingleNode("e:D0035", _man)?.Value;
+            }
+            else
+            {
+                BatchMessageHeader header = (_messageEventArgs.Header as BatchMessageHeader)!;
+                header.MessageReferenceNumber = nav.SelectSingleNode("e:D0062", _man)!.Value;
+                header.CommonAccessReference = nav.SelectSingleNode("e:D0068", _man)?.Value;
+                if (nav.SelectSingleNode("e:S010", _man) is XPathNavigator sof)
+                {
+                    header.StatusOfTransfer = new BatchStatusOfTransfer
+                    {
+                        SequenceOfTransfers = sof.SelectSingleNode("e:D0070", _man)!.Value,
+                        FirstAndLastTransfer = sof.SelectSingleNode("e:D0073", _man)?.Value,
+                    };
+                }
+                if (nav.SelectSingleNode("e:S016", _man) is XPathNavigator si)
+                {
+                    header.SubsetIdentification = new Identification
+                    {
+                        Identifier = si.SelectSingleNode("e:D0115", _man)!.Value,
+                        VersionNumber = si.SelectSingleNode("e:D0116", _man)?.Value,
+                        ReleaseNumber = si.SelectSingleNode("e:D0118", _man)?.Value,
+                        ControllingAgencyCoded = si.SelectSingleNode("e:D0051", _man)?.Value,
+                    };
+                }
+                if (nav.SelectSingleNode("e:S017", _man) is XPathNavigator gi)
+                {
+                    header.SubsetIdentification = new Identification
+                    {
+                        Identifier = gi.SelectSingleNode("e:D0121", _man)!.Value,
+                        VersionNumber = gi.SelectSingleNode("e:D0122", _man)?.Value,
+                        ReleaseNumber = gi.SelectSingleNode("e:D0124", _man)?.Value,
+                        ControllingAgencyCoded = gi.SelectSingleNode("e:D0051", _man)?.Value,
+                    };
+                }
+                if (nav.SelectSingleNode("e:S018", _man) is XPathNavigator sci)
+                {
+                    header.SubsetIdentification = new Identification
+                    {
+                        Identifier = sci.SelectSingleNode("e:D0127", _man)!.Value,
+                        VersionNumber = sci.SelectSingleNode("e:D0128", _man)?.Value,
+                        ReleaseNumber = sci.SelectSingleNode("e:D0130", _man)?.Value,
+                        ControllingAgencyCoded = sci.SelectSingleNode("e:D0051", _man)?.Value,
+                    };
+                }
+            }
+        }
     }
 
     private async Task ProcessGroupTraier(SegmentToken segment)
@@ -662,7 +754,44 @@ public class EdifactParser
 
     private void BuildGroupHeader()
     {
-        throw new NotImplementedException();
+        XPathNavigator nav = _groupHeaderXml.CreateNavigator()!.SelectSingleNode("/e:UNG", _man)!;
+        if(nav.SelectSingleNode("e:D0038", _man)?.Value is not null)
+        {
+            _groupEventArgs.Header.MessageGroupIdentification = new MessageIdentification
+            {
+                Identifier = nav.SelectSingleNode("e:D0038", _man)!.Value,
+                VersionNumber = nav.SelectSingleNode("e:S008/e:D0052", _man)!.Value,
+                ReleaseNumber = nav.SelectSingleNode("e:S008/e:D0054", _man)!.Value,
+                ControllingAgencyCoded = nav.SelectSingleNode("e:S008/e:D0051", _man)!.Value,
+                AssociationAssignedCode = nav.SelectSingleNode("e:S008/e:D0057", _man)?.Value,
+            };
+        }
+        if (nav.SelectSingleNode("e:S006", _man) is XPathNavigator si)
+        {
+            _groupEventArgs.Header.ApplicationSender = new PartyIdentification
+            {
+                Identification = si.SelectSingleNode("e:D0040", _man)!.Value,
+                CodeQualifier = si.SelectSingleNode("e:D0007", _man)?.Value,
+            };
+        }
+        if (nav.SelectSingleNode("e:S007", _man) is XPathNavigator ri)
+        {
+            _groupEventArgs.Header.ApplicationRecipient = new PartyIdentification
+            {
+                Identification = ri.SelectSingleNode("e:D0044", _man)!.Value,
+                CodeQualifier = ri.SelectSingleNode("e:D0007", _man)?.Value,
+            };
+        }
+        if (nav.SelectSingleNode("e:S004", _man) is XPathNavigator dt)
+        {
+            _groupEventArgs.Header.DateAndTimeOfPreparation = new DateTimeOfEvent
+            {
+                Date = dt.SelectSingleNode("e:D0017", _man)!.Value,
+                Time = dt.SelectSingleNode("e:D0019", _man)!.Value,
+            };
+        }
+        _groupEventArgs.Header.GroupReferenceNumber = nav.SelectSingleNode("e:D0048", _man)!.Value;
+        _groupEventArgs.Header.ApplicationPassword = nav.SelectSingleNode("e:D0058", _man)?.Value;
     }
 
     private void SelectProperSequence(SegmentToken segment)
@@ -698,6 +827,7 @@ public class EdifactParser
 
     private async Task ProcessInterchangeHeader(SegmentToken segment)
     {
+        _isInteractive = segment.Tag == s_uib;
         _xws = new()
         {
             Async = true,
@@ -711,7 +841,7 @@ public class EdifactParser
         XmlSchemaElement? el0;
         _interchangeEventArgs ??= new InterchangeEventArgs();
 
-        if (_tokenizer.IsInteractive)
+        if(_isInteractive)
         {
             Uri interactiveUri = new(_schemas, s_interactiveInterchangeXsd);
             _schemaSet.Add(_targetNamespace, interactiveUri.ToString());
@@ -733,7 +863,7 @@ public class EdifactParser
             _interchangeTrailer = s_unz;
             _interchangeEventArgs.Header = new BatchInterchangeHeader();
         }
-        _interchangeEventArgs.IsInteractive = _tokenizer.IsInteractive;
+        _interchangeEventArgs.IsInteractive = _isInteractive;
         if (
             el0 is { }
             && el0.ElementSchemaType is XmlSchemaComplexType ct
@@ -758,7 +888,118 @@ public class EdifactParser
     }
     private void BuildInterchangeHeader()
     {
-        throw new NotImplementedException();
+        XPathNavigator nav = _interchangeHeaderXml.CreateNavigator()!
+            .SelectSingleNode(string.Format("/e:{0}", _isInteractive ? s_uib : s_unb), _man)!;
+
+        if (nav.SelectSingleNode("e:S001", _man) is XPathNavigator syntax)
+        {
+            _interchangeEventArgs.Header!.SyntaxIdentifier = new SyntaxIdentifier
+            {
+                Identifier = syntax.SelectSingleNode("e:D0001", _man)!.Value,
+                VersionNumber = syntax.SelectSingleNode("e:D0002", _man)!.Value,
+                ServiceCodeListDirectoryVersionNumber = syntax.SelectSingleNode("e:D0133", _man)?.Value,
+                CharacterEncodingCoded = syntax.SelectSingleNode("e:D0133", _man)?.Value,
+            };
+        }
+        if (nav.SelectSingleNode("e:S002", _man) is XPathNavigator sender)
+        {
+            _interchangeEventArgs.Header!.Sender = new PartyIdentification
+            {
+                Identification = sender.SelectSingleNode("e:D0004", _man)!.Value,
+                CodeQualifier = sender.SelectSingleNode("e:D0007", _man)?.Value,
+                InternalIdentification = sender.SelectSingleNode("e:D0008", _man)?.Value,
+                InternalSubIdentification = sender.SelectSingleNode("e:D0042", _man)?.Value,
+            };
+        }
+        if (nav.SelectSingleNode("e:S003", _man) is XPathNavigator recipient)
+        {
+            _interchangeEventArgs.Header!.Recipient = new PartyIdentification
+            {
+                Identification = recipient.SelectSingleNode("e:D0010", _man)!.Value,
+                CodeQualifier = recipient.SelectSingleNode("e:D0007", _man)?.Value,
+                InternalIdentification = recipient.SelectSingleNode("e:D0014", _man)?.Value,
+                InternalSubIdentification = recipient.SelectSingleNode("e:D0046", _man)?.Value,
+            };
+        }
+        _interchangeEventArgs.Header!.TestIndicator = nav.SelectSingleNode("e:D0035", _man)?.Value;
+        if (_isInteractive)
+        {
+            InteractiveInterchangeHeader header = (_interchangeEventArgs.Header as InteractiveInterchangeHeader)!;
+            if(nav.SelectSingleNode("e:S302", _man) is XPathNavigator dr)
+            {
+                header.DialogueReference = new DialogueReference
+                {
+                    InitiatorControlReference = dr.SelectSingleNode("e:D0300", _man)!.Value,
+                    InitiatorReferenceIdentification = dr.SelectSingleNode("e:D0303", _man)?.Value,
+                    ControllingAgencyCoded = dr.SelectSingleNode("e:D0051", _man)?.Value,
+                    ResponderControlReference = dr.SelectSingleNode("e:D0304", _man)?.Value,
+                };
+            }
+            if (nav.SelectSingleNode("e:S303", _man) is XPathNavigator tr)
+            {
+                header.TransactionReference = new TransactionReference
+                {
+                    TransactionControlReference = tr.SelectSingleNode("e:D0306", _man)!.Value,
+                    InitiatorReferenceIdentification = tr.SelectSingleNode("e:D0303", _man)?.Value,
+                    ControllingAgencyCoded = tr.SelectSingleNode("e:D0051", _man)?.Value,
+                };
+            }
+            if (nav.SelectSingleNode("e:S018", _man) is XPathNavigator si)
+            {
+                header.ScenarioIdentification = new Identification
+                {
+                    Identifier = si.SelectSingleNode("e:D0127", _man)!.Value,
+                    VersionNumber = si.SelectSingleNode("e:D0128", _man)?.Value,
+                    ReleaseNumber = si.SelectSingleNode("e:D0130", _man)?.Value,
+                    ControllingAgencyCoded = si.SelectSingleNode("e:D0051", _man)?.Value,
+                };
+            }
+            if (nav.SelectSingleNode("e:S305", _man) is XPathNavigator di)
+            {
+                header.DialogueIdentification = new Identification
+                {
+                    Identifier = di.SelectSingleNode("e:D0311", _man)!.Value,
+                    VersionNumber = di.SelectSingleNode("e:D0342", _man)?.Value,
+                    ReleaseNumber = di.SelectSingleNode("e:D0344", _man)?.Value,
+                    ControllingAgencyCoded = di.SelectSingleNode("e:D0051", _man)?.Value,
+                };
+            }
+            if (nav.SelectSingleNode("e:S300", _man) is XPathNavigator dt)
+            {
+                header.DateAndTimeOfInitiation = new DateTimeOfEvent
+                {
+                    Date = dt.SelectSingleNode("e:D0338", _man)?.Value,
+                    Time = dt.SelectSingleNode("e:D0314", _man)?.Value,
+                    UtcOffset = dt.SelectSingleNode("e:D0336", _man)?.Value,
+                };
+            }
+            header.DuplicateIndicator = nav.SelectSingleNode("e:D0325", _man)?.Value;
+        }
+        else
+        {
+            BatchInterchangeHeader header = (_interchangeEventArgs.Header as BatchInterchangeHeader)!;
+            if (nav.SelectSingleNode("e:S004", _man) is XPathNavigator dt)
+            {
+                header.DateAndTimeOfPreparation = new DateTimeOfEvent
+                {
+                    Date = dt.SelectSingleNode("e:D0017", _man)?.Value,
+                    Time = dt.SelectSingleNode("e:D0019", _man)?.Value,
+                };
+            }
+            header.ControlReference = nav.SelectSingleNode("e:D0020", _man)!.Value;
+            if (nav.SelectSingleNode("e:S005", _man) is XPathNavigator rrpd)
+            {
+                header.RecipientReferencePasswordDetails = new ReferenceOrPasswordDetails
+                {
+                    ReferenceOrPassword = rrpd.SelectSingleNode("e:D0022", _man)!.Value,
+                    Qualifier = rrpd.SelectSingleNode("e:D0025", _man)?.Value,
+                };
+            }
+            header.ApplicationReference = nav.SelectSingleNode("e:D0025", _man)?.Value;
+            header.PriorityCode = nav.SelectSingleNode("e:D0029", _man)?.Value;
+            header.AcknowledgementRequest = nav.SelectSingleNode("e:D0031", _man) is { };
+            header.AgreementIdentifier = nav.SelectSingleNode("e:D0032", _man)?.Value;
+        }
     }
     private async Task ParseSegmentAsync(SegmentToken segment, XmlSchemaObject? obj)
     {

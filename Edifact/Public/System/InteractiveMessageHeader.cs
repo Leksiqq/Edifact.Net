@@ -3,5 +3,7 @@
 public class InteractiveMessageHeader: MessageHeader
 {
     public DialogueReference? DialogueReference { get; set; }
-    public DateTime? DateAndTimeOfInitiation { get; set; }
+    public DateTimeOfEvent? DateAndTimeOfInitiation { get; set; }
+    public InteractiveStatusOfTransfer? StatusOfTransfer { get; set; }
+    public string? TestIndicator { get; set; }
 }

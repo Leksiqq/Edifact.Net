@@ -1,5 +1,4 @@
-﻿using System.Formats.Asn1;
-using System.Text;
+﻿using System.Text;
 
 namespace Net.Leksi.Edifact;
 
@@ -241,7 +240,6 @@ internal class EdifactTokenizer
     private char _decimalMark = '.';
     private char _releaseCharacter = '?';
     private char _segmentTerminator = '\'';
-    private bool _isInteractive = false;
     private char _syntaxLevel = '\0';
     private int _syntaxVersion = 0;
     private BOM? _bom = null;
@@ -250,7 +248,6 @@ internal class EdifactTokenizer
     private int _newLine = 0;
     internal Encoding? Encoding {  get; set; }
     internal char DecimalMark => _decimalMark;
-    internal bool IsInteractive => _isInteractive;
     internal bool IsStrict { get; set; } = true;
     internal int BufferLength { get; set; } = 2048;
     internal async IAsyncEnumerable<SegmentToken> Tokenize(Stream stream)
@@ -396,16 +393,12 @@ internal class EdifactTokenizer
             ThrowUnexpectedEoF(_line, _col);
         }
         _col += 2;
-        bool interchangeHeaderStarted = false;
+        string interchangeHeaderTag = string.Empty;
         if (buf[0] == 'U' && (buf[1] == 'I' || buf[1] == 'N') && buf[2] == 'B')
         {
-            interchangeHeaderStarted = true;
-            if (buf[1] == 'I')
-            {
-                _isInteractive = true;
-            }
+            interchangeHeaderTag = string.Format("{0}{1}{2}", (char)buf[0], (char)buf[1], (char)buf[2]);
         }
-        if (!interchangeHeaderStarted)
+        if (string.IsNullOrEmpty(interchangeHeaderTag))
         {
             throw new Exception($"TODO: \"UNB\" or \"UIB\" expected, but {(char)buf[0]}{(char)buf[1]}{(char)buf[2]} found at {_line}:{_col}.");
         }
@@ -486,7 +479,7 @@ internal class EdifactTokenizer
         _syntaxVersion = (char)b - '0';
         SegmentToken token = new()
         {
-            Tag = _isInteractive ? "UIB" : "UNB",
+            Tag = interchangeHeaderTag,
             Components = [
                 new ComponentToken 
                 {

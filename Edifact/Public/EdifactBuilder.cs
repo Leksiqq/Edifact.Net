@@ -1,25 +1,24 @@
-﻿using System.Xml;
+﻿namespace Net.Leksi.Edifact;
 
-namespace Net.Leksi.Edifact;
-
-public class EdifactInterchange
+public class EdifactBuilder
 {
     private readonly IServiceProvider _services;
     private EdifactInterchangeOptions _options = null!;
-    public EdifactInterchange(IServiceProvider services)
+    public EdifactBuilder(IServiceProvider services)
     {
         _services = services;
+
     }
-    public async Task BeginInterchange(EdifactInterchangeOptions options)
+    public async Task BeginInterchange(EdifactInterchangeOptions options, InterchangeHeader header)
     {
         _options = options;
         await Task.CompletedTask;
     }
-    public async Task BeginGroup(XmlDocument groupHeader)
+    public async Task BeginGroup(GroupHeader header)
     {
         await Task.CompletedTask;
     }
-    public async Task SendMessage(XmlDocument messageHeader, Stream input)
+    public async Task SendMessage(MessageHeader header, Stream input)
     {
         await Task.CompletedTask;
     }

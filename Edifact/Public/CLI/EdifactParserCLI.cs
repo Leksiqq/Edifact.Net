@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Net.Leksi.Streams;
 using System.Text;
 using static Net.Leksi.Edifact.Constants;
@@ -12,14 +13,16 @@ public class EdifactParserCLI : BackgroundService
     private readonly EdifactParserOptions _options;
     private readonly EdifactParser _parser;
     private readonly IServiceProvider _services;
+    private readonly ILogger<EdifactParserCLI>? _logger;
 
     public EdifactParserCLI(IServiceProvider services)
     {
         _services = services;
         _options = _services.GetRequiredService<EdifactParserOptions>();
         _parser = _services.GetRequiredService<EdifactParser>();
+        _logger = _services.GetService<ILogger<EdifactParserCLI>>();
     }
-    public static async Task RunAsync(string[] args, Action<IHostApplicationBuilder>? config = null)
+    public static async Task RunAsync(string[] args, Action<IHostApplicationBuilder>? configHostBuilder = null, Action<IServiceProvider>? configApp = null)
     {
         IConfiguration bootstrapConfig = new ConfigurationBuilder()
             .AddCommandLine(args)
@@ -35,7 +38,7 @@ public class EdifactParserCLI : BackgroundService
             InputUri = bootstrapConfig[s_input],
             OutputUri = bootstrapConfig[s_output],
         };
-        if(options.SchemasUri is null || options.InputUri is null || options.OutputUri is null)
+        if(options.SchemasUri is null || options.InputUri is null)
         {
             Usage();
             return;
@@ -67,8 +70,12 @@ public class EdifactParserCLI : BackgroundService
         builder.Services.AddSingleton<EdifactParser>();
         builder.Services.AddHostedService<EdifactParserCLI>();
         builder.Services.AddKeyedTransient<IStreamFactory, LocalFileStreamFactory>(s_file);
+        if(configApp is { })
+        {
+            builder.Services.AddSingleton(configApp);
+        }
 
-        config?.Invoke(builder);
+        configHostBuilder?.Invoke(builder);
 
         IHost host = builder.Build();
         await host.RunAsync();
@@ -96,6 +103,7 @@ public class EdifactParserCLI : BackgroundService
     {
         try
         {
+            _services.GetService<Action<IServiceProvider>>()?.Invoke(_services);
             _parser.Message += _parser_Message;
             await _parser.Parse(_options, stoppingToken);
         }
@@ -108,21 +116,37 @@ public class EdifactParserCLI : BackgroundService
     private void _parser_Message(object sender, MessageEventArgs e)
     {
         if(e.EventKind is EventKind.Start){
-            Uri uri = new(
-                new Uri(
+            if(_options.OutputUri is { })
+            {
+                Uri uri = new(
+                    new Uri(
+                        string.Format(
+                            s_folderUriFormat,
+                            _options.OutputUri
+                        )
+                    ),
                     string.Format(
-                        s_folderUriFormat, 
-                        _options.OutputUri
+                        s_fileNameFormat,
+                        e.Header.MessageReferenceNumber,
+                        s_xml
                     )
-                ), 
-                string.Format(
-                    s_fileNameFormat, 
-                    e.Header.MessageReferenceNumber, 
-                    s_xml
-                )
-            );
-            e.Stream = _services.GetRequiredKeyedService<IStreamFactory>(uri.Scheme)
-                .GetOutputStream(uri);
+                );
+                e.Stream = _services.GetRequiredKeyedService<IStreamFactory>(uri.Scheme)
+                    .GetOutputStream(uri);
+            }
+            else
+            {
+                _logger?.LogWarning(
+                    s_logMessage,
+                    string.Format(
+                        s_rmLabels.GetString(s_outputNotSetForMessage)!, 
+                        e.Header.Identifier.Identifier, 
+                        e.Header.Identifier.ControllingAgencyCoded, 
+                        e.Header.Identifier.VersionNumber, 
+                        e.Header.Identifier.ReleaseNumber
+                    )
+                );
+            }
         }
     }
 }

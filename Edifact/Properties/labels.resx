@@ -295,7 +295,7 @@ where OPTIONS:
 
                        --{2} URI    (Mandatory) The URI of input EDIFACT interchange file.
 
-                      --{3} URI    (Mandatory) The URI of output folder, where message Xml-files will be placed.
+                      --{3} URI    (Optional) The URI of output folder, where message Xml-files will be placed.
 
 --{4} "&lt;Type1&gt;=&lt;suffix1&gt;;..."    (Optional) List of type=suffix pairs separated with semicolon (;) of EDIFACT messages Xml-schemas files to use instead of original ones.
 
@@ -304,5 +304,8 @@ where OPTIONS:
                    --{6} yes|no    (Optional, default yes) Allows to check EDIFACT data a bit less strictly.
 
                 --{7} SIZE    (Optional) Internal buffer size for possible optimization.</value>
+  </data>
+  <data name="OUTPUT_NOT_SET_FOR_MESSAGE" xml:space="preserve">
+    <value>OutputUri not set for message '{0}:{1}:{2}:{3}'.</value>
   </data>
 </root>

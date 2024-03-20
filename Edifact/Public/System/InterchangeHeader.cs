@@ -3,5 +3,7 @@
 public class InterchangeHeader
 {
     public SyntaxIdentifier SyntaxIdentifier { get; set; } = null!;
-    public bool TestIndicator { get; set; } = false;
+    public PartyIdentification? Sender { get; set; } = null!;
+    public PartyIdentification? Recipient { get; set; } = null!;
+    public string? TestIndicator { get; set; }
 }

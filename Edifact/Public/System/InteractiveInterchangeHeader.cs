@@ -4,10 +4,8 @@ public class InteractiveInterchangeHeader: InterchangeHeader
 {
     public DialogueReference? DialogueReference { get; set; }
     public TransactionReference? TransactionReference { get; set; }
-    public MessageIdentifier? ScenarioIdentification { get; set; }
-    public MessageIdentifier? DialogueIdentification { get; set; }
-    public PartyIdentification? Sender { get; set; } = null!;
-    public PartyIdentification? Recipient { get; set; } = null!;
-    public DateTime? DateAndTimeOfInitiation { get; set; }
-    public bool DuplicateIndicator { get; set; } = false;
+    public Identification? ScenarioIdentification { get; set; }
+    public Identification? DialogueIdentification { get; set; }
+    public DateTimeOfEvent? DateAndTimeOfInitiation { get; set; }
+    public string? DuplicateIndicator { get; set; }
 }

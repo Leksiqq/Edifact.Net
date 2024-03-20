@@ -123,6 +123,7 @@ internal static class Constants
     internal const string s_numberTypePatternFormat = "^-?([0-9]\\.?){{{0}{1}}}[0-9]$";
     internal const string s_numberTypePattern = "^-?[^.]*\\.?[^.]+$";
     internal const string s_output = "output";
+    internal const string s_outputNotSetForMessage = "OUTPUT_NOT_SET_FOR_MESSAGE";
     internal const string s_pageWidth = "page-width";
     internal const string s_parserCliUsage = "PARSER_CLI_USAGE";
     internal const string s_path1 = "/DAM/trade/untdid/{0}/{1}.zip";
@@ -174,10 +175,12 @@ internal static class Constants
     internal const string s_t = "t";
     internal const string s_type = "type";
     internal const string s_typeForEnumXPathFormat = "/xs:schema/xs:complexType[@name='D{0}']/xs:simpleContent/xs:restriction";
+    internal const string s_uib = "UIB";
     internal const string s_uih = "UIH";
     internal const string s_uit = "UIT";
     internal const string s_uiz = "UIZ";
     internal const string s_un = "UN";
+    internal const string s_unb = "UNB";
     internal const string s_uncl = "UNCL";
     internal const string s_une = "UNE";
     internal const string s_unexpectedLine = "UNEXPECTED_LINE";
