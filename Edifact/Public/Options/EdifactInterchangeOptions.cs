@@ -7,7 +7,7 @@ public class EdifactInterchangeOptions
 {
     public string? SchemasUri { get; set; }
     public Stream? Output { get; set; }
-    public XmlDocument? InterchangeHeader { get; set; }
+    public InterchangeHeader? InterchangeHeader { get; set; }
     public Encoding? Encoding { get; set; } = Encoding.UTF8;
     public char SegmentPartsSeparator { get; set; } = '+';
     public char ComponentPartsSeparator { get; set; } = ':';
