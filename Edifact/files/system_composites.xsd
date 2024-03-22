@@ -26,6 +26,16 @@
           <xs:documentation eu:name="name">Syntax version number</xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element name="D0080" type="D0080" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation eu:name="name">Service code list directory version number</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0133" type="D0133" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation eu:name="name">Character encoding, coded</xs:documentation>
+        </xs:annotation>
+      </xs:element>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="S002">
@@ -48,6 +58,11 @@
           <xs:documentation eu:name="name">Address for reverse routing</xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element name="D0042" type="D0042" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation eu:name="name">Interchange sender internal sub-identification</xs:documentation>
+        </xs:annotation>
+      </xs:element>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="S003">
@@ -67,7 +82,12 @@
       </xs:element>
       <xs:element name="D0014" type="D0014" minOccurs="0">
         <xs:annotation>
-          <xs:documentation eu:name="name">Routing address</xs:documentation>
+          <xs:documentation eu:name="name">Interchange recipient internal identification</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0046" type="D0046" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation eu:name="name">Interchange recipient internal sub-identification</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>

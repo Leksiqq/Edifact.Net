@@ -157,7 +157,21 @@
       </xs:restriction>
     </xs:simpleContent>
   </xs:complexType>
+  <xs:complexType name="D0042">
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="35"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
   <xs:complexType name="D0044">
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="35"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0046">
     <xs:simpleContent>
       <xs:restriction base="D">
         <xs:maxLength value="35"/>
@@ -255,6 +269,13 @@
       </xs:restriction>
     </xs:simpleContent>
   </xs:complexType>
+  <xs:complexType name="D0080">
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:pattern value="^\d{1,6}$"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
   <xs:complexType name="D0083">
     <xs:simpleContent>
       <xs:restriction base="D">
@@ -302,6 +323,16 @@
   <xs:complexType name="D0130">
     <xs:annotation>
       <xs:documentation eu:name="name">Scenario release number</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="3"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0133">
+    <xs:annotation>
+      <xs:documentation eu:name="name"> 	Character encoding, coded</xs:documentation>
     </xs:annotation>
     <xs:simpleContent>
       <xs:restriction base="D">

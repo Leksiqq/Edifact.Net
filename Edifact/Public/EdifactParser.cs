@@ -10,38 +10,19 @@ using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
 
-public class EdifactParser
+public class EdifactParser: EdifactProcessor
 {
     public event InterchangeEventHandler? Interchange;
     public event GroupEventHandler? Group;
     public event MessageEventHandler? Message;
 
     private static readonly Regex s_reSegmentGroup = new("^SG\\d+$");
-    private readonly IServiceProvider _services;
-    private readonly ILogger<EdifactParser>? _logger;
     private int _entersNum = 0;
-    private readonly StringBuilder _sb = new();
-    private readonly XmlResolver _xmlResolver;
     private readonly Dictionary<string, XmlSchema> _messageSchemaCache = [];
-    private readonly HashSet<string> _validationWarningsCache = [];
     private readonly List<Sequence> _sequencesStack = [];
-    private readonly List<string> _path = [];
     private EdifactParserOptions _options = null!;
-    private XmlSchemaSet _schemaSet = null!;
-    private XmlNameTable _nameTable = null!;
-    private XmlDocument _interchangeHeaderXml = null!;
-    private XmlDocument _interchangeTrailerXml = null!;
-    private XmlDocument _groupHeaderXml = null!;
-    private XmlDocument _groupTrailerXml = null!;
-    private XmlDocument _messageHeaderXml = null!;
-    private XmlDocument _messageTrailerXml = null!;
     private XmlDocument _elementXml = null!;
-    private XmlNamespaceManager _man = null!;
-    private XmlWriterSettings _xws = null!;
     private EdifactTokenizer _tokenizer = null!;
-    private XmlWriter _writer = null!;
-    private Uri _schemas = null!;
-    private string _targetNamespace = string.Empty;
     private string _messageHeader = string.Empty;
     private string _messageTrailer = string.Empty;
     private string _interchangeTrailer = string.Empty;
@@ -59,11 +40,9 @@ public class EdifactParser
     private int _interchangeControlCount = 0;
     private bool _isInteractive = false;
 
-    public EdifactParser(IServiceProvider services)
+    public EdifactParser(IServiceProvider services): base(services)
     {
-        _services = services;
         _logger = _services.GetService<ILogger<EdifactParser>>();
-        _xmlResolver = new Resolver(_services);
     }
     public async Task Parse(EdifactParserOptions options, CancellationToken? cancellationToken)
     {
@@ -114,30 +93,21 @@ public class EdifactParser
             _interchangeControlCount = 0;
             _messageSchema = null;
             _isInteractive = false;
+            _xws = new()
+            {
+                Async = true,
+                Encoding = _tokenizer.Encoding!,
+                Indent = true,
+            };
 
             Uri input = new(options.InputUri!);
-            IStreamFactory schemasStreamFactory = _services.GetKeyedService<IStreamFactory>(_schemas.Scheme)!;
             IStreamFactory inputStreamFactory = _services.GetKeyedService<IStreamFactory>(input.Scheme)!;
-            Uri edifactUri = new(_schemas, s_edifactXsd);
-            using Stream edifact = _xmlResolver.GetEntity(edifactUri, null, typeof(Stream)) as Stream
-                ?? throw new Exception("TODO: edifact.xsd not found.");
-            _man = new(_nameTable);
-            _man.AddNamespace(s_xsPrefix, Properties.Resources.schema_ns);
-            _man.AddNamespace("xsi", Properties.Resources.schema_instance_ns);
 
-            XmlDocument doc = new(_nameTable);
-            doc.Load(edifact);
-            XPathNavigator nav = doc.CreateNavigator()!;
-            if (nav.SelectSingleNode(s_targetNamespaceXPath1, _man) is not XPathNavigator tns)
-            {
-                throw new Exception("TODO: not schema.");
-            }
-            _targetNamespace = tns.Value;
-            _man.AddNamespace("e", _targetNamespace);
+            InitBaseStuff();
 
             int segmentPosition = 0;
 
-            await foreach (SegmentToken segment in _tokenizer.Tokenize(inputStreamFactory.GetInputStream(input)))
+            await foreach (SegmentToken segment in _tokenizer.TokenizeAsync(inputStreamFactory.GetInputStream(input)))
             {
                 cancellationToken?.ThrowIfCancellationRequested();
 
@@ -204,7 +174,6 @@ public class EdifactParser
             Interlocked.Decrement(ref _entersNum);
         }
     }
-
     private async Task ProcessSegment(SegmentToken segment)
     {
         while (true)
@@ -314,15 +283,16 @@ public class EdifactParser
                 _messageEventArgs.EventKind = EventKind.End;
                 Message?.Invoke(this, _messageEventArgs);
 
-                _sb.Clear();
-                _writer = XmlWriter.Create(_sb, _xws);
+                _ms.SetLength(0);
+                _writer = XmlWriter.Create(_ms, _xws);
                 await _writer.WriteStartDocumentAsync();
                 await ParseSegmentAsync(segment, el);
                 await _writer!.WriteEndDocumentAsync();
                 _writer.Close();
                 _sequencesStack.Last().Reset();
                 _inMessage = false;
-                _messageTrailerXml.LoadXml(_sb.ToString());
+                _ms.Position = 0;
+                _messageTrailerXml.Load(_ms);
                 int expectedSegments = _messageTrailerXml.CreateNavigator()!
                         .SelectSingleNode(string.Format(s_d0074XPathFormat, _messageTrailer), _man)?.ValueAsInt ?? -1;
                 if (expectedSegments != -1 && expectedSegments != _messageControlCount)
@@ -361,13 +331,14 @@ public class EdifactParser
             )
             {
 
-                _sb.Clear();
-                _writer = XmlWriter.Create(_sb, _xws);
+                _ms.SetLength(0);
+                _writer = XmlWriter.Create(_ms, _xws);
                 await _writer.WriteStartDocumentAsync();
                 await ParseSegmentAsync(segment, el);
                 await _writer!.WriteEndDocumentAsync();
                 _writer.Close();
-                _interchangeTrailerXml.LoadXml(_sb.ToString());
+                _ms.Position = 0;
+                _interchangeTrailerXml.Load(_ms);
                 int exepectedCount = _interchangeTrailerXml.CreateNavigator()!
                         .SelectSingleNode(string.Format(s_secondLevelXPathFormat, _interchangeTrailer, s_d0036), _man)?.ValueAsInt ?? -1;
                 if (exepectedCount != -1 && exepectedCount != _interchangeControlCount)
@@ -393,13 +364,14 @@ public class EdifactParser
         {
             if (el.QualifiedName == new XmlQualifiedName(segment.Tag, _targetNamespace))
             {
-                _sb.Clear();
-                _writer = XmlWriter.Create(_sb, _xws);
+                _ms.SetLength(0);
+                _writer = XmlWriter.Create(_ms, _xws);
                 await _writer.WriteStartDocumentAsync();
                 await ParseSegmentAsync(segment, el);
                 await _writer!.WriteEndDocumentAsync();
                 _writer.Close();
-                _messageHeaderXml.LoadXml(_sb.ToString());
+                _ms.Position = 0;
+                _messageHeaderXml.Load(_ms);
 
                 string s = _isInteractive ? s_s306 : s_s009;
                 string s1 = _isInteractive ? s_d0340 : s_d0062;
@@ -464,8 +436,8 @@ public class EdifactParser
                 }
                 if (_messageEventArgs.Stream is null)
                 {
-                    _sb.Clear();
-                    _writer = XmlWriter.Create(_sb, _xws);
+                    _ms.SetLength(0);
+                    _writer = XmlWriter.Create(_ms, _xws);
                 }
                 else
                 {
@@ -654,13 +626,14 @@ public class EdifactParser
             {
                 if (el.QualifiedName == new XmlQualifiedName(segment.Tag, _targetNamespace))
                 {
-                    _sb.Clear();
-                    _writer = XmlWriter.Create(_sb, _xws);
+                    _ms.SetLength(0);
+                    _writer = XmlWriter.Create(_ms, _xws);
                     await _writer.WriteStartDocumentAsync();
                     await ParseSegmentAsync(segment, el);
                     await _writer!.WriteEndDocumentAsync();
                     _writer.Close();
-                    _groupTrailerXml.LoadXml(_sb.ToString());
+                    _ms.Position = 0;
+                    _groupTrailerXml.Load(_ms);
                     _sequencesStack.Last().Reset();
                     _inGroup = false;
                     int expectedMessages = _groupTrailerXml.CreateNavigator()!
@@ -708,13 +681,14 @@ public class EdifactParser
             {
                 if (el.QualifiedName == new XmlQualifiedName(segment.Tag, _targetNamespace))
                 {
-                    _sb.Clear();
-                    _writer = XmlWriter.Create(_sb, _xws);
+                    _ms.SetLength(0);
+                    _writer = XmlWriter.Create(_ms, _xws);
                     await _writer.WriteStartDocumentAsync();
                     await ParseSegmentAsync(segment, el);
                     await _writer!.WriteEndDocumentAsync();
                     _writer.Close();
-                    _groupHeaderXml.LoadXml(_sb.ToString());
+                    _ms.Position = 0;
+                    _groupHeaderXml.Load(_ms);
                     _groupReference = _groupHeaderXml.CreateNavigator()!.SelectSingleNode(s_ungD0048XPath, _man)!.Value;
                     _groupControlCount = 0;
                     _inGroup = true;
@@ -828,14 +802,8 @@ public class EdifactParser
     private async Task ProcessInterchangeHeader(SegmentToken segment)
     {
         _isInteractive = segment.Tag == s_uib;
-        _xws = new()
-        {
-            Async = true,
-            Encoding = _tokenizer.Encoding!,
-            Indent = true,
-        };
-        _sb.Clear();
-        _writer = XmlWriter.Create(_sb, _xws);
+        _ms.SetLength(0);
+        _writer = XmlWriter.Create(_ms, _xws);
 
         await _writer.WriteStartDocumentAsync();
         XmlSchemaElement? el0;
@@ -875,7 +843,8 @@ public class EdifactParser
             await ParseSegmentAsync(segment, _sequencesStack.Last().Item);
             await _writer!.WriteEndDocumentAsync();
             _writer.Close();
-            _interchangeHeaderXml.LoadXml(_sb.ToString());
+            _ms.Position = 0;
+            _interchangeHeaderXml.Load(_ms);
             BuildInterchangeHeader();
             _interchangeEventArgs.EventKind = EventKind.Start;
 
@@ -893,13 +862,10 @@ public class EdifactParser
 
         if (nav.SelectSingleNode("e:S001", _man) is XPathNavigator syntax)
         {
-            _interchangeEventArgs.Header!.SyntaxIdentifier = new SyntaxIdentifier
-            {
-                Identifier = syntax.SelectSingleNode("e:D0001", _man)!.Value,
-                VersionNumber = syntax.SelectSingleNode("e:D0002", _man)!.Value,
-                ServiceCodeListDirectoryVersionNumber = syntax.SelectSingleNode("e:D0133", _man)?.Value,
-                CharacterEncodingCoded = syntax.SelectSingleNode("e:D0133", _man)?.Value,
-            };
+            _interchangeEventArgs.Header!.SyntaxIdentifier.Identifier = syntax.SelectSingleNode("e:D0001", _man)!.Value;
+            _interchangeEventArgs.Header!.SyntaxIdentifier.VersionNumber = syntax.SelectSingleNode("e:D0002", _man)!.Value;
+            _interchangeEventArgs.Header!.SyntaxIdentifier.ServiceCodeListDirectoryVersionNumber = syntax.SelectSingleNode("e:D0080", _man)?.Value;
+            _interchangeEventArgs.Header!.SyntaxIdentifier.CharacterEncodingCoded = syntax.SelectSingleNode("e:D0133", _man)?.Value;
         }
         if (nav.SelectSingleNode("e:S002", _man) is XPathNavigator sender)
         {
@@ -995,7 +961,7 @@ public class EdifactParser
                     Qualifier = rrpd.SelectSingleNode("e:D0025", _man)?.Value,
                 };
             }
-            header.ApplicationReference = nav.SelectSingleNode("e:D0025", _man)?.Value;
+            header.ApplicationReference = nav.SelectSingleNode("e:D0026", _man)?.Value;
             header.PriorityCode = nav.SelectSingleNode("e:D0029", _man)?.Value;
             header.AcknowledgementRequest = nav.SelectSingleNode("e:D0031", _man) is { };
             header.AgreementIdentifier = nav.SelectSingleNode("e:D0032", _man)?.Value;
@@ -1138,24 +1104,6 @@ public class EdifactParser
         if (_validationWarningsCache.Add(message))
         {
             _logger?.LogWarning(s_logMessage, message);
-        }
-    }
-
-    private void SchemaSet_ValidationEventHandler(object? sender, ValidationEventArgs e)
-    {
-        string message = string.Format("/{0}: {1}", string.Join('/', _path.Skip(1)), e.Message);
-        if (_validationWarningsCache.Add(message))
-        {
-
-            switch (e.Severity)
-            {
-                case XmlSeverityType.Warning:
-                    _logger?.LogWarning(s_logMessage, message);
-                    break;
-                case XmlSeverityType.Error:
-                    _logger?.LogError(s_logMessage, message);
-                    break;
-            }
         }
     }
 }

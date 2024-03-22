@@ -250,6 +250,7 @@ public class EdifactDownloader
         _generatedFiles.Add(targetFile);
         targetFile = Path.Combine(_tmpDir, s_systemSegmentsXsd);
         SaveXmlDocument(InitXmlDocument(s_systemSegments), targetFile);
+        _generatedFiles.Add(targetFile);
         targetFile = Path.Combine(_tmpDir, s_utilityXsd);
         SaveXmlDocument(InitXmlDocument(s_utility), targetFile);
         _generatedFiles.Add(targetFile);

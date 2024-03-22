@@ -16,8 +16,8 @@ public class EdifactDownloaderCLI : BackgroundService
     private readonly EdifactDownloader _downloader;
     private readonly EdifactDownloaderOptions _options;
     private readonly IStreamFactory? _outputStreamFactory;
-
     private readonly ILogger<EdifactDownloaderCLI>? _logger;
+    private readonly Uri _schemas;
     public EdifactDownloaderCLI(IServiceProvider services)
     {
         _services = services;
@@ -26,12 +26,13 @@ public class EdifactDownloaderCLI : BackgroundService
         _downloader = _services.GetRequiredService<EdifactDownloader>();
         _downloader.DirectoryNotFound += Downloader_DirectoryNotFound;
         _downloader.DirectoryDownloaded += _downloader_DirectoryDownloaded;
-        _outputStreamFactory = _services.GetKeyedService<IStreamFactory>(_options.TargetUri!.Scheme);
+        _schemas = new Uri(string.Format(s_folderUriFormat, _options.SchemasUri));
+        _outputStreamFactory = _services.GetKeyedService<IStreamFactory>(_schemas.Scheme);
         if (_outputStreamFactory is null)
         {
             throw new IOException(
                 string.Format(
-                    s_rmLabels.GetString(s_uriSchemeNotSupported)!, _options.TargetUri!.Scheme)
+                    s_rmLabels.GetString(s_uriSchemeNotSupported)!, _schemas.Scheme)
             );
         }
     }
@@ -44,9 +45,9 @@ public class EdifactDownloaderCLI : BackgroundService
             {
                 using Stream stream = _outputStreamFactory!.GetOutputStream(
                     new Uri(
-                        _options.TargetUri!, 
+                        _schemas, 
                         Path.Combine(
-                            Path.GetFileName(_options.TargetUri!.AbsolutePath), 
+                            Path.GetFileName(_schemas.AbsolutePath), 
                             file
                         )
                     )
@@ -153,7 +154,7 @@ public class EdifactDownloaderCLI : BackgroundService
             }
             else if (waiting is Waiting.SchemasRoot)
             {
-                options.TargetUri = new Uri(arg);
+                options.SchemasUri = arg;
                 prevArg = null;
             }
             else if (waiting is Waiting.TmpFolder)
@@ -270,7 +271,7 @@ public class EdifactDownloaderCLI : BackgroundService
             Usage();
             return null;
         }
-        if(options.TargetUri is null)
+        if(options.SchemasUri is null)
         {
             CommonCLI.MissedMandatoryKeyError("--target-folder");
             Usage();

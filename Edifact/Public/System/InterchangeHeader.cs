@@ -2,7 +2,7 @@
 
 public class InterchangeHeader
 {
-    public SyntaxIdentifier SyntaxIdentifier { get; set; } = null!;
+    public SyntaxIdentifier SyntaxIdentifier { get; private init; } = new();
     public PartyIdentification? Sender { get; set; } = null!;
     public PartyIdentification? Recipient { get; set; } = null!;
     public string? TestIndicator { get; set; }

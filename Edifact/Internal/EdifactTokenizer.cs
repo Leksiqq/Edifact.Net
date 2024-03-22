@@ -224,17 +224,6 @@ internal class EdifactTokenizer
             }
         }
     };
-    private static HashSet<char> s_levelAChars = [
-        'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-        '0','1','2','3','4','5','6','7','8','9',
-        ' ','.',',','-','(',')','/','=','\'','+',':','?','!','"','%','&','*',';','<','>'
-    ];
-    private static HashSet<char> s_levelBChars = [
-        'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
-        'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
-        '0','1','2','3','4','5','6','7','8','9',
-        ' ','.',',','-','(',')','/','=','\'','+',':','?','!','"','%','&','*',';','<','>'
-    ];
     private char _segmentPartsSeparator = '+';
     private char _componentPartsSeparator = ':';
     private char _decimalMark = '.';
@@ -250,7 +239,7 @@ internal class EdifactTokenizer
     internal char DecimalMark => _decimalMark;
     internal bool IsStrict { get; set; } = true;
     internal int BufferLength { get; set; } = 2048;
-    internal async IAsyncEnumerable<SegmentToken> Tokenize(Stream stream)
+    internal async IAsyncEnumerable<SegmentToken> TokenizeAsync(Stream stream)
     {
         if (!ReadBOM(stream))
         {
@@ -259,7 +248,10 @@ internal class EdifactTokenizer
         _line = 1;
         _col = 0;
         ReadSeparators(stream);
-        SegmentToken? token = ReadInterchangeHeaderStart(stream);
+        SegmentToken? token = new();
+        char[] buffer = new char[BufferLength];
+        buffer[0] = (char)ReadInterchangeHeaderStart(stream, token);
+        int offset = 1;
 
         if (Encoding is null)
         {
@@ -268,10 +260,10 @@ internal class EdifactTokenizer
         TextReader reader = new StreamReader(stream, Encoding!);
         bool escaped = false;
         StringBuilder sb = new();
-        char[] buffer = new char[BufferLength];
         int n;
-        while ((n = await reader.ReadAsync(buffer, 0, buffer.Length)) > 0)
+        while ((n = await reader.ReadAsync(buffer, offset, buffer.Length - offset)) > 0)
         {
+            offset = 0;
             for(int i = 0; i < n; ++i)
             {
                 char ch = buffer[i];
@@ -283,8 +275,8 @@ internal class EdifactTokenizer
                     if (
                         IsStrict
                         && (
-                            (_syntaxLevel == 'A' && !s_levelAChars.Contains(ch))
-                            || (_syntaxLevel == 'B' && !s_levelBChars.Contains(ch))
+                            (_syntaxLevel == 'A' && !EdifactProcessor.s_levelAChars.Contains(ch))
+                            || (_syntaxLevel == 'B' && !EdifactProcessor.s_levelBChars.Contains(ch))
                         )
                     )
                     {
@@ -384,7 +376,7 @@ internal class EdifactTokenizer
     {
         throw new Exception("TODO: Undefined encoding.");
     }
-    private SegmentToken ReadInterchangeHeaderStart(Stream stream)
+    private int ReadInterchangeHeaderStart(Stream stream, SegmentToken token)
     {
         int b = SkipByteWhitespaces(stream);
         byte[] buf = [(byte)b, 0, 0, 0];
@@ -415,40 +407,9 @@ internal class EdifactTokenizer
         if (buf[0] == 'U' && buf[1] == 'N' && buf[2] == 'O')
         {
             _syntaxLevel = (char)buf[3];
-            switch (_syntaxLevel)
+            if(Encoding is null && EdifactProcessor.SyntaxLevelToEncoding(_syntaxLevel) is Encoding encoding)
             {
-                case 'A' or 'B':
-                    Encoding = Encoding.ASCII;
-                    break;
-                case 'C':
-                    Encoding = Encoding.Latin1;
-                    break;
-                case 'D':
-                    Encoding = Encoding.GetEncoding("ISO-8859-2");
-                    break;
-                case 'E':
-                    Encoding = Encoding.GetEncoding("ISO-8859-5");
-                    break;
-                case 'F':
-                    Encoding = Encoding.GetEncoding("ISO-8859-7");
-                    break;
-                case 'G':
-                    Encoding = Encoding.GetEncoding("ISO-8859-3");
-                    break;
-                case 'H':
-                    Encoding = Encoding.GetEncoding("ISO-8859-4");
-                    break;
-                case 'I':
-                    Encoding = Encoding.GetEncoding("ISO-8859-6");
-                    break;
-                case 'J':
-                    Encoding = Encoding.GetEncoding("ISO-8859-8");
-                    break;
-                case 'K':
-                    Encoding = Encoding.GetEncoding("ISO-8859-9");
-                    break;
-                case 'X' or 'Y':
-                    throw new NotSupportedException();
+                Encoding = encoding;
             }
         }
         else
@@ -477,18 +438,55 @@ internal class EdifactTokenizer
         }
         ++_col;
         _syntaxVersion = (char)b - '0';
-        SegmentToken token = new()
+        b = stream.ReadByte();
+        if(b != _componentPartsSeparator && b != _segmentPartsSeparator && b != _segmentTerminator)
         {
-            Tag = interchangeHeaderTag,
-            Components = [
-                new ComponentToken 
+            ThrowUnexpectedChar(b, $"'{_componentPartsSeparator}', '{_segmentPartsSeparator}', '{_segmentTerminator}'", _line, _col);
+        }
+        ++_col;
+
+        token.Tag = interchangeHeaderTag;
+        token.Components = [
+            new ComponentToken
+            {
+                Elements = [Encoding.ASCII.GetString(buf), _syntaxVersion.ToString()]
+            }
+        ];
+
+        if (b == _componentPartsSeparator)
+        {
+            MemoryStream ms = new();
+            while (true)
+            {
+                b = stream.ReadByte();
+                ++_col;
+                if(b == _componentPartsSeparator || b == _segmentPartsSeparator || b == _segmentTerminator)
                 {
-                    Elements = [Encoding.ASCII.GetString(buf), _syntaxVersion.ToString()]
-                }    
-            ],
-        };
-        return token;
+                    token.Components.Last().Elements!.Add(Encoding.ASCII.GetString(ms.ToArray()));
+                    if(b == _segmentPartsSeparator || b == _segmentTerminator)
+                    {
+                        break;
+                    }
+                    ms.SetLength(0);
+                }
+                else
+                {
+                    ms.WriteByte((byte)b);
+                }
+
+            }
+            if(token.Components.Last().Elements!.Count > 3)
+            {
+                if(Encoding is null && EdifactProcessor.CharacterEncodingCodedToEncoding(token.Components.Last().Elements![3]) is Encoding encoding)
+                {
+                    Encoding = encoding;
+                }
+            }
+        }
+
+        return b;
     }
+
     private static void ThrowUnexpectedEoF(int line, int col)
     {
         throw new Exception($"TODO: unexpected end of file at {line}:{col}.");
