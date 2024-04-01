@@ -25,13 +25,16 @@ class Runner(IServiceProvider services) : BackgroundService
         {
             EdifactBuilder edifactBuilder = services.GetRequiredService<EdifactBuilder>();
 
-            BatchInterchangeHeader header = new()
-            {
-
-            };
+            BatchInterchangeHeader header = new();
 
             header.SyntaxIdentifier.Identifier = "UNOZ";
+            header.SyntaxIdentifier.VersionNumber = "1";
             header.SyntaxIdentifier.CharacterEncodingCoded = "5";
+            header.DateAndTimeOfPreparation = new DateTimeOfEvent(DateTime.Now);
+            header.Sender = new PartyIdentification { Identification = "BTS", CodeQualifier = "30" };
+            header.Recipient = new PartyIdentification { Identification = "003702011539", CodeQualifier = "30" };
+            //header.TestIndicator = "1";
+            header.ControlReference = "10122823639495";
 
             await edifactBuilder.BeginInterchangeAsync(services.GetRequiredService<EdifactBuilderOptions>(), header);
         }

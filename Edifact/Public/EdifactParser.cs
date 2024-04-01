@@ -174,6 +174,22 @@ public class EdifactParser: EdifactProcessor
             Interlocked.Decrement(ref _entersNum);
         }
     }
+    protected override void SchemaSet_ValidationEventHandler(object? sender, ValidationEventArgs e)
+    {
+        string message = string.Format("/{0}: {1}", string.Join('/', _path.Skip(1)), e.Message);
+        if (_validationWarningsCache.Add(message))
+        {
+            switch (e.Severity)
+            {
+                case XmlSeverityType.Warning:
+                    _logger?.LogWarning(s_logMessage, message);
+                    break;
+                case XmlSeverityType.Error:
+                    _logger?.LogError(e.Exception, s_logMessage, message);
+                    break;
+            }
+        }
+    }
     private async Task ProcessSegment(SegmentToken segment)
     {
         while (true)
@@ -963,7 +979,7 @@ public class EdifactParser: EdifactProcessor
             }
             header.ApplicationReference = nav.SelectSingleNode("e:D0026", _man)?.Value;
             header.PriorityCode = nav.SelectSingleNode("e:D0029", _man)?.Value;
-            header.AcknowledgementRequest = nav.SelectSingleNode("e:D0031", _man) is { };
+            header.AcknowledgementRequest = nav.SelectSingleNode("e:D0031", _man)?.Value;
             header.AgreementIdentifier = nav.SelectSingleNode("e:D0032", _man)?.Value;
         }
     }

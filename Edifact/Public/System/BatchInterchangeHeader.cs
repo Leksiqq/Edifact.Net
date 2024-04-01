@@ -7,7 +7,7 @@ public class BatchInterchangeHeader : InterchangeHeader
     public ReferenceOrPasswordDetails? RecipientReferencePasswordDetails { get; set; }
     public string? ApplicationReference { get; set; }
     public string? PriorityCode { get; set; }
-    public bool AcknowledgementRequest { get; set; } = false;
+    public string? AcknowledgementRequest { get; set; }
     public string? AgreementIdentifier { get; set; }
 }
  

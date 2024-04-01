@@ -92,21 +92,16 @@ public class EdifactProcessor(IServiceProvider services)
         }
         return null;
     }
-    protected void SchemaSet_ValidationEventHandler(object? sender, ValidationEventArgs e)
+    protected virtual void SchemaSet_ValidationEventHandler(object? sender, ValidationEventArgs e)
     {
-        string message = string.Format("/{0}: {1}", string.Join('/', _path.Skip(1)), e.Message);
-        if (_validationWarningsCache.Add(message))
+        switch (e.Severity)
         {
-
-            switch (e.Severity)
-            {
-                case XmlSeverityType.Warning:
-                    _logger?.LogWarning(s_logMessage, message);
-                    break;
-                case XmlSeverityType.Error:
-                    _logger?.LogError(s_logMessage, message);
-                    break;
-            }
+            case XmlSeverityType.Warning:
+                _logger?.LogWarning(s_logMessage, e.Message);
+                break;
+            case XmlSeverityType.Error:
+                _logger?.LogError(s_logMessage, e.Message);
+                break;
         }
     }
     protected void InitBaseStuff()
