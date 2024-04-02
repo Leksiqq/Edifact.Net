@@ -26,7 +26,7 @@ public class EdifactDownloaderCLI : BackgroundService
         _downloader = _services.GetRequiredService<EdifactDownloader>();
         _downloader.DirectoryNotFound += Downloader_DirectoryNotFound;
         _downloader.DirectoryDownloaded += _downloader_DirectoryDownloaded;
-        _schemas = new Uri(string.Format(s_folderUriFormat, _options.SchemasUri));
+        _schemas = new Uri(_options.SchemasUri!);
         _outputStreamFactory = _services.GetKeyedService<IStreamFactory>(_schemas.Scheme);
         if (_outputStreamFactory is null)
         {

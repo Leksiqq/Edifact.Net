@@ -100,7 +100,7 @@ public class EdifactProcessor(IServiceProvider services)
                 _logger?.LogWarning(s_logMessage, e.Message);
                 break;
             case XmlSeverityType.Error:
-                _logger?.LogError(s_logMessage, e.Message);
+                _logger?.LogError(e.Exception, s_logMessage, e.Message);
                 break;
         }
     }

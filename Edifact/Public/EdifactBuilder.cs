@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using Net.Leksi.Streams;
 using System.Text;
 using System.Xml;
-using System.Xml.Linq;
 using System.Xml.Schema;
 using System.Xml.XPath;
 using static Net.Leksi.Edifact.Constants;
@@ -12,6 +11,7 @@ namespace Net.Leksi.Edifact;
 
 public class EdifactBuilder: EdifactProcessor
 {
+    public event SendMessageEventHandler? SendMessage;
     private EdifactBuilderOptions _options = null!;
     private char _syntaxLevel = 'A';
     private TextWriter _output = null!;
@@ -104,19 +104,19 @@ public class EdifactBuilder: EdifactProcessor
         }
 
     }
-    public async Task BeginGroup(GroupHeader header)
+    public async Task BeginGroupAsync(GroupHeader header)
     {
         await Task.CompletedTask;
     }
-    public async Task SendMessage(MessageHeader header, Stream input)
+    public async Task SendMessageAsync(MessageHeader header, Stream input)
     {
         await Task.CompletedTask;
     }
-    public async Task EndGroup()
+    public async Task EndGroupAsync()
     {
         await Task.CompletedTask;
     }
-    public async Task EndInterchange()
+    public async Task EndInterchangeAsync()
     {
         await Task.CompletedTask;
     }
@@ -447,7 +447,9 @@ public class EdifactBuilder: EdifactProcessor
         _ms.Position = 0;
         result.Load(_ms);
 
+
         ValidateElement(result.DocumentElement!);
+        Console.WriteLine(result.OuterXml);
 
         return result;
     }
@@ -456,8 +458,7 @@ public class EdifactBuilder: EdifactProcessor
     {
         if(element.SchemaInfo.Validity is XmlSchemaValidity.NotKnown)
         {
-            element.SetAttribute("xmlns:e", _targetNamespace);
-            element.SetAttribute("type", Properties.Resources.schema_instance_ns, string.Format("e:{0}", element.LocalName));
+            element.SetAttribute("type", Properties.Resources.schema_instance_ns, element.LocalName);
             element.OwnerDocument.Validate(SchemaSet_ValidationEventHandler, element);
         }
     }
