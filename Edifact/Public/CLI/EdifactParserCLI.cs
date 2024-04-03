@@ -140,7 +140,7 @@ public class EdifactParserCLI : BackgroundService
                     s_logMessage,
                     string.Format(
                         s_rmLabels.GetString(s_outputNotSetForMessage)!, 
-                        e.Header.Identifier.Identifier, 
+                        e.Header.Identifier.Type, 
                         e.Header.Identifier.ControllingAgencyCoded, 
                         e.Header.Identifier.VersionNumber, 
                         e.Header.Identifier.ReleaseNumber

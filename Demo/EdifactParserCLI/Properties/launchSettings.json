@@ -2,7 +2,11 @@
   "profiles": {
     "Профиль 1": {
       "commandName": "Project",
-      "commandLineArgs": "--schemas-root W:\\C#\\Edifact\\var\\xsd \r\n--input W:\\C#\\Edifact\\misc\\PDF73217 \r\n--output W:\\C#\\Edifact\\var\\out\r\n--suffixes \"IFCSUM=.2;IFTMBF=.1\"\r\n--encoding ISO-8859-1\r\n"
+      "commandLineArgs": "--schemas-root W:\\C#\\Edifact\\var\\xsd \r\n--input W:\\C#\\Edifact\\var\\manifest.poll\\P0013928 \r\n--output W:\\C#\\Edifact\\var\\out\r\n--suffixes \"IFCSUM=.2;IFTMBF=.1\"\r\n--encoding ISO-8859-1\r\n"
+    },
+    "Профиль 2": {
+      "commandName": "Project",
+      "commandLineArgs": "--schemas-root W:\\C#\\Edifact\\var\\xsd \r\n--input W:\\C#\\Edifact\\var\\out\\1.edi \r\n--output W:\\C#\\Edifact\\var\\out\\1\r\n--suffixes \"IFCSUM=.2;IFTMBF=.1\"\r\n--encoding ISO-8859-1\r\n"
     }
   }
 }

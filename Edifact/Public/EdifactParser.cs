@@ -18,7 +18,6 @@ public class EdifactParser: EdifactProcessor
 
     private static readonly Regex s_reSegmentGroup = new("^SG\\d+$");
     private int _entersNum = 0;
-    private readonly Dictionary<string, XmlSchema> _messageSchemaCache = [];
     private readonly List<Sequence> _sequencesStack = [];
     private EdifactParserOptions _options = null!;
     private XmlDocument _elementXml = null!;
@@ -26,19 +25,19 @@ public class EdifactParser: EdifactProcessor
     private string _messageHeader = string.Empty;
     private string _messageTrailer = string.Empty;
     private string _interchangeTrailer = string.Empty;
-    private string _messageXsd = string.Empty;
     private MessageEventArgs _messageEventArgs = null!;
     private GroupEventArgs _groupEventArgs = null!;
     private InterchangeEventArgs _interchangeEventArgs = null!;
-    private XmlSchema? _messageSchema = null;
+    protected XmlDocument _interchangeHeaderXml = null!;
+    protected XmlDocument _interchangeTrailerXml = null!;
+    protected XmlDocument _groupHeaderXml = null!;
+    protected XmlDocument _groupTrailerXml = null!;
+    protected XmlDocument _messageHeaderXml = null!;
+    protected XmlDocument _messageTrailerXml = null!;
 
     private bool _inMessage = false;
     private bool _inGroup = false;
-    private int _messageControlCount = 0;
     private string _groupReference = string.Empty;
-    private int _groupControlCount = 0;
-    private int _interchangeControlCount = 0;
-    private bool _isInteractive = false;
 
     public EdifactParser(IServiceProvider services): base(services)
     {
@@ -62,7 +61,7 @@ public class EdifactParser: EdifactProcessor
             {
                 _tokenizer.Encoding = encoding;
             }
-            if (options.BufferLength is int bufferSize)
+            if (options.BufferSize is int bufferSize)
             {
                 _tokenizer.BufferLength = bufferSize;
             }
@@ -179,15 +178,7 @@ public class EdifactParser: EdifactProcessor
         string message = string.Format("/{0}: {1}", string.Join('/', _path.Skip(1)), e.Message);
         if (_validationWarningsCache.Add(message))
         {
-            switch (e.Severity)
-            {
-                case XmlSeverityType.Warning:
-                    _logger?.LogWarning(s_logMessage, message);
-                    break;
-                case XmlSeverityType.Error:
-                    _logger?.LogError(e.Exception, s_logMessage, message);
-                    break;
-            }
+            _logger?.LogWarning(e.Exception, s_logMessage, message);
         }
     }
     private async Task ProcessSegment(SegmentToken segment)
@@ -196,6 +187,10 @@ public class EdifactParser: EdifactProcessor
         {
             if (_sequencesStack.Last().MoveIfNeed())
             {
+                if(_sequencesStack.Last().Item is XmlSchemaChoice)
+                {
+                    _sequencesStack.Last().Move();
+                }
                 if (_sequencesStack.Last().Item is XmlSchemaElement el)
                 {
                     if (s_reSegmentGroup.IsMatch(((XmlSchemaElement)_sequencesStack.Last().Item!).Name!))
@@ -290,9 +285,7 @@ public class EdifactParser: EdifactProcessor
             {
                 _path.RemoveAt(_path.Count - 1);
                 await _writer!.WriteEndElementAsync();
-                await ParseSegmentAsync(segment, el);
-                _path.RemoveAt(_path.Count - 1);
-                await _writer.WriteEndElementAsync();
+
                 await _writer.WriteEndDocumentAsync();
                 _writer.Close();
                 _messageEventArgs!.Stream?.Close();
@@ -407,42 +400,7 @@ public class EdifactParser: EdifactProcessor
 
                 Message?.Invoke(this, _messageEventArgs);
 
-
-                if (
-                    _options.MessagesSuffixes is null 
-                    || !_options.MessagesSuffixes.TryGetValue(
-                        _messageEventArgs.Header.Identifier.Identifier, 
-                        out string? suffix
-                    )
-                )
-                {
-                    suffix = string.Empty;
-                }
-
-                _messageXsd = string.Format(
-                    s_fileInDirectoryXsdFormat,
-                    _messageEventArgs.Header.Identifier.ControllingAgencyCoded,
-                    _messageEventArgs.Header.Identifier.VersionNumber,
-                    _messageEventArgs.Header.Identifier.ReleaseNumber,
-                    _messageEventArgs.Header.Identifier.Identifier,
-                    suffix
-                );
-
-                if (_messageSchema is { })
-                {
-                    if (_messageSchemaCache[_messageEventArgs.Header.Identifier.Identifier] != _messageSchema)
-                    {
-                        _schemaSet.Remove(_messageSchema);
-                        _messageSchema = _schemaSet.Add(_messageSchemaCache[_messageEventArgs.Header.Identifier.Identifier]);
-                        _schemaSet.Compile();
-                    }
-                }
-                else
-                {
-                    _messageSchema = _schemaSet.Add(_targetNamespace, new Uri(_schemas, _messageXsd).ToString());
-                    _messageSchemaCache.Add(_messageEventArgs.Header.Identifier.Identifier, _messageSchema!);
-                    _schemaSet.Compile();
-                }
+                UpdateSchemaSet(_options, _messageEventArgs.Header);
 
                 if (_schemaSet.GlobalTypes[new XmlQualifiedName(s_message1, _targetNamespace)] is XmlSchemaComplexType messageType)
                 {
@@ -460,16 +418,12 @@ public class EdifactParser: EdifactProcessor
                     _writer = XmlWriter.Create(_messageEventArgs.Stream, _xws);
                 }
                 await _writer.WriteStartDocumentAsync();
-                _path.Add(_isInteractive ? s_interactiveInterchange1 : s_batchInterchange1);
-                await _writer.WriteStartElementAsync(
-                null,
-                    _path.Last(),
-                    _targetNamespace
-                );
-                List<XmlDocument> headers = [_interchangeHeaderXml];
+                _path.Add(s_message1);
+                await _writer.WriteStartElementAsync(null, _path.Last(), _targetNamespace);
+                List<XmlDocument> headers = [_interchangeHeaderXml!];
                 if (_inGroup)
                 {
-                    headers.Add(_groupHeaderXml);
+                    headers.Add(_groupHeaderXml!);
                 }
                 headers.Add(_messageHeaderXml);
                 foreach (XmlDocument h in headers)
@@ -510,8 +464,6 @@ public class EdifactParser: EdifactProcessor
                         tree.Pop();
                     }
                 }
-                _path.Add(s_message1);
-                await _writer.WriteStartElementAsync(null, _path.Last(), _targetNamespace);
                 _inMessage = true;
                 _messageControlCount = 1;
                 if (_inGroup)
@@ -541,7 +493,7 @@ public class EdifactParser: EdifactProcessor
         {
             _messageEventArgs.Header.Identifier = new MessageIdentification
             {
-                Identifier = mi.SelectSingleNode("e:D0065", _man)!.Value,
+                Type = mi.SelectSingleNode("e:D0065", _man)!.Value,
                 VersionNumber = mi.SelectSingleNode("e:D0052", _man)!.Value,
                 ReleaseNumber = mi.SelectSingleNode("e:D0054", _man)!.Value,
                 ControllingAgencyCoded = mi.SelectSingleNode("e:D0051", _man)!.Value,
@@ -600,7 +552,7 @@ public class EdifactParser: EdifactProcessor
                 {
                     header.SubsetIdentification = new Identification
                     {
-                        Identifier = si.SelectSingleNode("e:D0115", _man)!.Value,
+                        Type = si.SelectSingleNode("e:D0115", _man)!.Value,
                         VersionNumber = si.SelectSingleNode("e:D0116", _man)?.Value,
                         ReleaseNumber = si.SelectSingleNode("e:D0118", _man)?.Value,
                         ControllingAgencyCoded = si.SelectSingleNode("e:D0051", _man)?.Value,
@@ -610,7 +562,7 @@ public class EdifactParser: EdifactProcessor
                 {
                     header.SubsetIdentification = new Identification
                     {
-                        Identifier = gi.SelectSingleNode("e:D0121", _man)!.Value,
+                        Type = gi.SelectSingleNode("e:D0121", _man)!.Value,
                         VersionNumber = gi.SelectSingleNode("e:D0122", _man)?.Value,
                         ReleaseNumber = gi.SelectSingleNode("e:D0124", _man)?.Value,
                         ControllingAgencyCoded = gi.SelectSingleNode("e:D0051", _man)?.Value,
@@ -620,7 +572,7 @@ public class EdifactParser: EdifactProcessor
                 {
                     header.SubsetIdentification = new Identification
                     {
-                        Identifier = sci.SelectSingleNode("e:D0127", _man)!.Value,
+                        Type = sci.SelectSingleNode("e:D0127", _man)!.Value,
                         VersionNumber = sci.SelectSingleNode("e:D0128", _man)?.Value,
                         ReleaseNumber = sci.SelectSingleNode("e:D0130", _man)?.Value,
                         ControllingAgencyCoded = sci.SelectSingleNode("e:D0051", _man)?.Value,
@@ -749,7 +701,7 @@ public class EdifactParser: EdifactProcessor
         {
             _groupEventArgs.Header.MessageGroupIdentification = new MessageIdentification
             {
-                Identifier = nav.SelectSingleNode("e:D0038", _man)!.Value,
+                Type = nav.SelectSingleNode("e:D0038", _man)!.Value,
                 VersionNumber = nav.SelectSingleNode("e:S008/e:D0052", _man)!.Value,
                 ReleaseNumber = nav.SelectSingleNode("e:S008/e:D0054", _man)!.Value,
                 ControllingAgencyCoded = nav.SelectSingleNode("e:S008/e:D0051", _man)!.Value,
@@ -930,7 +882,7 @@ public class EdifactParser: EdifactProcessor
             {
                 header.ScenarioIdentification = new Identification
                 {
-                    Identifier = si.SelectSingleNode("e:D0127", _man)!.Value,
+                    Type = si.SelectSingleNode("e:D0127", _man)!.Value,
                     VersionNumber = si.SelectSingleNode("e:D0128", _man)?.Value,
                     ReleaseNumber = si.SelectSingleNode("e:D0130", _man)?.Value,
                     ControllingAgencyCoded = si.SelectSingleNode("e:D0051", _man)?.Value,
@@ -940,7 +892,7 @@ public class EdifactParser: EdifactProcessor
             {
                 header.DialogueIdentification = new Identification
                 {
-                    Identifier = di.SelectSingleNode("e:D0311", _man)!.Value,
+                    Type = di.SelectSingleNode("e:D0311", _man)!.Value,
                     VersionNumber = di.SelectSingleNode("e:D0342", _man)?.Value,
                     ReleaseNumber = di.SelectSingleNode("e:D0344", _man)?.Value,
                     ControllingAgencyCoded = di.SelectSingleNode("e:D0051", _man)?.Value,

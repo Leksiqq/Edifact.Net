@@ -4,6 +4,6 @@
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup>
-    <ActiveDebugProfile>EdifactParserCLI</ActiveDebugProfile>
+    <ActiveDebugProfile>Профиль 2</ActiveDebugProfile>
   </PropertyGroup>
 </Project>

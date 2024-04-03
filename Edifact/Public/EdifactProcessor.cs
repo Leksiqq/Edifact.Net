@@ -14,15 +14,10 @@ public class EdifactProcessor(IServiceProvider services)
     protected readonly IServiceProvider _services = services;
     protected readonly XmlResolver _xmlResolver = new Resolver(services);
     protected readonly HashSet<string> _validationWarningsCache = [];
+    protected readonly Dictionary<string, XmlSchema> _messageSchemaCache = [];
     protected readonly List<string> _path = [];
     protected readonly MemoryStream _ms = new();
     protected ILogger? _logger = null!;
-    protected XmlDocument _interchangeHeaderXml = null!;
-    protected XmlDocument _interchangeTrailerXml = null!;
-    protected XmlDocument _groupHeaderXml = null!;
-    protected XmlDocument _groupTrailerXml = null!;
-    protected XmlDocument _messageHeaderXml = null!;
-    protected XmlDocument _messageTrailerXml = null!;
     protected XmlSchemaSet _schemaSet = null!;
     protected XmlNameTable _nameTable = null!;
     protected XmlNamespaceManager _man = null!;
@@ -30,6 +25,11 @@ public class EdifactProcessor(IServiceProvider services)
     protected Uri _schemas = null!;
     protected XmlWriter _writer = null!;
     protected string _targetNamespace = string.Empty;
+    protected XmlSchema? _messageSchema = null;
+    protected int _messageControlCount = 0;
+    protected int _groupControlCount = 0;
+    protected int _interchangeControlCount = 0;
+    protected bool _isInteractive = false;
 
     internal static HashSet<char> s_levelAChars = [
         'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
@@ -94,15 +94,7 @@ public class EdifactProcessor(IServiceProvider services)
     }
     protected virtual void SchemaSet_ValidationEventHandler(object? sender, ValidationEventArgs e)
     {
-        switch (e.Severity)
-        {
-            case XmlSeverityType.Warning:
-                _logger?.LogWarning(s_logMessage, e.Message);
-                break;
-            case XmlSeverityType.Error:
-                _logger?.LogError(e.Exception, s_logMessage, e.Message);
-                break;
-        }
+        _logger?.LogWarning(e.Exception, s_logMessage, e.Message);
     }
     protected void InitBaseStuff()
     {
@@ -125,6 +117,49 @@ public class EdifactProcessor(IServiceProvider services)
         }
         _targetNamespace = tns.Value;
         _man.AddNamespace("e", _targetNamespace);
+        _messageSchema = null;
+        _messageControlCount = 0;
+        _groupControlCount = 0;
+        _interchangeControlCount = 0;
     }
+    protected void UpdateSchemaSet(EdifactProcessorOptions options, MessageHeader header)
+    {
+        if (
+            options.MessagesSuffixes is null
+            || !options.MessagesSuffixes.TryGetValue(
+                header.Identifier.Type,
+                out string? suffix
+            )
+        )
+        {
+            suffix = string.Empty;
+        }
+
+        string messageXsd = string.Format(
+            s_fileInDirectoryXsdFormat,
+            header.Identifier.ControllingAgencyCoded,
+            header.Identifier.VersionNumber,
+            header.Identifier.ReleaseNumber,
+            header.Identifier.Type,
+            suffix
+        );
+
+        if (_messageSchema is { })
+        {
+            if (_messageSchemaCache[header.Identifier.Type] != _messageSchema)
+            {
+                _schemaSet.Remove(_messageSchema);
+                _messageSchema = _schemaSet.Add(_messageSchemaCache[header.Identifier.Type]);
+                _schemaSet.Compile();
+            }
+        }
+        else
+        {
+            _messageSchema = _schemaSet.Add(_targetNamespace, new Uri(_schemas, messageXsd).ToString());
+            _messageSchemaCache.Add(header.Identifier.Type, _messageSchema!);
+            _schemaSet.Compile();
+        }
+    }
+
 
 }

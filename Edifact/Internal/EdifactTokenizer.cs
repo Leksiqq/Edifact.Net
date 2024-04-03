@@ -263,8 +263,7 @@ internal class EdifactTokenizer
         int n;
         while ((n = await reader.ReadAsync(buffer, offset, buffer.Length - offset)) > 0)
         {
-            offset = 0;
-            for(int i = 0; i < n; ++i)
+            for (int i = 0; i < n + offset; ++i)
             {
                 char ch = buffer[i];
 
@@ -334,8 +333,9 @@ internal class EdifactTokenizer
                 }
 
             }
+            offset = 0;
         }
-        if(sb.Length > 0)
+        if (sb.Length > 0)
         {
             throw new Exception("TODO: unclosed last segment found.");
         }

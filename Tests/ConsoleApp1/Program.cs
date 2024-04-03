@@ -8,6 +8,7 @@ EdifactBuilderOptions options = new()
 {
     OutputUri = @"W:\C#\Edifact\var\out\1.edi",
     SchemasUri = @"W:\C#\Edifact\var\xsd",
+    MessagesSuffixes = new Dictionary<string, string>() { { "IFCSUM", ".2" } },
 };
 
 builder.Services.AddSingleton(options);
@@ -36,7 +37,27 @@ class Runner(IServiceProvider services) : BackgroundService
             //header.TestIndicator = "1";
             header.ControlReference = "10122823639495";
 
+            string[] messages = Directory.GetFiles(@"W:\C#\Edifact\var\out\manifest.poll", "*.xml");
+
             await edifactBuilder.BeginInterchangeAsync(services.GetRequiredService<EdifactBuilderOptions>(), header);
+
+            for(int i = 0; i < messages.Length; ++i)
+            {
+                BatchMessageHeader mh = new()
+                {
+                    Identifier = new MessageIdentification
+                    {
+                        Type = "IFCSUM",
+                        VersionNumber = "D",
+                        ReleaseNumber = "97B",
+                        ControllingAgencyCoded = "UN",
+                    },
+                    MessageReferenceNumber = i.ToString()
+                };
+                await edifactBuilder.DeliverMessageAsync(mh, File.OpenRead(messages[i]));
+            }
+
+            await edifactBuilder.EndInterchangeAsync();
         }
         finally
         {

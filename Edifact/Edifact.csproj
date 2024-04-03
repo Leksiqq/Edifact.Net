@@ -47,7 +47,6 @@
     <None Remove="files\system_elements.xsd" />
     <None Remove="files\UN\D\composites.xsd" />
     <None Remove="files\UN\D\elements.xsd" />
-    <None Remove="files\UN\D\message.xsd" />
     <None Remove="files\UN\D\segments.xsd" />
   </ItemGroup>
 
@@ -65,7 +64,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="files\UN\D\composites.xsd" />
     <EmbeddedResource Include="files\UN\D\elements.xsd" />
-    <EmbeddedResource Include="files\UN\D\message.xsd" />
     <EmbeddedResource Include="files\UN\D\segments.xsd" />
   </ItemGroup>
 

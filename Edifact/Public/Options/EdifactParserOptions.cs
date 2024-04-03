@@ -6,5 +6,5 @@ public class EdifactParserOptions: EdifactProcessorOptions
 {
     public string? InputUri { get; set; }
     public string? OutputUri { get; set; }
-    public int? BufferLength { get; set; }
+    public int? BufferSize { get; set; }
 }

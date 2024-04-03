@@ -36,15 +36,15 @@
     <EmbeddedResource Update="files\UN\D\elements.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Update="files\UN\D\message.xsd">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Update="files\UN\D\segments.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Update="files\system_segments.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Update="files\UN\D\message.xsd">
       <SubType>Designer</SubType>
     </None>
     <None Update="files\utility.xsd">

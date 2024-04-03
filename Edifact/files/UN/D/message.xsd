@@ -17,6 +17,17 @@
     <xs:complexContent>
       <xs:extension base="BASE-MESSAGE">
         <xs:sequence id="structure">
+          <xs:choice minOccurs="0">
+            <xs:sequence>
+              <xs:element name="UNB" type="UNB" minOccurs="0"/>
+              <xs:element name="UNG" type="UNG" minOccurs="0"/>
+              <xs:element name="UNH" type="UNH" minOccurs="0"/>
+            </xs:sequence>
+            <xs:sequence>
+              <xs:element name="UIB" type="UIB" minOccurs="0"/>
+              <xs:element name="UIH" type="UIH" minOccurs="0"/>
+            </xs:sequence>
+          </xs:choice>
         </xs:sequence>
       </xs:extension>
     </xs:complexContent>

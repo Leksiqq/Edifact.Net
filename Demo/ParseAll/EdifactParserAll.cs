@@ -34,7 +34,15 @@ internal class EdifactParserAll : BackgroundService
                 {
                     stoppingToken.ThrowIfCancellationRequested();
                     _options.InputUri = item;
-                    await _parser.Parse(_options, stoppingToken);
+                    Console.WriteLine(item);
+                    try
+                    {
+                        await _parser.Parse(_options, stoppingToken);
+                    }
+                    catch(Exception ex)
+                    {
+                        Console.WriteLine(ex);
+                    }
                 }
             }
         }

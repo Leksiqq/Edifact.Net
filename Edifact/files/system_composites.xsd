@@ -43,7 +43,7 @@
       <xs:documentation eu:name="name">INTERCHANGE SENDER</xs:documentation>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="D0004 " type="D0004 ">
+      <xs:element name="D0004" type="D0004">
         <xs:annotation>
           <xs:documentation eu:name="name">Sender identification</xs:documentation>
         </xs:annotation>
@@ -70,7 +70,7 @@
       <xs:documentation eu:name="name">INTERCHANGE RECIPIENT</xs:documentation>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="D0010 " type="D0010 ">
+      <xs:element name="D0010" type="D0010">
         <xs:annotation>
           <xs:documentation eu:name="name">Recipient Identification</xs:documentation>
         </xs:annotation>
@@ -97,7 +97,7 @@
       <xs:documentation eu:name="name">DATE/TIME OF PREPARATION</xs:documentation>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="D0017 " type="D0017">
+      <xs:element name="D0017" type="D0017">
         <xs:annotation>
           <xs:documentation eu:name="note">Date YYMMDD</xs:documentation>
         </xs:annotation>
@@ -114,7 +114,7 @@
       <xs:documentation eu:name="name">RECIPIENTS REFERENCE, PASSWORD</xs:documentation>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="D0022 " type="D0022">
+      <xs:element name="D0022" type="D0022">
         <xs:annotation>
           <xs:documentation eu:name="name">Recipient's reference/password</xs:documentation>
         </xs:annotation>
@@ -131,7 +131,7 @@
       <xs:documentation eu:name="name">APPLICATION SENDER'S IDENTIFICATION</xs:documentation>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="D0040 " type="D0040">
+      <xs:element name="D0040" type="D0040">
         <xs:annotation>
           <xs:documentation eu:name="name">Application sender's identification</xs:documentation>
           <xs:documentation eu:name="description">Code or name identifying the division, department etc. within the originating sender's organization</xs:documentation>

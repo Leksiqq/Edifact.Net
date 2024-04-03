@@ -215,8 +215,8 @@ namespace Net.Leksi.Edifact.Properties {
         ///&gt;
         ///  &lt;xs:include schemaLocation=&quot;segments.xsd&quot;/&gt;
         ///  &lt;xs:complexType name=&quot;MESSAGE&quot;&gt;
-        ///    &lt;xs:annotation&gt;
-        ///      &lt;xs:appinfo eu:name=&quot; [остаток строки не уместился]&quot;;.
+        ///    &lt;xs:complexContent&gt;
+        ///      &lt;xs:extension bas [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string message {
             get {
@@ -255,9 +255,8 @@ namespace Net.Leksi.Edifact.Properties {
         ///  xmlns:eu=&quot;http://leksi.net/EDIFACT/utility&quot;
         ///&gt;
         ///  &lt;xs:include schemaLocation=&quot;composites.xsd&quot;/&gt;
-        ///  &lt;xs:complexType name=&quot;UNS&quot;&gt;
-        ///    &lt;xs:annotation&gt;
-        ///      &lt;xs:documentation eu:na [остаток строки не уместился]&quot;;.
+        ///  &lt;xs:include schemaLocation=&quot;../../system_segments.xsd&quot;/&gt;
+        ///  &lt;xs:complexType nam [остаток строки не уместился]&quot;;.
         /// </summary>
         internal static string segments {
             get {
