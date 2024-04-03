@@ -139,6 +139,14 @@ public class EdifactMessageVisualizer
             {
                 while (true)
                 {
+                    bool changed = false;
+                    int startPosition = 1;
+                    while(positions[^1] < seq.Items.Count
+                        && seq.Items[positions[^1]] is not XmlSchemaElement)
+                    {
+                        ++positions[^1];
+                        ++startPosition;
+                    }
                     if (
                         positions[^1] < seq.Items.Count 
                         && seq.Items[positions[^1]] is XmlSchemaElement cur
@@ -159,7 +167,7 @@ public class EdifactMessageVisualizer
                         }
                         if (positions[^1] < seq.Items.Count || positions.Count == 1)
                         {
-                            if (positions.Count == 1 && positions[^1] == 1)
+                            if (positions.Count == 1 && positions[^1] == startPosition)
                             {
                                 await WriteAsync(s_x250Cx2500);
                             }
@@ -213,12 +221,17 @@ public class EdifactMessageVisualizer
                         {
                             break;
                         }
+                        changed = true;
                     }
                     if (positions[^1] == seq.Items.Count)
                     {
                         elementsStack.RemoveAt(elementsStack.Count - 1);
                         positions.RemoveAt(positions.Count - 1);
                         break;
+                    }
+                    if (!changed)
+                    {
+                        throw new Exception();
                     }
                 }
             }
