@@ -7,12 +7,12 @@ using System.Web;
 internal class EdifactParserAll : BackgroundService
 {
     private readonly IServiceProvider _services;
-    private readonly EdifactParserOptions _options;
+    private readonly EdifactParserCLIOptions _options;
     private readonly EdifactParser _parser;
     public EdifactParserAll(IServiceProvider services)
     {
         _services = services;
-        _options = _services.GetRequiredService<EdifactParserOptions>();
+        _options = _services.GetRequiredService<EdifactParserCLIOptions>();
         _parser = _services.GetRequiredService<EdifactParser>();
     }
 
@@ -26,6 +26,7 @@ internal class EdifactParserAll : BackgroundService
             Console.WriteLine(path);
             if (File.Exists(path))
             {
+                _options.Input = File.OpenRead(path);
                 await _parser.Parse(_options, stoppingToken);
             }
             else if(Directory.Exists(path))
@@ -35,6 +36,7 @@ internal class EdifactParserAll : BackgroundService
                     stoppingToken.ThrowIfCancellationRequested();
                     _options.InputUri = item;
                     Console.WriteLine(item);
+                    _options.Input = File.OpenRead(item);
                     try
                     {
                         await _parser.Parse(_options, stoppingToken);

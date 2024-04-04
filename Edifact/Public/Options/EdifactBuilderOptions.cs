@@ -4,7 +4,7 @@ namespace Net.Leksi.Edifact;
 
 public class EdifactBuilderOptions: EdifactProcessorOptions
 {
-    public string? OutputUri { get; set; }
+    public Stream? Output { get; set; }
     public char SegmentPartsSeparator { get; set; } = '+';
     public char ComponentPartsSeparator { get; set; } = ':';
     public char DecimalMark { get; set; } = '.';

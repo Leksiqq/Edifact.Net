@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Net.Leksi.Streams;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -99,14 +98,11 @@ public class EdifactParser: EdifactProcessor
                 Indent = true,
             };
 
-            Uri input = new(options.InputUri!);
-            IStreamFactory inputStreamFactory = _services.GetKeyedService<IStreamFactory>(input.Scheme)!;
-
             InitBaseStuff();
 
             int segmentPosition = 0;
 
-            await foreach (SegmentToken segment in _tokenizer.TokenizeAsync(inputStreamFactory.GetInputStream(input)))
+            await foreach (SegmentToken segment in _tokenizer.TokenizeAsync(_options.Input!))
             {
                 cancellationToken?.ThrowIfCancellationRequested();
 

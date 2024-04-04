@@ -9,7 +9,7 @@ IConfiguration bootstrapConfig = new ConfigurationBuilder()
     .AddCommandLine(args)
     .Build();
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-EdifactParserOptions options = new()
+EdifactParserCLIOptions options = new()
 {
     SchemasUri = bootstrapConfig["schemas-root"],
     InputUri = bootstrapConfig["input"],

@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Net.Leksi.Streams;
 using System.IO.Pipes;
 using System.Text;
 using System.Xml;
@@ -35,17 +34,11 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
     {
         try
         {
-            if (options is null)
+            ArgumentNullException.ThrowIfNull(options);
+            ArgumentNullException.ThrowIfNull(header);
+            if (options.Output is null)
             {
-                throw new ArgumentNullException(nameof(options));
-            }
-            if (header is null)
-            {
-                throw new ArgumentNullException(nameof(header));
-            }
-            if (options.OutputUri is null)
-            {
-                throw new ArgumentNullException($"{nameof(options)}.{nameof(options.OutputUri)}");
+                throw new ArgumentNullException($"{nameof(options)}.{nameof(options.Output)}");
             }
             if (_interchangeHeader is { })
             {
@@ -57,16 +50,21 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
             _nameTable = new NameTable();
             _path.Clear();
 
-            Uri output = new(options.OutputUri!);
-            IStreamFactory outputStreamFactory = _services.GetRequiredKeyedService<IStreamFactory>(output.Scheme)!;
-            Stream outputStream = outputStreamFactory.GetOutputStream(output);
+            byte[] una = [
+                (byte)'U', 
+                (byte)'N', 
+                (byte)'A',
+                (byte)_options.ComponentPartsSeparator, 
+                (byte)_options.SegmentPartsSeparator, 
+                (byte)_options.DecimalMark,
+                (byte)_options.ReleaseCharacter, 
+                (byte)'*', 
+                (byte)_options.SegmentTerminator,
+                .. 
+                (_options.SegmentsSeparator?.ToCharArray() ?? []).Select(ch => (byte)ch),
+            ];
 
-            byte[] una = new byte[]{(byte)'U', (byte)'N', (byte)'A',
-            (byte)_options.ComponentPartsSeparator, (byte)_options.SegmentPartsSeparator, (byte)_options.DecimalMark,
-            (byte)_options.ReleaseCharacter, (byte)'*', (byte)_options.SegmentTerminator
-            }.Concat((_options.SegmentsSeparator?.ToCharArray() ?? []).Select(ch => (byte)ch)).ToArray();
-
-            await outputStream.WriteAsync(una);
+            await options.Output.WriteAsync(una);
 
             if (
                 header.SyntaxIdentifier.Identifier is null
@@ -78,10 +76,7 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
             }
             _syntaxLevel = header.SyntaxIdentifier.Identifier[3];
             Encoding? encoding = _options.Encoding;
-            if (encoding is null)
-            {
-                encoding = EdifactProcessor.SyntaxLevelToEncoding(_syntaxLevel);
-            }
+            encoding ??= EdifactProcessor.SyntaxLevelToEncoding(_syntaxLevel);
 
             if (
                 encoding is null
@@ -107,7 +102,7 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
             };
             _schemaSet.ValidationEventHandler += SchemaSet_ValidationEventHandler;
             _schemas = new(string.Format(s_folderUriFormat, options.SchemasUri!));
-            _output = new StreamWriter(outputStream, encoding);
+            _output = new StreamWriter(options.Output, encoding);
             _isGroupBased = null;
             _groupHeader = null;
             _messageHeader = null;
@@ -124,7 +119,7 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
             };
             if(_options.IsStrict is not bool strict || !strict)
             {
-                _xmlReaderSettings.ValidationEventHandler += _xmlReaderSettings_ValidationEventHandler;
+                _xmlReaderSettings.ValidationEventHandler += XmlReaderSettings_ValidationEventHandler;
             }
 
             await WriteSegmentAsync(InterchangeHeaderToXml());
@@ -137,7 +132,7 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
 
     }
 
-    private void _xmlReaderSettings_ValidationEventHandler(object? sender, ValidationEventArgs e)
+    private void XmlReaderSettings_ValidationEventHandler(object? sender, ValidationEventArgs e)
     {
         if(_messageHeader is { })
         {
@@ -153,10 +148,7 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
     {
         try
         {
-            if (header is null)
-            {
-                throw new ArgumentNullException(nameof(header));
-            }
+            ArgumentNullException.ThrowIfNull(header);
             if (_interchangeHeader is null)
             {
                 throw new Exception("TODO: Any interchange is not began.");

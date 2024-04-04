@@ -10,7 +10,7 @@ public class EdifactMessageVisualizerCLI(IServiceProvider services) : Background
 {
     private const string s_schema2treeUsage = "SCHEMA2TREE_USAGE";
     private readonly EdifactMessageVisualizerOptions _optoins = services.GetRequiredService<EdifactMessageVisualizerOptions>();
-    public static async Task RunAsync(string[] args, Action<IHostApplicationBuilder>? config = null)
+    public static async Task RunAsync(string[] args, Action<IHostApplicationBuilder>? configHostBuilder = null, Action<IServiceProvider>? configApp = null)
     {
         IConfiguration bootstrapConfig = new ConfigurationBuilder()
             .AddCommandLine(args)
@@ -48,7 +48,12 @@ public class EdifactMessageVisualizerCLI(IServiceProvider services) : Background
         builder.Services.AddSingleton<EdifactMessageVisualizer>();
         builder.Services.AddHostedService<EdifactMessageVisualizerCLI>();
         builder.Services.AddKeyedSingleton<IStreamFactory, LocalFileStreamFactory>(s_file);
-        config?.Invoke(builder);
+        configHostBuilder?.Invoke(builder);
+        if (configApp is { })
+        {
+            builder.Services.AddKeyedSingleton("applicationConfig", configApp);
+        }
+        
         IHost host = builder.Build();
         Uri uri = new(bootstrapConfig[s_output]!);
         options.Output = host.Services.GetRequiredKeyedService<IStreamFactory>(uri.Scheme)?.GetOutputStream(uri, FileMode.Create);

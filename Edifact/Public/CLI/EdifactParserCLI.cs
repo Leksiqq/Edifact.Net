@@ -10,7 +10,7 @@ namespace Net.Leksi.Edifact;
 
 public class EdifactParserCLI : BackgroundService
 {
-    private readonly EdifactParserOptions _options;
+    private readonly EdifactParserCLIOptions _options;
     private readonly EdifactParser _parser;
     private readonly IServiceProvider _services;
     private readonly ILogger<EdifactParserCLI>? _logger;
@@ -18,7 +18,7 @@ public class EdifactParserCLI : BackgroundService
     public EdifactParserCLI(IServiceProvider services)
     {
         _services = services;
-        _options = _services.GetRequiredService<EdifactParserOptions>();
+        _options = _services.GetRequiredService<EdifactParserCLIOptions>();
         _parser = _services.GetRequiredService<EdifactParser>();
         _logger = _services.GetService<ILogger<EdifactParserCLI>>();
     }
@@ -32,7 +32,7 @@ public class EdifactParserCLI : BackgroundService
             Usage();
             return;
         }
-        EdifactParserOptions options = new()
+        EdifactParserCLIOptions options = new()
         {
             SchemasUri = bootstrapConfig[s_schemasRoot],
             InputUri = bootstrapConfig[s_input],
@@ -69,13 +69,13 @@ public class EdifactParserCLI : BackgroundService
         builder.Services.AddSingleton(options);
         builder.Services.AddSingleton<EdifactParser>();
         builder.Services.AddHostedService<EdifactParserCLI>();
-        builder.Services.AddKeyedTransient<IStreamFactory, LocalFileStreamFactory>(s_file);
-        if(configApp is { })
+        builder.Services.AddKeyedSingleton<IStreamFactory, LocalFileStreamFactory>(s_file);
+        configHostBuilder?.Invoke(builder);
+        if (configApp is { })
         {
-            builder.Services.AddSingleton(configApp);
+            builder.Services.AddKeyedSingleton(s_applicationConfig, configApp);
         }
 
-        configHostBuilder?.Invoke(builder);
 
         IHost host = builder.Build();
         await host.RunAsync();
@@ -98,13 +98,15 @@ public class EdifactParserCLI : BackgroundService
             )
         );
     }
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
         {
-            _services.GetService<Action<IServiceProvider>>()?.Invoke(_services);
-            _parser.Message += _parser_Message;
+            _services.GetKeyedService<Action<IServiceProvider>>(s_applicationConfig)?.Invoke(_services);
+            Uri input = new(_options.InputUri!);
+            IStreamFactory inputStreamFactory = _services.GetKeyedService<IStreamFactory>(input.Scheme)!;
+            _options.Input = inputStreamFactory.GetInputStream(input);
+            _parser.Message += Parser_Message;
             await _parser.Parse(_options, stoppingToken);
         }
         finally
@@ -113,7 +115,7 @@ public class EdifactParserCLI : BackgroundService
         }
     }
 
-    private void _parser_Message(object sender, MessageEventArgs e)
+    private void Parser_Message(object sender, MessageEventArgs e)
     {
         if(e.EventKind is EventKind.Start){
             if(_options.OutputUri is { })

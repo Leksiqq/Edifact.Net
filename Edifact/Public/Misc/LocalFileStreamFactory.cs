@@ -6,6 +6,15 @@ namespace Net.Leksi.Edifact;
 
 public class LocalFileStreamFactory : IStreamFactory
 {
+    public bool FileExists(Uri uri)
+    {
+        if (uri.Scheme == s_file)
+        {
+            return File.Exists(HttpUtility.UrlDecode(uri.AbsolutePath));
+        }
+        throw new NotSupportedException(uri.Scheme);
+    }
+
     public Stream GetInputStream(Uri uri)
     {
         if(uri.Scheme == s_file)

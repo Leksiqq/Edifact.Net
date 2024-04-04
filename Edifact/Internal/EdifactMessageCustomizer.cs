@@ -9,7 +9,7 @@ using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
 
-public class EdifactMessageCustomizer
+internal class EdifactMessageCustomizer
 {
     private static readonly Regex s_reMessageIdentifier =
         new("^(?<type>[A-Z]{6}):(?<version>[^:]{1,3}):(?<release>[^:]{1,3}):(?<agency>[^:]{1,3})$");
@@ -32,7 +32,7 @@ public class EdifactMessageCustomizer
         _resolver = new Resolver(_services);
     }
 
-    public void Customize(EdifactMessageCustomizerOptions options, CancellationToken cancellationToken)
+    public void Customize(EdifactMessageCustomizerOptions options)
     {
         try
         {

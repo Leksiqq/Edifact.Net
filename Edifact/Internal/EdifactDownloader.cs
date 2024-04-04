@@ -14,10 +14,10 @@ using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
 
-public class EdifactDownloader
+internal class EdifactDownloader
 {
-    public event DirectoryNotFoundEventHandler? DirectoryNotFound;
-    public event DirectoryDownloadedEventHandler? DirectoryDownloaded;
+    internal event DirectoryNotFoundEventHandler? DirectoryNotFound;
+    internal event DirectoryDownloadedEventHandler? DirectoryDownloaded;
 
     private static readonly List<string> s_directories = [];
     private static readonly Regex s_reRepr = new("(a?n?)((?:\\.\\.)?)(\\d+)");
@@ -89,6 +89,10 @@ public class EdifactDownloader
         if (_options.ConnectionTimeout is int timeout)
         {
             _wc.Timeout = TimeSpan.FromSeconds(timeout);
+        }
+        if(_options.Proxy is { })
+        {
+            HttpClient.DefaultProxy = _options.Proxy;
         }
         if(_options.Directories is { })
         {

@@ -8,7 +8,7 @@ namespace Net.Leksi.Edifact;
 
 public class EdifactMessageCustomizerCLI(IServiceProvider services) : BackgroundService
 {
-    public static async Task RunAsync(string[] args, Action<IHostApplicationBuilder>? config = null)
+    public static async Task RunAsync(string[] args, Action<IHostApplicationBuilder>? configHostBuilder = null, Action<IServiceProvider>? configApp = null)
     {
         IConfiguration bootstrapConfig = new ConfigurationBuilder()
             .AddCommandLine(args)
@@ -23,6 +23,11 @@ public class EdifactMessageCustomizerCLI(IServiceProvider services) : Background
             SchemasUri = bootstrapConfig[s_schemasRoot],
             ScriptUri = bootstrapConfig[s_script],
         };
+        if (string.IsNullOrEmpty(options.SchemasUri) || string.IsNullOrEmpty(options.ScriptUri))
+        {
+            Usage();
+            return;
+        }
         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
         builder.Services.AddSingleton(options);
         builder.Services.AddSingleton<EdifactParser>();
@@ -30,7 +35,11 @@ public class EdifactMessageCustomizerCLI(IServiceProvider services) : Background
         builder.Services.AddHostedService<EdifactMessageCustomizerCLI>();
         builder.Services.AddKeyedTransient<IStreamFactory, LocalFileStreamFactory>(s_file);
 
-        config?.Invoke(builder);
+        configHostBuilder?.Invoke(builder);
+        if (configApp is { })
+        {
+            builder.Services.AddKeyedSingleton(s_applicationConfig, configApp);
+        }
 
         IHost host = builder.Build();
         await host.RunAsync();
@@ -42,8 +51,7 @@ public class EdifactMessageCustomizerCLI(IServiceProvider services) : Background
         {
             services.GetRequiredService<EdifactMessageCustomizer>()
                 .Customize(
-                    services.GetRequiredService<EdifactMessageCustomizerOptions>(), 
-                    stoppingToken
+                    services.GetRequiredService<EdifactMessageCustomizerOptions>()
                 );
         }
         finally
@@ -53,6 +61,13 @@ public class EdifactMessageCustomizerCLI(IServiceProvider services) : Background
     }
     private static void Usage()
     {
-        throw new NotImplementedException();
+        Console.WriteLine(
+            string.Format(
+                s_rmLabels.GetString(s_messageCustomizerUsage)!,
+                Path.GetFileName(Environment.ProcessPath),
+                s_schemasRoot,
+                s_script
+            )
+        );
     }
 }

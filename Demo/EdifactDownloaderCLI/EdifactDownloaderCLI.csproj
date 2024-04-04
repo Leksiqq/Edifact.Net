@@ -5,7 +5,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AssemblyName>Net.Leksi.EdfifactDownloaderCLI</AssemblyName>
+    <AssemblyName>EdifactDownloaderCLI</AssemblyName>
     <RootNamespace>Net.Leksi.Edifact</RootNamespace>
   </PropertyGroup>
 

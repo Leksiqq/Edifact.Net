@@ -216,14 +216,15 @@
   <data name="EDIFACT_DOWNLOADER_USAGE" xml:space="preserve">
     <value>Usage: {0} ARGS 
 ARGS:
-  /m, --message  {{MESSAGE|#}}                               - message type (# for no message, all messages if omitted)
-  /d, --directory  LIST                                  - message directory(ies) divided with commas and minuses
+  --{1}  URI                                - (Mandatory) URI where schemas will be placed
+  --{2}  {{MESSAGE|#}}                             - (Optional, default all messages) message type 
+								or # for no message
+  --{3}  LIST                                - (Optional) message directory(ies) divided with commas and minuses
                                                              for intervals (for example: "D97B,D10A-D11B")
-  /n, --ns NS                                              - EDIFACT namespace substitution
-  /s, --schemas-root  URI                                - URI where schemas will be placed
-  --tmp-folder PATH                                        - temporary folder
-  /p, --proxy  http[s]://[USER[:PASSWORD]@]ADDRESS:PORT    - use proxy for download
-  --connection-timeout  SECONDS                            - connection timeout of web client</value>
+  --{4} NS                                     - (Optional) target namespace
+  --{5} PATH                                 - (Optional) temporary folder
+  --{6}  SECONDS                      - (Optional) connection timeout of web client
+  --{7}  http[s]://[USER[:PASSWORD]@]ADDRESS:PORT  - (Optional) use proxy for download</value>
   </data>
   <data name="KEY_ALREADY_USED" xml:space="preserve">
     <value>The key '{0}' is already used.</value>
@@ -307,5 +308,17 @@ where OPTIONS:
   </data>
   <data name="OUTPUT_NOT_SET_FOR_MESSAGE" xml:space="preserve">
     <value>OutputUri not set for message '{0}:{1}:{2}:{3}'.</value>
+  </data>
+  <data name="MESSAGE_CUSTOMIZER_USAGE" xml:space="preserve">
+    <value>Usage:
+{0} OPTIONS
+
+where OPTIONS:
+  --{1} URI    (Mandatory) The root folder URI where EDIFACT Xml-schemas are placed.
+
+  --{2} URI          (Mandatory) The URI of customizing script.</value>
+  </data>
+  <data name="USING_SAVED_NS" xml:space="preserve">
+    <value>Using saved namespace '{0}'.</value>
   </data>
 </root>

@@ -4,7 +4,7 @@ using Net.Leksi.Edifact;
 using Net.Leksi.Streams;
 
 HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
-EdifactBuilderOptions options = new()
+EdifactBuilderCLIOptions options = new()
 {
     OutputUri = @"W:\C#\Edifact\var\out\1.edi",
     SchemasUri = @"W:\C#\Edifact\var\xsd",
@@ -14,9 +14,14 @@ EdifactBuilderOptions options = new()
 builder.Services.AddSingleton(options);
 builder.Services.AddSingleton<EdifactBuilder>();
 builder.Services.AddHostedService<Runner>();
-builder.Services.AddKeyedTransient<IStreamFactory, LocalFileStreamFactory>("file");
+builder.Services.AddKeyedSingleton<IStreamFactory, LocalFileStreamFactory>("file");
 IHost host = builder.Build();
 await host.RunAsync();
+
+class EdifactBuilderCLIOptions: EdifactBuilderOptions
+{
+    internal string? OutputUri {  get; set; }
+}
 
 class Runner(IServiceProvider services) : BackgroundService
 {
@@ -25,6 +30,12 @@ class Runner(IServiceProvider services) : BackgroundService
         try
         {
             EdifactBuilder edifactBuilder = services.GetRequiredService<EdifactBuilder>();
+            EdifactBuilderCLIOptions options = services.GetRequiredService<EdifactBuilderCLIOptions>();
+
+            Uri output = new(options.OutputUri!);
+            IStreamFactory outputStreamFactory = services.GetRequiredKeyedService<IStreamFactory>(output.Scheme)!;
+            options.Output = outputStreamFactory.GetOutputStream(output);
+
 
             BatchInterchangeHeader header = new();
 
@@ -39,9 +50,9 @@ class Runner(IServiceProvider services) : BackgroundService
 
             string[] messages = Directory.GetFiles(@"W:\C#\Edifact\var\out\manifest.poll", "*.xml");
 
-            await edifactBuilder.BeginInterchangeAsync(services.GetRequiredService<EdifactBuilderOptions>(), header);
+            await edifactBuilder.BeginInterchangeAsync(options, header);
 
-            for(int i = 0; i < messages.Length; ++i)
+            for(int i = 0; i < 10/* messages.Length*/; ++i)
             {
                 BatchMessageHeader mh = new()
                 {

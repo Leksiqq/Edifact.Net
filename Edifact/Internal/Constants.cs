@@ -14,6 +14,7 @@ internal static class Constants
     internal const string s_allElementsXPath = "//e:*";
     internal const string s_annotation = "annotation";
     internal const string s_appinfoXPathFormat = $"/xs:schema/xs:complexType[@name='{s_message1}']/xs:annotation/xs:appinfo[@eu:name='{{0}}']";
+    internal const string s_applicationConfig = "applicationConfig";
     internal const string s_args = "args";
     internal const string s_askKey = "/?";
     internal const string s_askSign = "?";
@@ -36,6 +37,7 @@ internal static class Constants
     internal const string s_complexType = "complexType";
     internal const string s_composites = "composites";
     internal const string s_compositesXsd = "composites.xsd";
+    internal const string s_connectionTimeout = "connection-timeout";
     internal const string s_controlAgency = "control-agency";
     internal const string s_d = "D";
     internal const string s_d00 = "D00";
@@ -55,6 +57,7 @@ internal static class Constants
     internal const string s_d99z = "D99Z";
     internal const string s_dataElementNotFound = "DATA_ELEMENT_NOT_FOUND";
     internal const string s_description = "description";
+    internal const string s_directories = "directories";
     internal const string s_directory = "directory";
     internal const string s_directoryFormat = "D{0:00}{1}";
     internal const string s_directoryNotFound = "DIRECTORY_NOT_FOUND";
@@ -102,6 +105,7 @@ internal static class Constants
     internal const string s_maxOccurs = "maxOccurs";
     internal const string s_message = "message";
     internal const string s_message1 = "MESSAGE";
+    internal const string s_messageCustomizerUsage = "MESSAGE_CUSTOMIZER_USAGE";
     internal const string s_messageNotFound = "MESSAGE_NOT_FOUND";
     internal const string s_messagesPatternFormat = "{0}_D.{1}";
     internal const string s_messageIdentifier = "messageIdentifier";
@@ -113,6 +117,7 @@ internal static class Constants
     internal const string s_missedMandatryKey = "MISSED_MANDATORY_KEY";
     internal const string s_n = "n";
     internal const string s_name = "name";
+    internal const string s_namespace = "namespace";
     internal const string s_noSimpleTypesFound = "NO_SIMPLE_TYPES_FOUND";
     internal const string s_note = "note";
     internal const string s_noteAtComposite = "Note: {0}: {1}";
@@ -132,6 +137,7 @@ internal static class Constants
     internal const string s_pattern = "pattern";
     internal const string s_placeholderElement = "<root/>";
     internal const string s_position = "position";
+    internal const string s_proxy = "proxy";
     internal const string s_receivingDirectory = "RECEIVING_DIRECTORY";
     internal const string s_release = "release";
     internal const string s_renameElementFormat = "D{0}";
@@ -170,9 +176,10 @@ internal static class Constants
     internal const string s_systemElementsXsd = "system_elements.xsd";
     internal const string s_systemSegments = "system_segments";
     internal const string s_systemSegmentsXsd = "system_segments.xsd";
+    internal const string s_t = "t";
     internal const string s_targetNamespaceXPath = "@targetNamespace";
     internal const string s_targetNamespaceXPath1 = "/xs:schema/@targetNamespace";
-    internal const string s_t = "t";
+    internal const string s_tempFolder = "temp-folder";
     internal const string s_type = "type";
     internal const string s_typeForEnumXPathFormat = "/xs:schema/xs:complexType[@name='D{0}']/xs:simpleContent/xs:restriction";
     internal const string s_uib = "UIB";
@@ -196,6 +203,7 @@ internal static class Constants
     internal const string s_unz = "UNZ";
     internal const string s_uriFormat = "{0}{1}";
     internal const string s_uriSchemeNotSupported = "URI_SCHEME_NOT_SUPPORTED";
+    internal const string s_usingSavedNs = "USING_SAVED_NS";
     internal const string s_utility = "utility";
     internal const string s_utilityXsd = "utility.xsd";
     internal const string s_value = "value";
