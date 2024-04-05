@@ -20,8 +20,8 @@ await EdifactParserCLI.RunAsync(
 
 void P_Interchange(object? sender, InterchangeEventArgs args)
 {
-    if(args.EventKind is EventKind.Start)
+    if(args.EventKind is EventKind.Begin)
     {
-        logger?.LogInformation("interchangeHeader: {interchangeHeader}", JsonSerializer.Serialize(args.Header, serializerOptions));
+        //logger?.LogInformation("interchangeHeader: {interchangeHeader}", JsonSerializer.Serialize(args.Header, serializerOptions));
     }
 }

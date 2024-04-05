@@ -27,7 +27,7 @@ internal class EdifactParserAll : BackgroundService
             if (File.Exists(path))
             {
                 _options.Input = File.OpenRead(path);
-                await _parser.Parse(_options, stoppingToken);
+                await _parser.ParseAsync(_options, stoppingToken);
             }
             else if(Directory.Exists(path))
             {
@@ -39,7 +39,7 @@ internal class EdifactParserAll : BackgroundService
                     _options.Input = File.OpenRead(item);
                     try
                     {
-                        await _parser.Parse(_options, stoppingToken);
+                        await _parser.ParseAsync(_options, stoppingToken);
                     }
                     catch(Exception ex)
                     {
@@ -55,7 +55,7 @@ internal class EdifactParserAll : BackgroundService
     }
     private void _parser_Message(object sender, MessageEventArgs e)
     {
-        if (e.EventKind is EventKind.Start)
+        if (e.EventKind is EventKind.Begin)
         {
             Uri uri = new(new Uri($"{_options.OutputUri}/_"), $"{e.Header.MessageReferenceNumber}.xml");
             e.Stream = _services.GetRequiredKeyedService<IStreamFactory>(uri.Scheme).GetOutputStream(uri);

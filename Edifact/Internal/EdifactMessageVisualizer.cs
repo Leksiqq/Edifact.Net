@@ -7,7 +7,7 @@ using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
 
-public class EdifactMessageVisualizer
+internal class EdifactMessageVisualizer
 {
     internal const int s_deafultWidth = 80;
     private const string s_htmlBegin = @"<html>

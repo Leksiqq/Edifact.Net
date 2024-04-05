@@ -2,6 +2,6 @@
 
 public enum EventKind
 {
-    Start,
+    Begin,
     End
 }

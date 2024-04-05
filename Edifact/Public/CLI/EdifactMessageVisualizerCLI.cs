@@ -15,7 +15,7 @@ public class EdifactMessageVisualizerCLI(IServiceProvider services) : Background
         IConfiguration bootstrapConfig = new ConfigurationBuilder()
             .AddCommandLine(args)
             .Build();
-        if (args.Contains(s_helpKey))
+        if (args.Contains(s_askKey) || args.Contains(s_helpKey))
         {
             Usage();
             return;

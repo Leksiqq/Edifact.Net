@@ -42,7 +42,7 @@ public class EdifactParser: EdifactProcessor
     {
         _logger = _services.GetService<ILogger<EdifactParser>>();
     }
-    public async Task Parse(EdifactParserOptions options, CancellationToken? cancellationToken)
+    public async Task ParseAsync(EdifactParserOptions options, CancellationToken? cancellationToken)
     {
         try
         {
@@ -381,7 +381,7 @@ public class EdifactParser: EdifactProcessor
                 string s = _isInteractive ? s_s306 : s_s009;
                 string s1 = _isInteractive ? s_d0340 : s_d0062;
                 _messageEventArgs ??= new MessageEventArgs();
-                _messageEventArgs.EventKind = EventKind.Start;
+                _messageEventArgs.EventKind = EventKind.Begin;
                 if(_isInteractive)
                 {
                     _messageEventArgs.Header = new InteractiveMessageHeader();
@@ -390,7 +390,6 @@ public class EdifactParser: EdifactProcessor
                 {
                     _messageEventArgs.Header = new BatchMessageHeader();
                 }
-                _messageEventArgs.IsInteractive = _isInteractive;
 
                 BuildMessageHeader();
 
@@ -670,7 +669,7 @@ public class EdifactParser: EdifactProcessor
                         Header = new GroupHeader()
                     };
                     BuildGroupHeader();
-                    _groupEventArgs.EventKind = EventKind.Start;
+                    _groupEventArgs.EventKind = EventKind.Begin;
 
                     Group?.Invoke(this, _groupEventArgs);
                 }
@@ -795,7 +794,6 @@ public class EdifactParser: EdifactProcessor
             _interchangeTrailer = s_unz;
             _interchangeEventArgs.Header = new BatchInterchangeHeader();
         }
-        _interchangeEventArgs.IsInteractive = _isInteractive;
         if (
             el0 is { }
             && el0.ElementSchemaType is XmlSchemaComplexType ct
@@ -810,7 +808,7 @@ public class EdifactParser: EdifactProcessor
             _ms.Position = 0;
             _interchangeHeaderXml.Load(_ms);
             BuildInterchangeHeader();
-            _interchangeEventArgs.EventKind = EventKind.Start;
+            _interchangeEventArgs.EventKind = EventKind.Begin;
 
             Interchange?.Invoke(this, _interchangeEventArgs);
         }

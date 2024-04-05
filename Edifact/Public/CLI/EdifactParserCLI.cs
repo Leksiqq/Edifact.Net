@@ -107,7 +107,7 @@ public class EdifactParserCLI : BackgroundService
             IStreamFactory inputStreamFactory = _services.GetKeyedService<IStreamFactory>(input.Scheme)!;
             _options.Input = inputStreamFactory.GetInputStream(input);
             _parser.Message += Parser_Message;
-            await _parser.Parse(_options, stoppingToken);
+            await _parser.ParseAsync(_options, stoppingToken);
         }
         finally
         {
@@ -117,7 +117,7 @@ public class EdifactParserCLI : BackgroundService
 
     private void Parser_Message(object sender, MessageEventArgs e)
     {
-        if(e.EventKind is EventKind.Start){
+        if(e.EventKind is EventKind.Begin){
             if(_options.OutputUri is { })
             {
                 Uri uri = new(
