@@ -131,19 +131,6 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
         }
 
     }
-
-    private void XmlReaderSettings_ValidationEventHandler(object? sender, ValidationEventArgs e)
-    {
-        if(_messageHeader is { })
-        {
-            string message = string.Format("At message {0}: {1}", _messageHeader.MessageReferenceNumber, e.Message);
-            _logger?.LogWarning(e.Exception, s_logMessage, message);
-        }
-        else {
-            _logger?.LogWarning(e.Exception, s_logMessage, e.Message);
-        }
-    }
-
     public async Task BeginGroupAsync(GroupHeader header)
     {
         try
@@ -257,7 +244,76 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
             throw;
         }
     }
+    public async Task EndGroupAsync()
+    {
+        try
+        {
+            if (_interchangeHeader is null)
+            {
+                throw new Exception("TODO: Any interchange is not began.");
+            }
+            if (_groupHeader is null)
+            {
+                throw new Exception("TODO: Any group is not began.");
+            }
 
+            await WriteSegmentAsync(GroupTrailerToXml());
+
+            _groupHeader = null;
+            await Task.CompletedTask;
+        }
+        catch (Exception)
+        {
+            InternalDispose();
+            throw;
+        }
+    }
+    public async Task EndInterchangeAsync()
+    {
+        try
+        {
+            if (_interchangeHeader is null)
+            {
+                throw new Exception("TODO: Any interchange is not began.");
+            }
+            if (_groupHeader is { })
+            {
+                throw new Exception("TODO: A group is not ended.");
+            }
+
+            await WriteSegmentAsync(InterchangeTrailerToXml());
+
+            _interchangeHeader = null;
+            await Task.CompletedTask;
+        }
+        catch (Exception)
+        {
+            InternalDispose();
+            throw;
+        }
+    }
+    public void Dispose()
+    {
+        if (_disposed)
+        {
+            return;
+        }
+        _disposed = true;
+        InternalDispose();
+        GC.SuppressFinalize(this);
+    }
+    private void XmlReaderSettings_ValidationEventHandler(object? sender, ValidationEventArgs e)
+    {
+        if (_messageHeader is { })
+        {
+            string message = string.Format("At message {0}: {1}", _messageHeader.MessageReferenceNumber, e.Message);
+            _logger?.LogWarning(e.Exception, s_logMessage, message);
+        }
+        else
+        {
+            _logger?.LogWarning(e.Exception, s_logMessage, e.Message);
+        }
+    }
     private async Task ProcessMessageAsync(Stream input)
     {
         XmlReader reader = XmlReader.Create(input, _xmlReaderSettings);
@@ -293,66 +349,6 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
                 await reader.MoveToContentAsync();
             }
         }
-    }
-
-    public async Task EndGroupAsync()
-    {
-        try
-        {
-            if (_interchangeHeader is null)
-            {
-                throw new Exception("TODO: Any interchange is not began.");
-            }
-            if (_groupHeader is null)
-            {
-                throw new Exception("TODO: Any group is not began.");
-            }
-
-            await WriteSegmentAsync(GroupTrailerToXml());
-
-            _groupHeader = null;
-            await Task.CompletedTask;
-        }
-        catch (Exception)
-        {
-            InternalDispose();
-            throw;
-        }
-    }
-
-    public async Task EndInterchangeAsync()
-    {
-        try
-        {
-            if (_interchangeHeader is null)
-            {
-                throw new Exception("TODO: Any interchange is not began.");
-            }
-            if (_groupHeader is { })
-            {
-                throw new Exception("TODO: A group is not ended.");
-            }
-
-            await WriteSegmentAsync(InterchangeTrailerToXml());
-
-            _interchangeHeader = null;
-            await Task.CompletedTask;
-        }
-        catch (Exception)
-        {
-            InternalDispose();
-            throw;
-        }
-    }
-    public void Dispose()
-    {
-        if (_disposed)
-        {
-            return;
-        }
-        _disposed = true;
-        InternalDispose();
-        GC.SuppressFinalize(this);
     }
     private void InternalDispose()
     {
@@ -474,7 +470,6 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
 
         return EndDocument();
     }
-
     private XmlElement MessageHeaderToXml()
     {
         StartDocument();
@@ -642,7 +637,6 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
 
         return EndDocument();
     }
-
     private XmlElement EndDocument()
     {
         _writer.WriteEndDocument();
@@ -660,7 +654,6 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
 
         return doc.DocumentElement!;
     }
-
     private void StartDocument()
     {
         _ms.SetLength(0);
@@ -668,7 +661,6 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
 
         _writer.WriteStartDocument();
     }
-
     private XmlElement InterchangeTrailerToXml()
     {
         StartDocument();
@@ -699,7 +691,6 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
 
         return EndDocument();
     }
-
     private XmlElement GroupTrailerToXml()
     {
         StartDocument();
@@ -713,7 +704,6 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
 
         return EndDocument();
     }
-
     private XmlElement GroupHeaderToXml()
     {
         StartDocument();
@@ -999,7 +989,6 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
 
         return EndDocument();
     }
-
     private void DialogueReferenceToXml(DialogueReference? dialogue)
     {
         if (dialogue is { })
@@ -1023,7 +1012,6 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
             _writer.WriteEndElement();
         }
     }
-
     private void ValidateElement(XmlElement element)
     {
         if (element.SchemaInfo.Validity is XmlSchemaValidity.NotKnown)
