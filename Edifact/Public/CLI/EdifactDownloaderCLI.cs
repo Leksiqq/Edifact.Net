@@ -61,7 +61,7 @@ public class EdifactDownloaderCLI : BackgroundService
             {
                 _options.Namespace = Properties.Resources.edifact_ns;
             }
-            if (_outputStreamFactory.GetOutputStream(new Uri(new Uri(string.Format(s_folderUriFormat, _options.SchemasUri!)), ".ns"), FileMode.CreateNew) is Stream streamNs1)
+            if (_outputStreamFactory.GetOutputStream(new Uri(new Uri(string.Format(s_folderUriFormat, _options.SchemasUri!)), ".ns")) is Stream streamNs1)
             {
                 StreamWriter sw = new(streamNs1);
                 sw.Write(_options.Namespace);
@@ -73,8 +73,9 @@ public class EdifactDownloaderCLI : BackgroundService
     {
         IConfiguration bootstrapConfig = new ConfigurationBuilder()
             .AddCommandLine(args)
+            .AddEnvironmentVariables()
             .Build();
-        if (bootstrapConfig["DefaultThreadCurrentCulture"] is string ci)
+        if (bootstrapConfig[s_defaultThreadCurrentCulture] is string ci)
         {
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo(ci);
             CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo(ci);

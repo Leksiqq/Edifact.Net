@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Net.Leksi.Streams;
+using System.Globalization;
 using System.Text;
 using static Net.Leksi.Edifact.Constants;
 
@@ -26,8 +27,14 @@ public class EdifactParserCLI : BackgroundService
     {
         IConfiguration bootstrapConfig = new ConfigurationBuilder()
             .AddCommandLine(args)
+            .AddEnvironmentVariables()
             .Build();
-        if(args.Contains(s_askKey) || args.Contains(s_helpKey))
+        if (bootstrapConfig[s_defaultThreadCurrentCulture] is string ci)
+        {
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo(ci);
+            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo(ci);
+        }
+        if (args.Contains(s_askKey) || args.Contains(s_helpKey))
         {
             Usage();
             return;

@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Edifact", "Edifact\Edifact.csproj", "{B5BA2538-F0DE-4222-986A-A5336B8FE135}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A0DCDCA6-26E8-4498-9171-0E74FE9348BB} = {A0DCDCA6-26E8-4498-9171-0E74FE9348BB}
+		{CF28F317-1A73-4977-B883-D917D7B37947} = {CF28F317-1A73-4977-B883-D917D7B37947}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Files2Resources", "Files2Resources\Files2Resources.csproj", "{A0DCDCA6-26E8-4498-9171-0E74FE9348BB}"
@@ -15,18 +16,36 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demo", "Demo", "{1229C4B7-AC21-42DF-BA14-F07FCC77CA9C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EdifactDownloaderCLI", "Demo\EdifactDownloaderCLI\EdifactDownloaderCLI.csproj", "{23F03B12-77E7-4918-9A48-E3B0E31FFBE5}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B5BA2538-F0DE-4222-986A-A5336B8FE135} = {B5BA2538-F0DE-4222-986A-A5336B8FE135}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EdifactMessageCustomizerCLI", "Demo\EdifactMessageCustomizerCLI\EdifactMessageCustomizerCLI.csproj", "{68A165EE-D334-4BF1-9A89-9F888107C23F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B5BA2538-F0DE-4222-986A-A5336B8FE135} = {B5BA2538-F0DE-4222-986A-A5336B8FE135}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EdifactParserCLI", "Demo\EdifactParserCLI\EdifactParserCLI.csproj", "{4BB82C6F-50E0-4F0C-B145-AC7648E29F5C}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B5BA2538-F0DE-4222-986A-A5336B8FE135} = {B5BA2538-F0DE-4222-986A-A5336B8FE135}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParseAll", "Demo\ParseAll\ParseAll.csproj", "{ED6060E1-CD06-466A-A3B4-AF317032D111}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B5BA2538-F0DE-4222-986A-A5336B8FE135} = {B5BA2538-F0DE-4222-986A-A5336B8FE135}
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EdifactMessageVisualizerCLI", "Demo\EdifactMessageVisualizerCLI\EdifactMessageVisualizerCLI.csproj", "{C9CE0277-DDF5-47A4-B690-17045959252E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B5BA2538-F0DE-4222-986A-A5336B8FE135} = {B5BA2538-F0DE-4222-986A-A5336B8FE135}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0644F82D-2CD1-4649-B946-F89525BADA4E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "Tests\ConsoleApp1\ConsoleApp1.csproj", "{58B098E7-834C-4B6B-8FED-77343EA7063A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp1", "Tests\ConsoleApp1\ConsoleApp1.csproj", "{58B098E7-834C-4B6B-8FED-77343EA7063A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B5BA2538-F0DE-4222-986A-A5336B8FE135} = {B5BA2538-F0DE-4222-986A-A5336B8FE135}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

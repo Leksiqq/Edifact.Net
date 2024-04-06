@@ -3,9 +3,9 @@
 public class Identification: IEquatable<Identification>
 {
     public string Type { get; set; } = null!;
-    public string? VersionNumber { get; set; } = null!;
-    public string? ReleaseNumber { get; set; } = null!;
-    public string? ControllingAgencyCoded { get; set; } = null!;
+    public string? VersionNumber { get; set; }
+    public string? ReleaseNumber { get; set; }
+    public string? ControllingAgencyCoded { get; set; }
 
     public bool Equals(Identification? other)
     {
@@ -17,5 +17,15 @@ public class Identification: IEquatable<Identification>
                 && ControllingAgencyCoded == other.ControllingAgencyCoded;
         }
         return false;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as Identification);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Type, VersionNumber, ReleaseNumber, ControllingAgencyCoded);
     }
 }

@@ -247,38 +247,45 @@
             <xs:annotation>
               <xs:documentation eu:name="name">FUNCTIONAL GROUP IDENTIFICATION</xs:documentation>
               <xs:documentation eu:name="description">Identifies the one message type in the functional group</xs:documentation>
+              <xs:documentation eu:name="position">010</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S006" type="S006" minOccurs="0">
             <xs:annotation>
               <xs:documentation eu:name="name">APPLICATION SENDER'S IDENTIFICATION</xs:documentation>
+              <xs:documentation eu:name="position">020</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S007" type="S007" minOccurs="0">
             <xs:annotation>
               <xs:documentation eu:name="name">APPLICATION RECIPIENT'S IDENTIFICATION</xs:documentation>
+              <xs:documentation eu:name="position">030</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S004" type="S004" minOccurs="0">
             <xs:annotation>
               <xs:documentation eu:name="name">DATE/TIME OF PREPARATION</xs:documentation>
+              <xs:documentation eu:name="position">040</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0048" type="D0048">
             <xs:annotation>
               <xs:documentation eu:name="name">FUNCTIONAL GROUP REFERENCE NUMBER</xs:documentation>
               <xs:documentation eu:name="description">Unique reference number assigned by sender's division, department etc.</xs:documentation>
+              <xs:documentation eu:name="position">050</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0051" type="D0051" minOccurs="0">
             <xs:annotation>
               <xs:documentation eu:name="name">CONTROLLING AGENCY</xs:documentation>
               <xs:documentation eu:name="description">Code to identify the agency controlling the specification, maintenance and publication of the message type</xs:documentation>
+              <xs:documentation eu:name="position">060</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S008" type="S008" minOccurs="0">
             <xs:annotation>
               <xs:documentation eu:name="name">MESSAGE VERSION</xs:documentation>
+              <xs:documentation eu:name="position">070</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0058" type="D0058" minOccurs="0">
@@ -287,6 +294,7 @@
               <xs:documentation eu:name="description">
                 Password to recepient's division, department or sectional system (if required)
               </xs:documentation>
+              <xs:documentation eu:name="position">080</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -305,12 +313,14 @@
             <xs:annotation>
               <xs:documentation eu:name="name">NUMBER OF MESSAGES</xs:documentation>
               <xs:documentation eu:name="description">The count of the number of messages in the functional group</xs:documentation>
+              <xs:documentation eu:name="position">010</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0048" type="D0048">
             <xs:annotation>
               <xs:documentation eu:name="name">FUNCTIONAL GROUP REFERENCE NUMBER</xs:documentation>
               <xs:documentation eu:name="description">Shall be identical to 0048 in UNG</xs:documentation>
+              <xs:documentation eu:name="position">020</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -329,11 +339,13 @@
             <xs:annotation>
               <xs:documentation eu:name="name">MESSAGE REFERENCE NUMBER</xs:documentation>
               <xs:documentation eu:name="description">A sender's unique message reference</xs:documentation>
+              <xs:documentation eu:name="position">010</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S009" type="S009">
             <xs:annotation>
               <xs:documentation eu:name="name">MESSAGE IDENTIFIER</xs:documentation>
+              <xs:documentation eu:name="position">020</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0068" type="D0068" minOccurs="0">
@@ -343,11 +355,31 @@
                 Key to relate all subsequent transfers of data to the same business case of file.
                 Within the 35 characters the IA may specify component elements
               </xs:documentation>
+              <xs:documentation eu:name="position">030</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="S010" type="S010" minOccurs="0">
             <xs:annotation>
               <xs:documentation eu:name="name">STATUS OF THE TRANSFER</xs:documentation>
+              <xs:documentation eu:name="position">040</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S016" type="S016" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation eu:name="name">MESSAGE SUBSET IDENTIFICATION</xs:documentation>
+              <xs:documentation eu:name="position">050</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S017" type="S017" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation eu:name="name">MESSAGE IMPLEMENTATION GUIDELINE IDENTIFICATION</xs:documentation>
+              <xs:documentation eu:name="position">060</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element name="S018" type="S018" minOccurs="0">
+            <xs:annotation>
+              <xs:documentation eu:name="name">SCENARIO IDENTIFICATION</xs:documentation>
+              <xs:documentation eu:name="position">070</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>
@@ -414,12 +446,14 @@
             <xs:annotation>
               <xs:documentation eu:name="name">NUMBER OF SEGMENTS IN THE MESSAGE</xs:documentation>
               <xs:documentation eu:name="description">Control count including UNH and UNT</xs:documentation>
+              <xs:documentation eu:name="position">010</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element name="D0062" type="D0062">
             <xs:annotation>
               <xs:documentation eu:name="name">MESSAGE REFERENCE NUMBER</xs:documentation>
               <xs:documentation eu:name="description">Shall be identical to 0062 in UNH</xs:documentation>
+              <xs:documentation eu:name="position">020</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:sequence>

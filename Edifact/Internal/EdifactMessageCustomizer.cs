@@ -210,7 +210,7 @@ internal class EdifactMessageCustomizer
             );
 
             IStreamFactory streamFactory = _services.GetRequiredKeyedService<IStreamFactory>(outputUri.Scheme);
-            using Stream output = streamFactory.GetOutputStream(outputUri, FileMode.Create);
+            using Stream output = streamFactory.GetOutputStream(outputUri);
             using XmlWriter writer = XmlWriter.Create(output, new XmlWriterSettings
             {
                 Indent = true,

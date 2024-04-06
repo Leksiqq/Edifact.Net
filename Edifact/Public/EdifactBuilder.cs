@@ -11,7 +11,6 @@ namespace Net.Leksi.Edifact;
 
 public class EdifactBuilder : EdifactProcessor, IDisposable
 {
-    public event SendMessageEventHandler? SendMessage;
     private EdifactBuilderOptions _options = null!;
     private char _syntaxLevel = 'A';
     private TextWriter _output = null!;
@@ -203,25 +202,7 @@ public class EdifactBuilder : EdifactProcessor, IDisposable
             await WriteSegmentAsync(MessageHeaderToXml());
 
             
-            if(input is null)
-            {
-                using AnonymousPipeServerStream serverStream = new(PipeDirection.Out);
-                using AnonymousPipeClientStream clientStream = new(PipeDirection.In, serverStream.ClientSafePipeHandle);
-                await Task.WhenAll([
-                    Task.Run(() => {
-                        SendMessage?.Invoke(this, new SendMessageEventArgs { Header = header, Output = serverStream } );
-                    }),
-                    Task.Run(async () => {
-                        await ProcessMessageAsync(clientStream);
-                        clientStream.Close();
-                        serverStream.Close();
-                    }),
-                ]);
-            }
-            else
-            {
-                await ProcessMessageAsync(input);
-            }
+            await ProcessMessageAsync(input);
 
 
             if (_isGroupBased is bool b1 && !b1)

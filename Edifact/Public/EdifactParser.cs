@@ -486,16 +486,13 @@ public class EdifactParser: EdifactProcessor
         XPathNavigator nav = _messageHeaderXml.CreateNavigator()!.SelectSingleNode(string.Format("/e:{0}", _isInteractive ? s_uih : s_unh), _man)!;
         if(nav.SelectSingleNode("e:S009", _man) is XPathNavigator mi)
         {
-            _messageEventArgs.Header.Identifier = new MessageIdentification
-            {
-                Type = mi.SelectSingleNode("e:D0065", _man)!.Value,
-                VersionNumber = mi.SelectSingleNode("e:D0052", _man)!.Value,
-                ReleaseNumber = mi.SelectSingleNode("e:D0054", _man)!.Value,
-                ControllingAgencyCoded = mi.SelectSingleNode("e:D0051", _man)!.Value,
-                AssociationAssignedCode = mi.SelectSingleNode("e:D0057", _man)?.Value,
-                CodeListDirectoryVersionNUmber = mi.SelectSingleNode("e:D0110", _man)?.Value,
-                MessageTypeSubfunctionIdentification = mi.SelectSingleNode("e:D0113", _man)?.Value,
-            };
+            _messageEventArgs.Header.Identifier.Type = mi.SelectSingleNode("e:D0065", _man)!.Value;
+            _messageEventArgs.Header.Identifier.VersionNumber = mi.SelectSingleNode("e:D0052", _man)!.Value;
+            _messageEventArgs.Header.Identifier.ReleaseNumber = mi.SelectSingleNode("e:D0054", _man)!.Value;
+            _messageEventArgs.Header.Identifier.ControllingAgencyCoded = mi.SelectSingleNode("e:D0051", _man)!.Value;
+            _messageEventArgs.Header.Identifier.AssociationAssignedCode = mi.SelectSingleNode("e:D0057", _man)?.Value;
+            _messageEventArgs.Header.Identifier.CodeListDirectoryVersionNUmber = mi.SelectSingleNode("e:D0110", _man)?.Value;
+            _messageEventArgs.Header.Identifier.MessageTypeSubfunctionIdentification = mi.SelectSingleNode("e:D0113", _man)?.Value;
             if (_isInteractive)
             {
                 InteractiveMessageHeader header = (_messageEventArgs.Header as InteractiveMessageHeader)!;
@@ -908,11 +905,8 @@ public class EdifactParser: EdifactProcessor
             BatchInterchangeHeader header = (_interchangeEventArgs.Header as BatchInterchangeHeader)!;
             if (nav.SelectSingleNode("e:S004", _man) is XPathNavigator dt)
             {
-                header.DateAndTimeOfPreparation = new DateTimeOfEvent
-                {
-                    Date = dt.SelectSingleNode("e:D0017", _man)?.Value,
-                    Time = dt.SelectSingleNode("e:D0019", _man)?.Value,
-                };
+                header.DateAndTimeOfPreparation.Date = dt.SelectSingleNode("e:D0017", _man)?.Value;
+                header.DateAndTimeOfPreparation.Time = dt.SelectSingleNode("e:D0019", _man)?.Value;
             }
             header.ControlReference = nav.SelectSingleNode("e:D0020", _man)!.Value;
             if (nav.SelectSingleNode("e:S005", _man) is XPathNavigator rrpd)

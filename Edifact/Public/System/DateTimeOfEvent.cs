@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 
 namespace Net.Leksi.Edifact;
 
@@ -7,8 +8,15 @@ public class DateTimeOfEvent
     public string? Date { get; set; }
     public string? Time { get; set; }
     public string? UtcOffset { get; set; }
-    public DateTimeOfEvent() { }
+    public DateTimeOfEvent() 
+    {
+        Set(DateTime.Now);
+    }
     public DateTimeOfEvent(DateTime dateTime)
+    {
+        Set(dateTime);
+    }
+    public void Set(DateTime dateTime)
     {
         Date = dateTime.ToString(Formats.s_yyMMdd);
         Time = dateTime.ToString(Formats.s_HHmm);

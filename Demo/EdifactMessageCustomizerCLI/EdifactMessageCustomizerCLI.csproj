@@ -11,7 +11,11 @@
     <None Include="W:\C#\Edifact\misc\script.IFCSUM.D97B.2.xsd" Link="script.IFCSUM.D97B.2.xsd" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(Configuration)'=='Release'">
+    <PackageReference Include="Net.Leksi.Edifact" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(Configuration)'=='Debug'">
     <ProjectReference Include="..\..\Edifact\Edifact.csproj" />
   </ItemGroup>
 

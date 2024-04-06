@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Net.Leksi.Streams;
+using System.Globalization;
 using static Net.Leksi.Edifact.Constants;
 
 namespace Net.Leksi.Edifact;
@@ -14,7 +15,13 @@ public class EdifactMessageVisualizerCLI(IServiceProvider services) : Background
     {
         IConfiguration bootstrapConfig = new ConfigurationBuilder()
             .AddCommandLine(args)
+            .AddEnvironmentVariables()
             .Build();
+        if (bootstrapConfig[s_defaultThreadCurrentCulture] is string ci)
+        {
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo(ci);
+            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.GetCultureInfo(ci);
+        }
         if (args.Contains(s_askKey) || args.Contains(s_helpKey))
         {
             Usage();
@@ -56,7 +63,7 @@ public class EdifactMessageVisualizerCLI(IServiceProvider services) : Background
         
         IHost host = builder.Build();
         Uri uri = new(bootstrapConfig[s_output]!);
-        options.Output = host.Services.GetRequiredKeyedService<IStreamFactory>(uri.Scheme)?.GetOutputStream(uri, FileMode.Create);
+        options.Output = host.Services.GetRequiredKeyedService<IStreamFactory>(uri.Scheme)?.GetOutputStream(uri);
         if (options.Output is null)
         {
             Usage();

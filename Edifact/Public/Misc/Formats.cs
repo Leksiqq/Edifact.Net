@@ -2,7 +2,7 @@
 
 namespace Net.Leksi.Edifact;
 
-public class Formats
+public static class Formats
 {
     internal const string s_ddMMyy = "ddMMyy";
     internal const string s_MMddyy = "MMddyy";

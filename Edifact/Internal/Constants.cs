@@ -56,6 +56,7 @@ internal static class Constants
     internal const string s_d8 = "D8";
     internal const string s_d99z = "D99Z";
     internal const string s_dataElementNotFound = "DATA_ELEMENT_NOT_FOUND";
+    internal const string s_defaultThreadCurrentCulture = "DefaultThreadCurrentCulture";
     internal const string s_description = "description";
     internal const string s_directories = "directories";
     internal const string s_directory = "directory";

@@ -42,9 +42,9 @@ class Runner(IServiceProvider services) : BackgroundService
             header.SyntaxIdentifier.Identifier = "UNOZ";
             header.SyntaxIdentifier.VersionNumber = "1";
             header.SyntaxIdentifier.CharacterEncodingCoded = "5";
-            header.DateAndTimeOfPreparation = new DateTimeOfEvent(DateTime.Now);
-            header.Sender = new PartyIdentification { Identification = "BTS", CodeQualifier = "30" };
-            header.Recipient = new PartyIdentification { Identification = "003702011539", CodeQualifier = "30" };
+            header.Sender.Identification = "BTS";
+            header.Sender.CodeQualifier = "30";
+            header.Recipient.Identification = "003702011539";
             //header.TestIndicator = "1";
             header.ControlReference = "10122823639495";
 
@@ -56,15 +56,13 @@ class Runner(IServiceProvider services) : BackgroundService
             {
                 BatchMessageHeader mh = new()
                 {
-                    Identifier = new MessageIdentification
-                    {
-                        Type = "IFCSUM",
-                        VersionNumber = "D",
-                        ReleaseNumber = "97B",
-                        ControllingAgencyCoded = "UN",
-                    },
                     MessageReferenceNumber = i.ToString()
                 };
+                mh.Identifier.Type = "IFCSUM";
+                mh.Identifier.VersionNumber = "D";
+                mh.Identifier.ReleaseNumber = "97B";
+                mh.Identifier.ControllingAgencyCoded = "UN";
+
                 await edifactBuilder.DeliverMessageAsync(mh, File.OpenRead(messages[i]));
             }
 

@@ -55,7 +55,7 @@
       </xs:element>
       <xs:element name="D0008" type="D0008" minOccurs="0">
         <xs:annotation>
-          <xs:documentation eu:name="name">Address for reverse routing</xs:documentation>
+          <xs:documentation eu:name="name">Interchange sender internal identification</xs:documentation>
         </xs:annotation>
       </xs:element>
       <xs:element name="D0042" type="D0042" minOccurs="0">
@@ -240,6 +240,16 @@
           <xs:documentation eu:name="name">Association assigned code</xs:documentation>
         </xs:annotation>
       </xs:element>
+      <xs:element name="D0110" type="D0110" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation eu:name="name">Code list directory version number</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0113" type="D0113" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation eu:name="name">Message type sub-function identification</xs:documentation>
+        </xs:annotation>
+      </xs:element>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="S010">
@@ -262,6 +272,60 @@
             C = Creation, must be present for first transfer if more than one foreseen
             F = Final, must be present for last transfer
           </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="S016">
+    <xs:annotation>
+      <xs:documentation eu:name="name">MESSAGE SUBSET IDENTIFICATION</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="D0115" type="D0115">
+        <xs:annotation>
+          <xs:documentation eu:name="name">Message subset identification</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0116" type="D0116" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation eu:name="name">Message subset version number</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0118" type="D0118" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation eu:name="name">Message subset release number</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0051" type="D0051" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation eu:name="name">Controlling agency, coded</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="S017">
+    <xs:annotation>
+      <xs:documentation eu:name="name">MESSAGE IMPLEMENTATION GUIDELINE IDENTIFICATION</xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="D0121" type="D0121">
+        <xs:annotation>
+          <xs:documentation eu:name="name">Message implementation guideline identification</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0122" type="D0122" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation eu:name="name">Message implementation guideline version number</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0124" type="D0124" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation eu:name="name">Message implementation guideline release number</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="D0051" type="D0051" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation eu:name="name">Controlling agency, coded</xs:documentation>
         </xs:annotation>
       </xs:element>
     </xs:sequence>

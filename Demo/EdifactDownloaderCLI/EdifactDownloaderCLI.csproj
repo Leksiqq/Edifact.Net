@@ -17,7 +17,7 @@
     <PackageReference Include="Net.Leksi.Edifact" Version="1.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(Configuration)'=='Debug'">
     <ProjectReference Include="..\..\Edifact\Edifact.csproj" />
   </ItemGroup>
 

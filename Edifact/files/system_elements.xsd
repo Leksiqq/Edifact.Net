@@ -290,6 +290,16 @@
       </xs:restriction>
     </xs:simpleContent>
   </xs:complexType>
+  <xs:complexType name="D0110">
+    <xs:annotation>
+      <xs:documentation eu:name="name">Code list directory version number</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="6"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
   <xs:complexType name="D0113">
     <xs:annotation>
       <xs:documentation eu:name="name">Message type sub-function identification</xs:documentation>
@@ -297,6 +307,66 @@
     <xs:simpleContent>
       <xs:restriction base="D">
         <xs:maxLength value="6"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0115">
+    <xs:annotation>
+      <xs:documentation eu:name="name">Message subset identification</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="14"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0116">
+    <xs:annotation>
+      <xs:documentation eu:name="name">Message subset version number</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="3"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0118">
+    <xs:annotation>
+      <xs:documentation eu:name="name">Message subset release number</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="3"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0121">
+    <xs:annotation>
+      <xs:documentation eu:name="name">Message implementation guideline identification</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="14"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0122">
+    <xs:annotation>
+      <xs:documentation eu:name="name">Message implementation guideline version number</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="3"/>
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="D0124">
+    <xs:annotation>
+      <xs:documentation eu:name="name">Message implementation guideline release number</xs:documentation>
+    </xs:annotation>
+    <xs:simpleContent>
+      <xs:restriction base="D">
+        <xs:maxLength value="3"/>
       </xs:restriction>
     </xs:simpleContent>
   </xs:complexType>
