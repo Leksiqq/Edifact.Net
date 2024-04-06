@@ -9,8 +9,8 @@ All classes are contained in the `Net.Leksi.Edifact` namespace.
 
 The following functionality is available.
 
-* [EdifactDownloaderCLI](https://github.com/Leksiqq/Edifact.Net/wiki/EdifactDownloaderCLI-en): preparation of a command line application for downloading specifications from the site [UNECE](https://unece.org/) with converting them into a set of XML schemas, which are subsequently used as a *grammar *, and to check data and structure restrictions for the translator between formats.
-* [EdifactMessageCustomizerCLI](https://github.com/Leksiqq/Edifact.Net/wiki/EdifactMessageCustomizerCLI-en): preparation of a command line application for editing the specification of a standard message (*customization*) for the needs of an agreed exchange between specific parties. This includes reducing the set of segments used and changing data limits.
+* [EdifactDownloaderCLI](https://github.com/Leksiqq/Edifact.Net/wiki/EdifactDownloaderCLI-en): preparation of a command line application for downloading specifications from the site [UNECE](https://unece.org/) with converting them into a set of XML schemas, which are subsequently used as a *grammar*, and to check data and structure restrictions for the translator between formats.
+* [EdifactMessageCustomizerCLI](https://github.com/Leksiqq/Edifact.Net/wiki/EdifactMessageCustomizerCLI-en): preparation of a command line application for editing the specification of a standard message (*customization*) for the needs of an agreed exchange between specific parties. This includes reducing the set of segments used and changing data restrictions.
 * [EdifactMessageVisualizerCLI](https://github.com/Leksiqq/Edifact.Net/wiki/EdifactMessageVisualizerCLI-en): template command line application for visualizing the specification of a standard or abbreviated message in the form of a tree of segments and groups of segments.
 * [EdifactParser](EdifactParser-en): translation of the incoming flow of the exchange session (interchange) into events:
      - start of the session;
@@ -29,6 +29,8 @@ The following functionality is available.
 
 In addition to the library, the working environment includes a directory of XML schemas containing schemas obtained from downloaded specifications, as well as custom schemas. [More details...](https://github.com/Leksiqq/Edifact.Net/wiki/SchemasRoot-en)
 
-Customization is carried out using a script, which is an XML schema of a special structure. [More...](https://github.com/Leksiqq/Edifact.Net/wiki/CustomizerScript-en)
+Customization is carried out using a script, which is an XML schema of a special structure. [More details...](https://github.com/Leksiqq/Edifact.Net/wiki/CustomizerScript-en)
 
 The structure of XML documents is described [Here](https://github.com/Leksiqq/Edifact.Net/wiki/XMLDocuments-en).
+
+[More details...](https://github.com/Leksiqq/Edifact.Net/wiki/)
