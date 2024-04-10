@@ -9,7 +9,7 @@ All classes are contained in the `Net.Leksi.Edifact` namespace.
 
 The following functionality is available.
 
-* [EdifactDownloaderCLI](https://github.com/Leksiqq/Edifact.Net/wiki/EdifactDownloaderCLI-en): preparation of a command line application for downloading specifications from the site [UNECE](https://unece.org/) with converting them into a set of XML schemas, which are subsequently used as a *grammar *, and to check data and structure restrictions for the translator between formats.
+* [EdifactDownloaderCLI](https://github.com/Leksiqq/Edifact.Net/wiki/EdifactDownloaderCLI-en): preparation of a command line application for downloading specifications from the site [UNECE](https://unece.org/) with converting them into a set of XML schemas, which are subsequently used as a *grammar*, and to check data and structure restrictions for the translator between formats.
 * [EdifactMessageCustomizerCLI](https://github.com/Leksiqq/Edifact.Net/wiki/EdifactMessageCustomizerCLI-en): preparation of a command line application for editing the specification of a standard message (*customization*) for the needs of an agreed exchange between specific parties. This includes reducing the set of segments used and changing data limits.
 * [EdifactMessageVisualizerCLI](https://github.com/Leksiqq/Edifact.Net/wiki/EdifactMessageVisualizerCLI-en): template command line application for visualizing the specification of a standard or abbreviated message in the form of a tree of segments and groups of segments.
 * [EdifactParser](EdifactParser-en): translation of the incoming flow of the exchange session (interchange) into events:
